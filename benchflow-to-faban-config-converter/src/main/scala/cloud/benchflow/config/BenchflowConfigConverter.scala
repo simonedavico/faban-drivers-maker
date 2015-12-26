@@ -3,7 +3,9 @@ package cloud.benchflow.config
 import java.io.InputStream
 
 /**
-  * @author: Simone D'avico
+  * @author Simone D'Avico (simonedavico@gmail.com)
+  *
+  *         Created on 26/12/15.
   */
 //generates xml from the output of the YAML parser
 object XMLGenerator {
