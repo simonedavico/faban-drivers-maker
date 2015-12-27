@@ -19,7 +19,7 @@ object XMLGenerator {
       mapping._2 match {
         case map: java.util.Map[String, Any] => toXML(map)
         case list: java.util.List[java.util.Map[String, Any]] => list.asScala.toList.map(toXML)
-        case foo @ _ => foo
+        case value @ _ => value
       }
 
       }</xml>.copy(label = mapping._1)
