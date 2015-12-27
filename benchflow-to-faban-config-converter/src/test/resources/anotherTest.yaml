@@ -1,0 +1,24 @@
+wfmsbenchmark:
+  description: A WfMS benchmark
+  hostConfig:
+    host: 192.181.131.121
+  scale: 10
+  runControl:
+    rampUp: 30
+    steadyState: 120
+    rampDown: 30
+  drivers:
+    - cloud.benchflow.drivers.WfMSDriver:
+        properties:
+          property:
+            name: contextPath
+            value: /
+          property:
+            name: secure
+            value: false
+  sutconfig:
+    hostConfig:
+      hostPorts: 192.181.131.120:6060
+
+
+

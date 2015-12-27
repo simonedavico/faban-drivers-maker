@@ -1,11 +1,14 @@
 package cloud.benchflow.config
 
 import java.io.InputStream
+import org.yaml.snakeyaml.Yaml
+
+import scala.collection.JavaConverters._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
-  *         Created on 26/12/15.
+  * Created on 26/12/15.
   */
 //generates xml from the output of the YAML parser
 object XMLGenerator {
@@ -14,16 +17,16 @@ object XMLGenerator {
     <xml>{
 
       mapping._2 match {
-        case s: String => s
-        case map: Map[String, Any] => toXML(map)
-        case list: List[Map[String, Any]] => list map toXML
+        case map: java.util.Map[String, Any] => toXML(map)
+        case list: java.util.List[java.util.Map[String, Any]] => list.asScala.toList.map(toXML)
+        case foo @ _ => foo
       }
 
       }</xml>.copy(label = mapping._1)
   }
 
-  def toXML(map: Map[String, Any]): List[scala.xml.Elem] = {
-    map map toXML toList
+  def toXML(map: java.util.Map[String, Any]): List[scala.xml.Elem] = {
+    map.asScala.toMap map toXML toList
   }
 
 }
@@ -42,31 +45,41 @@ object FabanXMLTransformer {
       "runControl" -> "fa",
       "rampUp" -> "fa",
       "steadyState" -> "fa",
-      "rampDown" -> "fa"
+      "rampDown" -> "fa",
+      "cpus" -> "fh",
+      "enabled" -> "fh",
+      "timeSync" -> "fh",
+      "agents" -> "fd",
+      "properties" -> "fd"
     )
 
-  private def addFabanNamespace(elem: scala.xml.Node): scala.xml.Elem = {
-    val ns = propertyToNamespace.getOrElse(elem.label, "")
-    elem.asInstanceOf[scala.xml.Elem].copy(label = ns + ":" + elem.label)
+  private def addFabanNamespace(elem: scala.xml.Node): scala.xml.Node = {
+    elem match {
+      case elem: scala.xml.Elem =>
+        val ns = propertyToNamespace.getOrElse(elem.label, "")
+        <xml>{elem.child.map(addFabanNamespace)}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label)
+      case _ => elem
+    }
   }
 
   private def transformDriverConfig(elem: scala.xml.Node): scala.xml.Elem =
     <driverConfig name={elem.label}>{elem.child map addFabanNamespace}</driverConfig>
 
   def apply(elem: scala.xml.Elem, javaHome: String, javaOpts: String): scala.xml.Elem = {
-    (elem \ "drivers" theSeq).head match {
+    (elem \\ "drivers" theSeq).head match {
       case <drivers>{drivers @ _*}</drivers> =>
-        <xml>
+         <xml>
           <jvmConfig xmlns="http://faban.sunsource.net/ns/fabanharness">
             <javaHome>{javaHome}</javaHome>
             <jvmOptions>{javaOpts}</jvmOptions>
           </jvmConfig>
-          <fa:runConfig definition={elem.label}
+           { elem.child.filter(node => node.label != "drivers") map addFabanNamespace }
+          <fd:runConfig definition={drivers.head.label}
                         xmlns:fa="http://faban.sunsource.net/ns/faban"
                         xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
-                        xmlns="http://faban.sunsource.net/ns/fabandriver">
+                        xmlns:fd="http://faban.sunsource.net/ns/fabandriver">
             {drivers map transformDriverConfig}
-          </fa:runConfig>
+          </fd:runConfig>
         </xml>.copy(label = elem.label)
       case _ => throw new Exception //TODO: throw meaningful exception
     }
@@ -79,21 +92,11 @@ class BenchflowConfigConverter(val javaHome: String, val javaOpts: String) {
 
   def from(in: InputStream): scala.xml.Elem = {
 
-    import YAMLParser._
     import XMLGenerator._
 
-    implicit def anyToMap(value: Any): Map[String, Any] =
-      value.asInstanceOf[Map[String, Any]]
-
     val yaml = io.Source.fromInputStream(in).mkString
-
-    val xml = parse(yaml) match {
-      case Success(r, b) => toXML(r)
-      case Failure(msg, n) => throw new Exception //TODO: throw meaningful exception
-      case Error(msg, n) => throw new Exception //TODO: as above
-    }
-
-    FabanXMLTransformer(xml head, javaHome, javaOpts)
+    val xml = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
+    FabanXMLTransformer(toXML(xml) head, javaHome, javaOpts)
   }
 
 }
