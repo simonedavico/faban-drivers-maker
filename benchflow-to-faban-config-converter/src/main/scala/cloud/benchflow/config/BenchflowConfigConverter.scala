@@ -14,7 +14,7 @@ import scala.xml.{Elem, Node}
 //generates xml from the output of the YAML parser
 object XMLGenerator {
 
-  def toXML(mapping: (String, Any)) = {
+  def toXML(mapping: (String, Any)): Elem = {
     <xml>{
 
       mapping._2 match {
@@ -26,7 +26,7 @@ object XMLGenerator {
       }</xml>.copy(label = mapping._1)
   }
 
-  def toXML(map: java.util.Map[String, Any]) = {
+  def toXML(map: java.util.Map[String, Any]): List[Elem] = {
     (map.asScala.toMap map toXML).toList
   }
 
@@ -64,7 +64,7 @@ object FabanXML {
   private def transformDriverConfig(elem: Node): Node =
     <fd:driverConfig name={elem.label}>{elem.child map addFabanNamespace("fd")}</fd:driverConfig>
 
-  def apply(elem: scala.xml.Elem, javaHome: String, javaOpts: String): scala.xml.Elem = {
+  def apply(elem: Elem, javaHome: String, javaOpts: String): Elem = {
     (elem \\ "drivers" theSeq).head match {
       case <drivers>{drivers @ _*}</drivers> =>
          <xml>
@@ -72,12 +72,12 @@ object FabanXML {
             <javaHome>{javaHome}</javaHome>
             <jvmOptions>{javaOpts}</jvmOptions>
           </jvmConfig>
-           { elem.child.filter(node => node.label != "drivers") map addFabanNamespace("") }
+           { elem.child.filter(child => child.label != "drivers") map addFabanNamespace("") }
           <fa:runConfig definition={drivers.head.label}
                         xmlns:fa="http://faban.sunsource.net/ns/faban"
                         xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                         xmlns:fd="http://faban.sunsource.net/ns/fabandriver">
-            {drivers map transformDriverConfig}
+           { drivers map transformDriverConfig }
           </fa:runConfig>
         </xml>.copy(label = elem.label)
       case _ => throw new Exception //TODO: throw meaningful exception
@@ -93,16 +93,15 @@ object BenchFlowConfigConverter {
 //the interface to the business logic
 class BenchFlowConfigConverter {
 
-  private val configMap =
+  private val configMap: java.util.Map[String, String] =
     (new Yaml load new FileInputStream(BenchFlowConfigConverter.configPath))
               .asInstanceOf[java.util.Map[String, String]]
 
-  def from(in: InputStream): scala.xml.Elem = {
+  def from(in: InputStream): Elem = {
 
     import XMLGenerator._
 
-    val javaHome = configMap.get("java.home")
-    val javaOpts = configMap.get("java.opts")
+    val (javaHome, javaOpts) = (configMap.get("java.home"), configMap.get("java.opts"))
     val yaml = io.Source.fromInputStream(in).mkString
     val map = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
     FabanXML(toXML(map).head, javaHome, javaOpts)
