@@ -105,7 +105,7 @@ class BenchFlowConfigConverter {
     val javaOpts = configMap.get("java.opts")
     val yaml = io.Source.fromInputStream(in).mkString
     val map = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
-    FabanXML(toXML(map) head, javaHome, javaOpts)
+    FabanXML(toXML(map).head, javaHome, javaOpts)
   }
 
 }
