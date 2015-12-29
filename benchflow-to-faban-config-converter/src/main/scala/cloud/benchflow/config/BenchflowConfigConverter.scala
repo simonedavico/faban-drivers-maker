@@ -4,6 +4,7 @@ import java.io.{FileInputStream, InputStream}
 import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._
+import scala.xml.{Elem, Node}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -13,7 +14,7 @@ import scala.collection.JavaConverters._
 //generates xml from the output of the YAML parser
 object XMLGenerator {
 
-  def toXML(mapping: (String, Any)): scala.xml.Elem = {
+  def toXML(mapping: (String, Any)) = {
     <xml>{
 
       mapping._2 match {
@@ -25,7 +26,7 @@ object XMLGenerator {
       }</xml>.copy(label = mapping._1)
   }
 
-  def toXML(map: java.util.Map[String, Any]): List[scala.xml.Elem] = {
+  def toXML(map: java.util.Map[String, Any]) = {
     map.asScala.toMap map toXML toList
   }
 
@@ -51,16 +52,16 @@ object FabanXMLTransformer {
       "timeSync" -> "fh"
     )
 
-  private def addFabanNamespace(defaultNS: String)(elem: scala.xml.Node): scala.xml.Node = {
+  private def addFabanNamespace(defaultNS: String)(elem: Node): Node = {
     elem match {
-      case elem: scala.xml.Elem =>
+      case elem: Elem =>
         val ns = propertyToNamespace.getOrElse(elem.label, defaultNS)
         <xml>{elem.child.map(addFabanNamespace(defaultNS))}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label)
       case _ => elem
     }
   }
 
-  private def transformDriverConfig(elem: scala.xml.Node): scala.xml.Elem =
+  private def transformDriverConfig(elem: Node): Elem =
     <fd:driverConfig name={elem.label}>{elem.child map addFabanNamespace("fd")}</fd:driverConfig>
 
   def apply(elem: scala.xml.Elem, javaHome: String, javaOpts: String): scala.xml.Elem = {
@@ -92,7 +93,7 @@ object BenchFlowConfigConverter {
 //the interface to the business logic
 class BenchFlowConfigConverter {
 
-  private val configMap: java.util.Map[String, String] =
+  private val configMap =
     (new Yaml load new FileInputStream(BenchFlowConfigConverter.configPath))
               .asInstanceOf[java.util.Map[String, String]]
 
