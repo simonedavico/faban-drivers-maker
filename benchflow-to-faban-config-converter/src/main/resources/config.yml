@@ -1,0 +1,2 @@
+java.home: /usr/lib/java7
+java.opts: -Xmx256m -Xms64m -XX:+DisableExplicitGC

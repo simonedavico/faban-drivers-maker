@@ -11,5 +11,5 @@ import scala.xml.PrettyPrinter
 object QuickTest extends App {
   val in = new FileInputStream("./benchflow-to-faban-config-converter/src/test/resources/anotherTest.yaml")
   print(new PrettyPrinter(60, 2) format
-    new BenchflowConfigConverter("/usr/lib/jvm/java7", "-Xmx256m -Xms64m -XX:+DisableExplicitGC").from(in))
+    (new BenchFlowConfigConverter from in))
 }

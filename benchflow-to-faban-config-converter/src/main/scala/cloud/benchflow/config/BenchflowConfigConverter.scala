@@ -1,6 +1,6 @@
 package cloud.benchflow.config
 
-import java.io.InputStream
+import java.io.{FileInputStream, InputStream}
 import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._
@@ -34,7 +34,7 @@ object XMLGenerator {
 //transform intermediate XML into Faban compliant XML
 object FabanXMLTransformer {
 
-  def propertyToNamespace =
+  private def propertyToNamespace =
     Map(
       "description" -> "fh",
       "hostConfig" -> "fa",
@@ -87,16 +87,26 @@ object FabanXMLTransformer {
 
 }
 
+object BenchFlowConfigConverter {
+  private val configPath = "./benchflow-to-faban-config-converter/src/main/resources/config.yml"
+}
+
 //the interface to the business logic
-class BenchflowConfigConverter(val javaHome: String, val javaOpts: String) {
+class BenchFlowConfigConverter {
+
+  private val configMap: java.util.Map[String, String] =
+    (new Yaml load new FileInputStream(BenchFlowConfigConverter.configPath))
+              .asInstanceOf[java.util.Map[String, String]]
 
   def from(in: InputStream): scala.xml.Elem = {
 
     import XMLGenerator._
 
+    val javaHome = configMap.get("java.home")
+    val javaOpts = configMap.get("java.opts")
     val yaml = io.Source.fromInputStream(in).mkString
-    val xml = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
-    FabanXMLTransformer(toXML(xml) head, javaHome, javaOpts)
+    val map = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
+    FabanXMLTransformer(toXML(map) head, javaHome, javaOpts)
   }
 
 }
