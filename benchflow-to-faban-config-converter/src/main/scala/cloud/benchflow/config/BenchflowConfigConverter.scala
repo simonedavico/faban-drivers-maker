@@ -27,13 +27,13 @@ object XMLGenerator {
   }
 
   def toXML(map: java.util.Map[String, Any]) = {
-    map.asScala.toMap map toXML toList
+    (map.asScala.toMap map toXML).toList
   }
 
 }
 
 //transform intermediate XML into Faban compliant XML
-object FabanXMLTransformer {
+object FabanXML {
 
   private def propertyToNamespace =
     Map(
@@ -61,7 +61,7 @@ object FabanXMLTransformer {
     }
   }
 
-  private def transformDriverConfig(elem: Node): Elem =
+  private def transformDriverConfig(elem: Node): Node =
     <fd:driverConfig name={elem.label}>{elem.child map addFabanNamespace("fd")}</fd:driverConfig>
 
   def apply(elem: scala.xml.Elem, javaHome: String, javaOpts: String): scala.xml.Elem = {
@@ -105,7 +105,7 @@ class BenchFlowConfigConverter {
     val javaOpts = configMap.get("java.opts")
     val yaml = io.Source.fromInputStream(in).mkString
     val map = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
-    FabanXMLTransformer(toXML(map) head, javaHome, javaOpts)
+    FabanXML(toXML(map) head, javaHome, javaOpts)
   }
 
 }
