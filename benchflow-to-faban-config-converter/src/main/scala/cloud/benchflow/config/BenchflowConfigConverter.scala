@@ -48,9 +48,7 @@ object FabanXMLTransformer {
       "rampDown" -> "fa",
       "cpus" -> "fh",
       "enabled" -> "fh",
-      "timeSync" -> "fh",
-      "agents" -> "fd",
-      "properties" -> "fd"
+      "timeSync" -> "fh"
     )
 
   private def addFabanNamespace(defaultNS: String)(elem: scala.xml.Node): scala.xml.Node = {
