@@ -10,12 +10,15 @@ wfmsbenchmark:
   drivers:
     - cloud.benchflow.drivers.WfMSDriver:
         properties:
-          property:
-            name: contextPath
-            value: /
-          property:
-            name: secure
-            value: false
+          - property:
+              name: contextPath
+              value: /
+          - property:
+              name: secure
+              value: false
+          - property:
+              name: a
+              value: b
   sutconfig:
     hostConfig:
       hostPorts: 192.181.131.120:6060
