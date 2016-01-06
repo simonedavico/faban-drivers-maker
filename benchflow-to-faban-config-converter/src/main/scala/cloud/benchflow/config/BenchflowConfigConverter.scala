@@ -4,7 +4,7 @@ import java.io.{FileInputStream, InputStream}
 import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._
-import scala.xml.{Elem, Node}
+import scala.xml.{PrettyPrinter, Elem, Node}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -26,8 +26,8 @@ object XMLGenerator {
       }</xml>.copy(label = mapping._1)
   }
 
-  def toXML(map: java.util.Map[String, Any]): List[Elem] = {
-    (map.asScala.toMap map toXML).toList
+  def toXML(map: java.util.Map[String, Any]): Iterable[Elem] = {
+    map.asScala.toMap map toXML
   }
 
 }
@@ -62,7 +62,7 @@ object FabanXML {
   }
 
   private def transformDriverConfig(elem: Node): Node =
-    <fd:driverConfig name={elem.label}>{elem.child map addFabanNamespace("fd")}</fd:driverConfig>
+    <driverConfig name={elem.label}>{elem.child map addFabanNamespace("")}</driverConfig>
 
   def apply(elem: Elem, javaHome: String, javaOpts: String): Elem = {
     (elem \\ "drivers" theSeq).head match {
@@ -91,20 +91,22 @@ object BenchFlowConfigConverter {
 }
 
 //the interface to the business logic
-class BenchFlowConfigConverter {
+class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
 
-  private val configMap: java.util.Map[String, String] =
-    (new Yaml load new FileInputStream(BenchFlowConfigConverter.configPath))
-              .asInstanceOf[java.util.Map[String, String]]
+//  private val configMap: java.util.Map[String, String] =
+//    (new Yaml load new FileInputStream(BenchFlowConfigConverter.configPath))
+//              .asInstanceOf[java.util.Map[String, String]]
 
-  def from(in: InputStream): Elem = {
-
+  private def convert(in: InputStream): Elem = {
     import XMLGenerator._
-
-    val (javaHome, javaOpts) = (configMap.get("java.home"), configMap.get("java.opts"))
-    val yaml = io.Source.fromInputStream(in).mkString
+    //val (javaHome, javaOpts) = (configMap.get("java.home"), configMap.get("java.opts"))
+    val yaml = scala.io.Source.fromInputStream(in).mkString
     val map = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
     FabanXML(toXML(map).head, javaHome, javaOpts)
+  }
+
+  def from(in: InputStream): String = {
+    new PrettyPrinter(60, 2).format(convert(in))
   }
 
 }
