@@ -106,7 +106,9 @@ class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
   }
 
   def from(in: InputStream): String = {
-    new PrettyPrinter(60, 2).format(convert(in))
+    val sb = new StringBuilder()
+    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    (sb ++= new PrettyPrinter(60, 2).format(convert(in))).toString
   }
 
 }

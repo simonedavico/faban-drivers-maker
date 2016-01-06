@@ -6,4 +6,6 @@
 /benchflow-to-faban-config-converter/benchflow-to-faban-config-converter.iml
 /benchflow-to-faban-config-converter/target
 /application/application.iml
+/application/benchflow-to-faban-config-converter
+/application/target
 /api/api.iml
