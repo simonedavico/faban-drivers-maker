@@ -1,6 +1,6 @@
 package cloud.benchflow.config
 
-import java.io.{FileInputStream, InputStream}
+import java.io.InputStream
 import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._
