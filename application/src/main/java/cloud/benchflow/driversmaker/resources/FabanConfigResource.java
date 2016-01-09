@@ -30,6 +30,7 @@ public class FabanConfigResource {
                           InputStream benchflowConfig,
                           @FormDataParam("benchflow-config")
                           FormDataContentDisposition benchflowConfigDetail) {
+        //returns benchflow config converted to faban xml
         return bfc.from(benchflowConfig);
     }
 

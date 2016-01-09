@@ -1,17 +1,17 @@
 faban.config:
-  javaHome: /usr/lib/java7/home
-  javaOpts: -bla
+  javaHome: /usr/lib/jvm/java7
+  javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
 
 server:
   type: default
   applicationConnectors:
     - type: http
-      port: 8080
-      bindHost: 127.0.0.1 # only bind to loopback
+      port: 6060
+#      bindHost: 127.0.0.1 # only bind to loopback
   adminConnectors:
     - type: http
-      port: 8081
-      bindHost: 127.0.0.1 # only bind to loopback
+      port: 6061
+#      bindHost: 127.0.0.1 # only bind to loopback
 
 logging:
   level: INFO
