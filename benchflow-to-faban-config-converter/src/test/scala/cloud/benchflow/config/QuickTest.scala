@@ -9,6 +9,6 @@ import scala.xml.PrettyPrinter
   * Created on 26/12/15.
   */
 object QuickTest extends App {
-  val in = new FileInputStream("./benchflow-to-faban-config-converter/src/test/resources/anotherTest.yaml")
+  val in = new FileInputStream("./benchflow-to-faban-config-converter/src/test/resources/camundaTest.yml")
   print(new BenchFlowConfigConverter("", "") from in)
 }

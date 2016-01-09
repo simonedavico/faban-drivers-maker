@@ -2,6 +2,7 @@ package cloud.benchflow.config
 
 import java.io.InputStream
 import org.yaml.snakeyaml.Yaml
+import util.Properties
 
 import scala.collection.JavaConverters._
 import scala.xml.{PrettyPrinter, Elem, Node}
@@ -115,7 +116,7 @@ class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
 
   def from(in: InputStream): String = {
     val sb = new StringBuilder()
-    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + java.io.File.separator
+    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
     (sb ++= new PrettyPrinter(60, 2).format(convert(in))).toString
   }
 
