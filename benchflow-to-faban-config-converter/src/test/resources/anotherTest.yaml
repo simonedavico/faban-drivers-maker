@@ -19,9 +19,10 @@ wfmsbenchmark:
           - property:
               name: a
               value: b
-  sutconfig:
-    hostConfig:
-      hostPorts: 192.181.131.120:6060
+  sut:
+    - sutconfig:
+        hostConfig:
+        hostPorts: 192.181.131.120:6060
 
 
 
