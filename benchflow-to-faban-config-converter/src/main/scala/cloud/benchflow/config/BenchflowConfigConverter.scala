@@ -109,8 +109,7 @@ class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
 
   private def convert(in: InputStream): Elem = {
     import XMLGenerator._
-    val yaml = scala.io.Source.fromInputStream(in).mkString
-    val map = (new Yaml load yaml).asInstanceOf[java.util.Map[String, Any]]
+    val map = (new Yaml load in).asInstanceOf[java.util.Map[String, Any]]
     FabanXML(toXML(map).head, javaHome, javaOpts)
   }
 
