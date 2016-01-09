@@ -33,5 +33,4 @@ public class FabanConfigResource {
         return bfc.from(benchflowConfig);
     }
 
-
 }
