@@ -18,6 +18,13 @@
         <jersey.multipart.version>2.19</jersey.multipart.version>
     </properties>
 
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>localRepository</id>-->
+            <!--<url>file://${project.basedir}/lib</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
+
     <dependencies>
 
         <dependency>
@@ -42,6 +49,8 @@
             <groupId>cloud.benchflow.faban</groupId>
             <artifactId>config-converter</artifactId>
             <version>0.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/config-converter-0.1.0.jar</systemPath>
         </dependency>
 
     </dependencies>
