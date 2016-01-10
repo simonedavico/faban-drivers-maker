@@ -101,7 +101,7 @@
                         </filter>
                     </filters>
                     <outputDirectory>${session.executionRootDirectory}/target</outputDirectory>
-                    <finalName>${project.name}-${project.version}</finalName>
+                    <finalName>${project.name}</finalName>
                 </configuration>
                 <executions>
                     <execution>
@@ -140,6 +140,7 @@
     <modules>
         <module>api</module>
         <module>application</module>
+        
     </modules>
     <dependencyManagement>
         <dependencies>

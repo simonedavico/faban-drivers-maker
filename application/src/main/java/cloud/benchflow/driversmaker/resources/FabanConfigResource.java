@@ -1,8 +1,9 @@
 package cloud.benchflow.driversmaker.resources;
 
-import cloud.benchflow.config.BenchFlowConfigConverter;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import cloud.benchflow.config.converter.BenchFlowConfigConverter;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
