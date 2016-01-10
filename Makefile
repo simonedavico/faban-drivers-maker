@@ -19,7 +19,8 @@ build:
 
 build_release:
 	cd benchflow-to-faban-config-converter/ && \
-	JAVA_HOME=$(JAVA_HOME) mvn install && \
+	JAVA_HOME=$(JAVA_HOME) mvn package && \
+    cp ./target/config-converter-0.1.0.jar ../application/lib && \
 	cd .. && \
 	JAVA_HOME=$(JAVA_HOME) mvn package
 
