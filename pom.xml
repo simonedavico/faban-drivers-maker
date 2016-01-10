@@ -133,7 +133,7 @@
     <modules>
         <module>api</module>
         <module>application</module>
-        <module>benchflow-to-faban-config-converter</module>
+        
     </modules>
     <dependencyManagement>
         <dependencies>
