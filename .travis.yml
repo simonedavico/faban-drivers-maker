@@ -15,7 +15,7 @@ branches:
 
 
 install:
-  - mvn install
+  - make all
 
 
 cache:
