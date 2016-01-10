@@ -1,6 +1,6 @@
 package cloud.benchflow.driversmaker;
 
-import cloud.benchflow.config.BenchFlowConfigConverter;
+import cloud.benchflow.config.converter.BenchFlowConfigConverter;
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
 import cloud.benchflow.driversmaker.resources.FabanConfigResource;
 import io.dropwizard.Application;

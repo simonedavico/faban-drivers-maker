@@ -11,6 +11,4 @@
     </parent>
     <groupId>cloud.benchflow.drivers-maker</groupId>
     <artifactId>api</artifactId>
-    <version>0.1.0</version>
-
 </project>
