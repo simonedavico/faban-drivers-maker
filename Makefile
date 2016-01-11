@@ -12,19 +12,12 @@ clean:
 	mvn clean
 
 build:
-	cd benchflow-to-faban-config-converter/ && \
-	JAVA_HOME=$(JAVA_HOME) mvn install && \
-	cd .. && \
 	JAVA_HOME=$(JAVA_HOME) mvn package
 
 build_release:
-	cd benchflow-to-faban-config-converter/ && \
 	JAVA_HOME=$(JAVA_HOME) mvn package
 
 install:
-	cd benchflow-to-faban-config-converter/ && \
-	JAVA_HOME=$(JAVA_HOME) mvn install && \
-	cd .. && \
 	JAVA_HOME=$(JAVA_HOME) mvn package
 
 test:
