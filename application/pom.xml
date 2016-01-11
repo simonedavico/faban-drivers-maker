@@ -64,16 +64,9 @@
             <artifactId>snakeyaml</artifactId>
             <version>${snakeyaml.version}</version>
         </dependency>
-        
-        <!--<dependency>-->
-            <!--<groupId>cloud.benchflow.faban</groupId>-->
-            <!--<artifactId>config-converter</artifactId>-->
-            <!--<version>0.1.0</version>-->
-        <!--</dependency>-->
 
     </dependencies>
 
-    <!-- do we need this? -->
     <build>
         <pluginManagement>
             <plugins>
@@ -135,28 +128,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <!--<plugins>-->
-             <!--<plugin>-->
-		        <!--<groupId>net.alchim31.maven</groupId>-->
-		        <!--<artifactId>scala-maven-plugin</artifactId>-->
-		        <!--<version>3.2.2</version>-->
-		        <!--<executions>-->
-		          <!--<execution>-->
-		            <!--<goals>-->
-		              <!--&lt;!&ndash; goal>add-source</goal&ndash;&gt;-->
-		              <!--<goal>compile</goal>-->
-		              <!--<goal>testCompile</goal>-->
-		            <!--</goals>-->
-		          <!--</execution>-->
-		        <!--</executions>-->
-		      <!--</plugin>-->
-
-        <!--</plugins>-->
     </build>
-
-    <!--<packaging>pom</packaging>-->
-    <!--<modules>-->
-        <!--<module>./benchflow-to-faban-config-converter</module>-->
-    <!--</modules>-->
 
 </project>
