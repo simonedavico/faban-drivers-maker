@@ -1,7 +1,6 @@
-package cloud.benchflow.config
+package cloud.benchflow.config.converter
 
 import java.io.FileInputStream
-import scala.xml.PrettyPrinter
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -9,6 +8,6 @@ import scala.xml.PrettyPrinter
   * Created on 26/12/15.
   */
 object QuickTest extends App {
-  val in = new FileInputStream("./benchflow-to-faban-config-converter/src/test/resources/camundaTest.yml")
+  val in = new FileInputStream("./application/src/test/resources/camundaTest.yml")
   print(new BenchFlowConfigConverter("", "") from in)
 }

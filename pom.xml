@@ -133,7 +133,6 @@
     <modules>
         <module>api</module>
         <module>application</module>
-        
     </modules>
     <dependencyManagement>
         <dependencies>

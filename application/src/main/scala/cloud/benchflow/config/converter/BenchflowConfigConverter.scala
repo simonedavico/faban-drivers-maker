@@ -1,4 +1,4 @@
-package cloud.benchflow.config
+package cloud.benchflow.config.converter
 
 import java.io.InputStream
 import org.yaml.snakeyaml.Yaml
