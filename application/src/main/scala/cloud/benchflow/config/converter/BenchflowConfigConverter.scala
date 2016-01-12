@@ -114,10 +114,22 @@ class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
     FabanXML(toXML(map).head, javaHome, javaOpts)
   }
 
+  private def convertFromString(in: String): Elem = {
+    import XMLGenerator._
+    val map = (new Yaml load in).asInstanceOf[java.util.Map[String, Any]]
+    FabanXML(toXML(map).head, javaHome, javaOpts)
+  }
+
   def from(in: InputStream): String = {
     val sb = new StringBuilder()
     sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
     (sb ++= new PrettyPrinter(60, 2).format(convert(in))).toString
+  }
+
+  def fromString(in : String): String = {
+    val sb = new StringBuilder()
+    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
+    (sb ++= new PrettyPrinter(60, 2).format(convertFromString(in))).toString
   }
 
 }
