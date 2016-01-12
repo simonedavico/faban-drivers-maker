@@ -1,5 +1,6 @@
 package cloud.benchflow.driversmaker.resources;
 
+import com.google.common.io.ByteStreams;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -10,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -30,9 +32,12 @@ public class FabanConfigResource {
     public String convert(@FormDataParam("benchflow-config")
                           InputStream benchflowConfig,
                           @FormDataParam("benchflow-config")
-                          FormDataContentDisposition benchflowConfigDetail) {
+                          FormDataContentDisposition benchflowConfigDetail) throws IOException {
         //returns benchflow config converted to faban xml
-        return bfc.from(benchflowConfig);
+        byte[] data = ByteStreams.toByteArray(benchflowConfig);
+        String yamlConfig = new String(data);
+        return bfc.fromString(yamlConfig);
+//        return bfc.from(benchflowConfig);
     }
 
 }

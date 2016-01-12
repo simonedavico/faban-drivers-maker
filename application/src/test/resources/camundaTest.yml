@@ -21,6 +21,7 @@ benchFlowBenchmark:
         agents: 195.176.181.45:5 195.176.181.55:10 195.176.181.106:10
         stats:
           interval: 30
+
   sut:
     - sutConfig:
         hostPorts: 195.176.181.105:8080
@@ -29,7 +30,9 @@ benchFlowBenchmark:
         name: camunda
     - services:
         benchFlowCompose: http://195.176.181.55:8090
-        monitors:
         collectors:
+          mysqldumpData: http://10.40.1.128:9301/data
+          statsStart: http://195.176.181.105:9302/start
+          statsStop: http://195.176.181.105:9302/stop
     - runInfo:
-        runID: camunda
+        runID: sut_camunda_1M

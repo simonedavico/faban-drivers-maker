@@ -2,6 +2,7 @@ package cloud.benchflow.config.converter
 
 import java.io.InputStream
 import org.yaml.snakeyaml.Yaml
+import scala.xml.transform.RewriteRule
 import util.Properties
 
 import scala.collection.JavaConverters._
@@ -97,7 +98,11 @@ object FabanXML {
 
             { drivers map transformDriverConfig }
           </fa:runConfig>
-          { elem \ "sut" }
+          {
+            (elem \ "sut" theSeq).head match {
+              case <sut>{suts @ _*}</sut> => suts
+            }
+          }
         </xml>.copy(label = elem.label)
       case _ => throw new Exception //TODO: throw meaningful exception
     }
@@ -108,7 +113,20 @@ object FabanXML {
 //the interface to the business logic
 class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
 
+  private val transformer = new RewriteRule {
+    override def transform(n: Node): Seq[Node] = n match {
+      case <benchFlowCompose>{ value }</benchFlowCompose> => <benchFlowCompose>{ value.text.stripPrefix("\n") }</benchFlowCompose>
+      case other => other
+    }
+  }
+
   private def convert(in: InputStream): Elem = {
+    import XMLGenerator._
+    val map = (new Yaml load in).asInstanceOf[java.util.Map[String, Any]]
+    FabanXML(toXML(map).head, javaHome, javaOpts)
+  }
+
+  private def convertFromString(in: String): Elem = {
     import XMLGenerator._
     val map = (new Yaml load in).asInstanceOf[java.util.Map[String, Any]]
     FabanXML(toXML(map).head, javaHome, javaOpts)
@@ -117,7 +135,16 @@ class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
   def from(in: InputStream): String = {
     val sb = new StringBuilder()
     sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
-    (sb ++= new PrettyPrinter(60, 2).format(convert(in))).toString
+    val result = transformer transform convert(in)
+    (sb ++= new PrettyPrinter(400, 2).format(result.head)).toString
+  }
+
+  def fromString(in : String): String = {
+    val sb = new StringBuilder()
+    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
+    val result = transformer.transform(convertFromString(in)).head
+    (sb ++= new PrettyPrinter(400, 2).format(result)).toString
+
   }
 
 }
