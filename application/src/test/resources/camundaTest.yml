@@ -35,4 +35,4 @@ benchFlowBenchmark:
           statsStart: http://195.176.181.105:9302/start
           statsStop: http://195.176.181.105:9302/stop
     - runInfo:
-        runID: camunda
+        runID: sut_camunda_1M
