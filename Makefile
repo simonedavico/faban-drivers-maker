@@ -32,7 +32,7 @@ build_container_local:
 	rm target/benchflow-$(REPONAME).jar
 
 test_container_local:
-	docker run -ti --rm -e "ENVCONSUL_CONSUL=195.176.181.55:8500" \
+	docker run -ti --rm -e "ENVCONSUL_CONSUL=$(ENVCONSUL_CONSUL)" \
 	-p 8080:8080 --name $(REPONAME) $(DOCKERIMAGENAME):$(VERSION)
 
 rm_container_local:
