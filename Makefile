@@ -24,9 +24,6 @@ test:
 	JAVA_HOME=$(JAVA_HOME) mvn test
 
 build_container_local:
-	cd benchflow-to-faban-config-converter/ && \
-	JAVA_HOME=$(JAVA_HOME) mvn install && \
-	cd .. && \
 	JAVA_HOME=$(JAVA_HOME) mvn package
 	docker build -t $(DOCKERIMAGENAME):$(VERSION) -f Dockerfile.test .
 	rm target/benchflow-$(REPONAME).jar
