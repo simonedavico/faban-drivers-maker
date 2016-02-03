@@ -2,6 +2,7 @@ FROM benchflow/base-images:envconsul-java8_dev
 
 MAINTAINER Vincenzo FERME <info@vincenzoferme.it>
 
+ENV FABAN_DRIVERS_MAKER_VERSION v-dev
 ENV RELEASE_VERSION v-dev
 ENV FABAN_VERSION dev
 ENV FABAN_ROOT /app/
