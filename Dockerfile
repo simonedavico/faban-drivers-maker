@@ -60,10 +60,5 @@ ENV ANT_HOME /opt/ant
 ENV PATH ${PATH}:/opt/ant/bin
 
 COPY ./services/300-faban-drivers-maker.conf /apps/chaperone.d/300-faban-drivers-maker.conf
-
-#TODO: remove, it is for testing
-RUN touch /app/test.tpl
-#TODO: remove, here because of a problem killing the container
-RUN rm /apps/chaperone.d/200-envconsul-envcp.conf
  
 EXPOSE 8080
