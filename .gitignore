@@ -8,4 +8,5 @@
 /application/application.iml
 /application/benchflow-to-faban-config-converter
 /application/target
+/configuration-personal.yml
 /api/api.iml

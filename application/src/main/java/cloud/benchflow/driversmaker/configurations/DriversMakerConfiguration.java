@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
- *         <p/>
- *         Created on 06/01/16.
+ *
+ * Created on 06/01/16.
  */
 public class DriversMakerConfiguration extends Configuration {
 

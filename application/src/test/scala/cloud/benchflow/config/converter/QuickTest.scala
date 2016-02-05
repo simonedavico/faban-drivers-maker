@@ -9,5 +9,5 @@ import java.io.FileInputStream
   */
 object QuickTest extends App {
   val in = new FileInputStream("./application/src/test/resources/camundaTest.yml")
-  print(new BenchFlowConfigConverter("", "") from in)
+  print(new BenchFlowConfigConverter("", "") convertAndStringify in)
 }

@@ -2,11 +2,11 @@ package cloud.benchflow.config.converter
 
 import java.io.InputStream
 import org.yaml.snakeyaml.Yaml
-import scala.xml.transform.RewriteRule
+import scala.xml.transform.{RuleTransformer, RewriteRule}
 import util.Properties
 
 import scala.collection.JavaConverters._
-import scala.xml.{PrettyPrinter, Elem, Node}
+import scala.xml._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -113,38 +113,38 @@ object FabanXML {
 //the interface to the business logic
 class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
 
-  private val transformer = new RewriteRule {
+  import XMLGenerator._
+
+  private val removeNewlinesRule = new RewriteRule {
+    val minimizeEmpty = false;
     override def transform(n: Node): Seq[Node] = n match {
-      case <benchFlowCompose>{ value }</benchFlowCompose> => <benchFlowCompose>{ value.text.stripPrefix("\n") }</benchFlowCompose>
+      case Elem(prefix, label, attribs, scope, _, Text(content)) =>
+        Elem(prefix, label, attribs, scope, minimizeEmpty, Text(content.trim))
       case other => other
     }
   }
+  private object removeNewlines extends RuleTransformer(removeNewlinesRule)
 
   private def convert(in: InputStream): Elem = {
-    import XMLGenerator._
     val map = (new Yaml load in).asInstanceOf[java.util.Map[String, Any]]
     FabanXML(toXML(map).head, javaHome, javaOpts)
   }
 
-  private def convertFromString(in: String): Elem = {
-    import XMLGenerator._
+  private def convert(in: String): Elem = {
     val map = (new Yaml load in).asInstanceOf[java.util.Map[String, Any]]
     FabanXML(toXML(map).head, javaHome, javaOpts)
   }
 
-  def from(in: InputStream): String = {
-    val sb = new StringBuilder()
-    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
-    val result = transformer transform convert(in)
-    (sb ++= new PrettyPrinter(400, 2).format(result.head)).toString
-  }
-
-  def fromString(in : String): String = {
-    val sb = new StringBuilder()
-    sb ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
-    val result = transformer.transform(convertFromString(in)).head
+  def convertAndStringify(in: InputStream): String = {
+    val sb = new StringBuilder ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
+    val result = removeNewlines(convert(in)).head
     (sb ++= new PrettyPrinter(400, 2).format(result)).toString
+  }
 
+  def convertAndStringify(in : String): String = {
+    val sb = new StringBuilder ++= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Properties.lineSeparator
+    val result = removeNewlines(convert(in)).head
+    (sb ++= new PrettyPrinter(400, 2).format(result)).toString
   }
 
 }

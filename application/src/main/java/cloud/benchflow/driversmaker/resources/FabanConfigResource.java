@@ -36,7 +36,7 @@ public class FabanConfigResource {
         //returns benchflow config converted to faban xml
         byte[] data = ByteStreams.toByteArray(benchflowConfig);
         String yamlConfig = new String(data);
-        return bfc.fromString(yamlConfig);
+        return bfc.convertAndStringify(yamlConfig);
 //        return bfc.from(benchflowConfig);
     }
 
