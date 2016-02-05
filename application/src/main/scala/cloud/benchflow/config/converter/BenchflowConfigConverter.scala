@@ -111,7 +111,7 @@ object FabanXML {
 }
 
 //the interface to the business logic
-class BenchFlowConfigConverter(val javaHome: String, val javaOpts: String) {
+class BenchFlowBenchmarkConfigConverter(val javaHome: String, val javaOpts: String) {
 
   import XMLGenerator._
 

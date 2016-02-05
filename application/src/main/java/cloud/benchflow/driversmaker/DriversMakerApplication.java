@@ -1,13 +1,13 @@
 package cloud.benchflow.driversmaker;
 
-
-import cloud.benchflow.config.converter.BenchFlowConfigConverter;
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
-import cloud.benchflow.driversmaker.resources.FabanConfigResource;
+import cloud.benchflow.driversmaker.modules.BenchFlowConfigConverterModule;
+import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
@@ -27,20 +27,19 @@ public class DriversMakerApplication extends Application<DriversMakerConfigurati
 
     @Override
     public void initialize(Bootstrap<DriversMakerConfiguration> bootstrap) {
-        // nothing to do yet
+        bootstrap.addBundle(new TemplateConfigBundle());
+
+        GuiceBundle<DriversMakerConfiguration> guiceBundle =
+                GuiceBundle.<DriversMakerConfiguration>builder()
+                        .enableAutoConfig("cloud.benchflow.driversmaker")
+                        .modules(new BenchFlowConfigConverterModule())
+                        .build();
+
+        bootstrap.addBundle(guiceBundle);
     }
 
     @Override
     public void run(DriversMakerConfiguration driversMakerConfiguration, Environment environment) throws Exception {
-
-        final String javaHome = driversMakerConfiguration.getFabanConfiguration().getJavaHome();
-        final String javaOpts = driversMakerConfiguration.getFabanConfiguration().getJavaOpts();
-
-        BenchFlowConfigConverter bfc = new BenchFlowConfigConverter(javaHome, javaOpts);
-        final FabanConfigResource configConverter = new FabanConfigResource(bfc);
-
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(configConverter);
-
     }
 }
