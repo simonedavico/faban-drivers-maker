@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>cloud.benchflow.faban</groupId>
+	<groupId>cloud.benchflow</groupId>
 	<artifactId>drivers-maker</artifactId>
 	<version>0.1.0</version>
-	<name>benchflow-faban-drivers-maker</name>
+	<name>benchflow-drivers-maker</name>
 
     <properties>
-		<project.name>benchflow-faban-drivers-maker</project.name>
+		<project.name>benchflow-drivers-maker</project.name>
         <project.mainclass>cloud.benchflow.driversmaker.DriversMakerApplication</project.mainclass>
         <project.configurationfile>configuration.yml</project.configurationfile>
 

@@ -1,4 +1,4 @@
-REPONAME = faban-drivers-maker
+REPONAME = drivers-maker
 DOCKERIMAGENAME = benchflow/$(REPONAME)
 VERSION = dev
 JAVA_VERSION_FOR_COMPILATION = java-8-oracle

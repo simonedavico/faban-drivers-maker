@@ -12,12 +12,12 @@ ENV CLIENT_VERSION v-dev
 ENV SUT_LIBRARIES_VERSION v-dev
 ENV SUT_PLUGINS_VERSION v-dev
 
-# Get benchflow-faban-drivers-maker
-RUN wget -q --no-check-certificate -O /app/benchflow-faban-drivers-maker.jar https://github.com/benchflow/faban-drivers-maker/releases/download/$FABAN_DRIVERS_MAKER_VERSION/benchflow-faban-drivers-maker.jar
+# Get benchflow-drivers-maker
+RUN wget -q --no-check-certificate -O /app/benchflow-drivers-maker.jar https://github.com/benchflow/drivers-maker/releases/download/$FABAN_DRIVERS_MAKER_VERSION/benchflow-drivers-maker.jar
 
 COPY configuration.yml /app/
 
-# Get benchflow-faban-drivers-maker dependencies
+# Get benchflow-drivers-maker dependencies
 RUN apk --update add wget tar && \
 	wget -q --no-check-certificate -O /tmp/faban.tar.gz https://github.com/benchflow/faban/releases/download/${RELEASE_VERSION}/faban-kit-${FABAN_VERSION}.tar.gz && \
 	mkdir -p ${FABAN_ROOT}/ && \
@@ -59,6 +59,6 @@ RUN mkdir -p /opt/ant && \
 ENV ANT_HOME /opt/ant
 ENV PATH ${PATH}:/opt/ant/bin
 
-COPY ./services/300-faban-drivers-maker.conf /apps/chaperone.d/300-faban-drivers-maker.conf
+COPY ./services/300-drivers-maker.conf /apps/chaperone.d/300-drivers-maker.conf
  
 EXPOSE 8080
