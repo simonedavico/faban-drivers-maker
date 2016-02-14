@@ -1,4 +1,4 @@
-REPONAME = faban-drivers-maker
+REPONAME = drivers-maker
 DOCKERIMAGENAME = benchflow/$(REPONAME)
 VERSION = dev
 JAVA_VERSION_FOR_COMPILATION = java-8-oracle
@@ -24,15 +24,12 @@ test:
 	JAVA_HOME=$(JAVA_HOME) mvn test
 
 build_container_local:
-	cd benchflow-to-faban-config-converter/ && \
-	JAVA_HOME=$(JAVA_HOME) mvn install && \
-	cd .. && \
 	JAVA_HOME=$(JAVA_HOME) mvn package
 	docker build -t $(DOCKERIMAGENAME):$(VERSION) -f Dockerfile.test .
 	rm target/benchflow-$(REPONAME).jar
 
 test_container_local:
-	docker run -ti --rm -e "ENVCONSUL_CONSUL=195.176.181.55:8500" \
+	docker run -ti --rm -e "ENVCONSUL_CONSUL=$(ENVCONSUL_CONSUL)" \
 	-p 8080:8080 --name $(REPONAME) $(DOCKERIMAGENAME):$(VERSION)
 
 rm_container_local:
