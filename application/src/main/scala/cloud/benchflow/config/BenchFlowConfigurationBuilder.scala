@@ -19,7 +19,49 @@ class BenchFlowConfigurationBuilder(val bfEnv: BenchFlowEnv,
   def build() = {
       val resolvedServices = dockerCompose.services.map(generateForService)
       val benchFlowServices = resolvedServices.flatMap(resolveBoundBenchFlowServices)
-      dockerCompose = dockerCompose.copy(services = resolvedServices ++ benchFlowServices)
+      dockerCompose = resolveBenchFlowVariables(dockerCompose.copy(services = resolvedServices ++ benchFlowServices))
+  }
+
+
+  private def resolveBenchFlowVariables(dc: DockerCompose): DockerCompose = {
+
+    def updateEntry(entry: String, resolvedValue: (String, String)): String = {
+      entry.replace(s"$${${resolvedValue._1}}", resolvedValue._2)
+    }
+
+    //resolves all the benchflow variables in a service
+    def resolveService(s: Service) = {
+
+      def benchflowEnvResolver(variable: String, dc: DockerCompose) =
+        bfEnv.getVariable[String](s"BENCHFLOW_$variable")
+
+      //given a variable, it returns the value
+      def resolveSingleVariable(variable: String) = {
+        val benchflow_env = "(BENCHFLOW_ENV_)(.*)".r
+        variable match {
+          case benchflow_env(prefix, name) => benchflowEnvResolver(name, dc)
+          case other =>  s"$${$other}"
+        }
+      }
+
+      //given an environment entry, returns the entry with benchflow variables resolved
+      def resolveEnvironmentEntry(entry: String) = {
+        val resolvedValues = entry.findBenchFlowVars
+                                  .getOrElse(Seq())
+                                  .map(v => (v, resolveSingleVariable(v)))
+
+        var resolvedString = entry
+        for(resolvedValue <- resolvedValues) {
+          resolvedString = updateEntry(resolvedString, resolvedValue)
+        }
+        resolvedString
+      }
+
+      s.copy(environment = Some(Environment(s.environment.get.environment.map(resolveEnvironmentEntry))))
+    }
+
+    DockerCompose(dc.services.map(resolveService))
+
   }
 
   /***
@@ -27,7 +69,6 @@ class BenchFlowConfigurationBuilder(val bfEnv: BenchFlowEnv,
     * Given an environment and a constraint, adds the constraint to the environment
     */
   private def resolveNodeConstraint(env: Environment, constraint: String): Environment = {
-//    val ip = bfEnv.getVariable[String](s"BENCHFLOW_SERVER_${constraint.toUpperCase}_PUBLICIP")
     val resolved: String = "constraint:node==" + constraint
     env :+ resolved
   }

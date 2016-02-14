@@ -62,5 +62,8 @@ COPY ./services/envcp/add_servers_info.sh /app/add_servers_info.sh
 RUN chmod +x /app/add_servers_info.sh
 
 COPY ./services/300-drivers-maker.conf /apps/chaperone.d/300-drivers-maker.conf
+
+#copy config.yml and benchflow-services
+COPY ./application/src/test/resources/app /app
  
 EXPOSE 8080

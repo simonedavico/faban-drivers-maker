@@ -21,13 +21,15 @@ package object config {
   case class Volumes(volumes: Seq[String])
   case class Ports(ports: Seq[String])
   case class Image(image: String)
+  case class Expose(expose: Seq[Int])
   case class Service(name: String,
                      image: Option[Image] = None,
                      containerName: Option[ContainerName] = None,
                      command: Option[Command] = None,
                      environment: Option[Environment] = None,
                      volumes: Option[Volumes] = None,
-                     ports: Option[Ports] = None)
+                     ports: Option[Ports] = None,
+                     expose: Option[Expose] = None)
 
   object ServiceYamlProtocol extends DefaultYamlProtocol {
 
@@ -37,6 +39,7 @@ package object config {
     implicit val environmentFormat = yamlFormat1(Environment)
     implicit val volumesFormat = yamlFormat1(Volumes)
     implicit val portsFormat = yamlFormat1(Ports)
+    implicit val exposeFormat = yamlFormat1(Expose)
 
     implicit object ServiceYamlFormat extends YamlFormat[Service] {
 
@@ -51,40 +54,47 @@ package object config {
                 case _ => emptyMap
               })
 
-                ++
+              ++
 
-                (c.containerName match {
-                  case Some(_) => c.containerName.toYaml.asYamlObject.fields
-                  case _ => emptyMap
-                })
+              (c.containerName match {
+                case Some(_) => c.containerName.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
 
-                ++
+              ++
 
-                (c.command match {
-                  case Some(_) => c.command.toYaml.asYamlObject.fields
-                  case _ => emptyMap
-                })
+              (c.command match {
+                case Some(_) => c.command.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
 
-                ++
+              ++
 
-                (c.environment match {
-                  case Some(_) => c.environment.toYaml.asYamlObject.fields
-                  case _ => emptyMap
-                })
+              (c.environment match {
+                case Some(_) => c.environment.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
 
-                ++
+              ++
 
-                (c.volumes match {
-                  case Some(_) => c.volumes.toYaml.asYamlObject.fields
-                  case _ => emptyMap
-                })
+              (c.volumes match {
+                case Some(_) => c.volumes.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
 
-                ++
+              ++
 
-                (c.ports match {
-                  case Some(_) => c.ports.toYaml.asYamlObject.fields
-                  case _ => emptyMap
-                })
+              (c.ports match {
+                case Some(_) => c.ports.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
+
+              ++
+
+              (c.expose match {
+                case Some(_) => c.expose.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
 
             )
         )
@@ -135,13 +145,21 @@ package object config {
               case _ => None
             }
 
+            val expose = params.fields.get(YamlString("expose"))
+            match {
+              case Some(YamlArray(exp)) =>
+                Some(Expose(exp.map(e => e.convertTo[Int])))
+              case _ => None
+            }
+
             Service(serviceName,
               image = image,
               containerName = cname,
               command = command,
               environment = environment,
               volumes = volumes,
-              ports = ports
+              ports = ports,
+              expose = expose
             )
           case _ => throw DeserializationException("Invalid Docker compose file")
         }
