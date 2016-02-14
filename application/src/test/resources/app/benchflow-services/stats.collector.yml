@@ -1,0 +1,28 @@
+#The service name should be "benchflowServiceName_BoundServiceName"
+stats:
+  image: 'benchflow/collectors:stats_dev'
+  # container_name: stats_camunda_TRIAL_ID
+  environment:
+    - "KAFKA_HOST=${BENCHFLOW_ENV_KAFKA_IP}"
+    - "MINIO_HOST=http://${BENCHFLOW_ENV_MINIO_IP}:${BENCHFLOW_ENV_MINIO_PORT}"
+    - "MINIO_ACCESSKEYID=${BENCHFLOW_ENV_MINIO_ACCESSKEYID}"
+    - MINIO_SECRETACCESSKEY=${BENCHFLOW_ENV_MINIO_SECRETACCESSKEY}
+
+    # - BENCHFLOW_EXPERIMENT_ID=camunda
+    # - BENCHFLOW_TRIAL_ID=camunda_1O
+    # - BENCHFLOW_TRIAL_TOTAL_NUM=1
+    - CONTAINERS=${BENCHFLOW_BENCHMARK_BOUNDSERVICE_CONTAINER_NAME}
+
+    # - BENCHFLOW_CONTAINER_NAME=stats_camunda_TRIAL_ID
+    - BENCHFLOW_COLLECTOR_NAME=stats
+    - BENCHFLOW_DATA_NAME=stats
+
+    # - "constraint:node==lisa1"
+
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+  expose:
+    - 8080
+  ports:
+    - '8080'
+    #192.168.41.105::8080
