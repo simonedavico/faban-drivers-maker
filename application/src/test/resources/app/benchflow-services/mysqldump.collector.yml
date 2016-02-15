@@ -24,9 +24,9 @@ mysqldump:
     - BENCHFLOW_COLLECTOR_NAME=mysqldump
     - BENCHFLOW_DATA_NAME=mysqldump
 
-    # - "constraint:node==bull"
+    # - "constraint:node==alias"
   expose:
     - 8080
   ports:
     - '8080'
-  #192.168.41.128::8080
+  #ip::8080

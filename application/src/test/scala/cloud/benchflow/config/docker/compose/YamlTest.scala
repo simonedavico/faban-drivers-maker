@@ -13,8 +13,8 @@ object YamlTest extends App {
 //  println(dc)
 
   val tests = List(
-    "http://${BENCHFLOW_CIAO}/ciao/${BENCHFLOW_ADDIO}",
-    "http://${BENCHFLOW_CIAO}/ciao/${bla}",
+    "http://${BENCHFLOW_HELLO}/ciao/${BENCHFLOW_GOODBYE}",
+    "http://${BENCHFLOW_HELLO}/ciao/${bla}",
     "${blablabla}/ciao/${fofofo}",
     "http://",
     "${ahahahah}",
@@ -30,26 +30,26 @@ object YamlTest extends App {
 
   println(
     """properties:
-      |    ciao: ciao
+      |    hello: hello
       |    boh:
-      |       addio: addio
+      |       bye: bye
       |    foo:
-      |       - uno
+      |       - one
     """.stripMargin.parseYaml.convertTo[Properties])
 
   println(
     """deploy:
-      |    foo: lisa1
-      |    bar: lisa2
-      |    foobar: neha
+      |    foo: alias1
+      |    bar: alias2
+      |    foobar: alias3
     """.stripMargin.parseYaml.convertTo[Deploy])
 
   println(
     """bound:
       |    config:
-      |         uno: due
-      |         tre:
-      |            quattro: cinque
+      |         one: two
+      |         three:
+      |            four: five
     """.stripMargin.parseYaml.convertTo[Binding])
 
   println("bound".parseYaml.convertTo[Binding])
@@ -59,9 +59,9 @@ object YamlTest extends App {
     |            service1:
     |                - benchflow-service1:
     |                    config:
-    |                        uno: due
-    |                        tre:
-    |                            quattro: cinque
+    |                        one: two
+    |                        three:
+    |                            four: five
     |                - benchflow-service2
     |            service2: [ benchflow-service3, benchflow-service4 ]"""
     .stripMargin.parseYaml.convertTo[BenchFlowConfig])
@@ -72,13 +72,13 @@ object YamlTest extends App {
       |        name: camunda
       |        endpoint: /engine-rest
       |    deploy:
-      |        camunda: lisa1
+      |        camunda: alias1
       |    benchflow-config:
       |        camunda: [ stats, mysqldump ]
       |        foo:
       |            - bar:
       |                 config:
-      |                      madre: padre
+      |                      one: two
     """.stripMargin.parseYaml.convertTo[SutConfiguration])
 
   val completeConfiguration =
@@ -87,10 +87,10 @@ object YamlTest extends App {
       |benchmark_name: myBenchmark
       |description: configuration for testing
       |properties:
-      |    uno: due
-      |    tre:
-      |        quattro: cinque
-      |    sei: [ sette ]
+      |    one: two
+      |    three:
+      |        four: five
+      |    six: [ seven ]
       |sut-configuration:
       |    target-service:
       |        name: camunda
@@ -102,7 +102,7 @@ object YamlTest extends App {
       |        foo:
       |            - bar:
       |                 config:
-      |                      madre: padre
+      |                      one: two
     """
 
   println(BenchFlowBenchmark.fromYaml(completeConfiguration))

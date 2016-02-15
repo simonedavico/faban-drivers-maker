@@ -1,7 +1,7 @@
 wfmsbenchmark:
   description: A WfMS benchmark
   hostConfig:
-    host: 192.181.131.121
+    host: 1.0.0.0
   scale: 10
   runControl:
     rampUp: 30
@@ -22,7 +22,7 @@ wfmsbenchmark:
   sut:
     - sutconfig:
         hostConfig:
-        hostPorts: 192.181.131.120:6060
+        hostPorts: 1.0.0.0:6060
 
 
 

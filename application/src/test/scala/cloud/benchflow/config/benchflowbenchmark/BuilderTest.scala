@@ -23,23 +23,23 @@ object BuilderTest extends App {
       |benchmark_name: myBenchmark
       |description: configuration for testing
       |properties:
-      |    uno: due
-      |    tre:
-      |        quattro: cinque
-      |    sei: [ sette ]
+      |    one: two
+      |    three:
+      |        four: five
+      |    six: [ seven ]
       |sut-configuration:
       |    target-service:
       |        name: camunda
       |        endpoint: /engine-rest
       |    deploy:
-      |        camunda: lisa1
-      |        bubu: lisa2
+      |        camunda: alias1
+      |        bubu: alias2
       |    benchflow-config:
       |        camunda: [ stats ]
       |        foo:
       |            - bar:
       |                 config:
-      |                      madre: padre
+      |                      one: two
     """.stripMargin
 
 
