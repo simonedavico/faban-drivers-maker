@@ -111,7 +111,7 @@
                 <artifactId>scala-maven-plugin</artifactId>
                 <configuration>
                     <recompileMode>incremental</recompileMode>
-                    <compileOrder>ScalaThenJava</compileOrder>
+                    <!--<compileOrder>ScalaThenJava</compileOrder>-->
                     <args>
                         <arg>-feature</arg>
                         <arg>-deprecation</arg>
