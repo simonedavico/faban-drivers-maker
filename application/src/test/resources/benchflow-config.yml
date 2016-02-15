@@ -1,0 +1,38 @@
+benchFlowBenchmark:
+  description: This is the benchmark description
+  hostConfig:
+    host: 1.0.0.0 1.0.0.0 1.0.0.0
+    tools: NONE
+  scale: 100
+  timeSync: false
+  runControl:
+    rampUp: 30
+    steadyState: 100
+    rampDown: 30
+  threadStart:
+    delay: 1000
+    simultaneous: false
+    parallel: false
+  stats:
+    maxRunTime: 6
+    interval: 30
+  drivers:
+    - cloud.benchflow.wfmsbenchmark.driver.WfMSBenchmarkDriver:
+        agents: 1.0.0.0:5 1.0.0.0:10 1.0.0.0:10
+        stats:
+          interval: 30
+
+  sut:
+    - sutConfig:
+        hostPorts: 1.0.0.0:8080
+        protocol: http
+        contextPath: engine-rest
+        name: camunda
+    - services:
+        benchFlowCompose: http://1.0.0.0:8090
+        collectors:
+          mysqldumpData: http://1.0.0.0:1111/data
+          statsStart: http://1.0.0.0:1111/start
+          statsStop: http://1.0.0.0:1111/stop
+    - runInfo:
+        runID: sut_camunda_1M

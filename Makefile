@@ -30,7 +30,7 @@ build_container_local:
 
 test_container_local:
 	docker run -ti --rm -e "ENVCONSUL_CONSUL=$(ENVCONSUL_CONSUL)" \
-	-p 8080:8080 --name $(REPONAME) $(DOCKERIMAGENAME):$(VERSION)
+	-p 6060:8080 --name $(REPONAME) $(DOCKERIMAGENAME):$(VERSION)
 
 rm_container_local:
 	docker rm -f -v $(REPONAME)

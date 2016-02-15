@@ -15,6 +15,9 @@
 
     <properties>
         <scala.major>2.11.7</scala.major>
+        <scala.xml.version>1.0.5</scala.xml.version>
+        <scala.parser.combinators.version>1.0.4</scala.parser.combinators.version>
+        <moultingyaml.version>0.2</moultingyaml.version>
         <snakeyaml.version>1.17-SNAPSHOT</snakeyaml.version>
         <jersey.multipart.version>2.19</jersey.multipart.version>
     </properties>
@@ -64,13 +67,25 @@
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-xml_2.11</artifactId>
-            <version>1.0.5</version>
+            <version>${scala.xml.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${snakeyaml.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.jcazevedo</groupId>
+            <artifactId>moultingyaml_2.11</artifactId>
+            <version>${moultingyaml.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-parser-combinators_2.11</artifactId>
+            <version>${scala.parser.combinators.version}</version>
         </dependency>
 
     </dependencies>
@@ -96,7 +111,7 @@
                 <artifactId>scala-maven-plugin</artifactId>
                 <configuration>
                     <recompileMode>incremental</recompileMode>
-                    <compileOrder>ScalaThenJava</compileOrder>
+                    <!--<compileOrder>ScalaThenJava</compileOrder>-->
                     <args>
                         <arg>-feature</arg>
                         <arg>-deprecation</arg>

@@ -1,3 +1,7 @@
+benchflow.env:
+  config.yml: /app/config.yml
+  benchflow.services: /app/benchflow-services
+
 faban.config:
   javaHome: /usr/lib/jvm/java7
   javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
