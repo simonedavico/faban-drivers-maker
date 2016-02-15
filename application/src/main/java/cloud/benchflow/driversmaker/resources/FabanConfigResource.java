@@ -38,7 +38,8 @@ public class FabanConfigResource {
                           FormDataContentDisposition benchflowConfigDetail) throws IOException {
         //returns benchflow config converted to faban xml
         byte[] data = ByteStreams.toByteArray(benchflowConfig);
-        String yamlConfig = new String(data);
+        String yamlConfig = new String(data, "UTF-8");
+        System.out.println(yamlConfig);
         return bfc.convertAndStringify(yamlConfig);
     }
 

@@ -33,7 +33,7 @@ public class DriversMakerApplication extends Application<DriversMakerConfigurati
         GuiceBundle<DriversMakerConfiguration> guiceBundle =
                 GuiceBundle.<DriversMakerConfiguration>builder()
                         .enableAutoConfig("cloud.benchflow.driversmaker")
-                        .modules(new BenchFlowEnvModule(),
+                        .modules(/*new BenchFlowEnvModule(),*/
                                  new BenchFlowConfigConverterModule())
                         .build();
 
