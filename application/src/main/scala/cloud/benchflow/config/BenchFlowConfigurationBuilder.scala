@@ -1,132 +1,166 @@
 package cloud.benchflow.config
 
-import cloud.benchflow.config.benchflowbenchmark.{Binding, BenchFlowBenchmark}
+import cloud.benchflow.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.utils.BenchFlowEnv
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
-  * Created on 13/02/16.
+  * Created on 16/02/16.
   */
-class BenchFlowConfigurationBuilder(val bfEnv: BenchFlowEnv,
-                                    dockercompose: String,
-                                    benchFlowBenchmark: String) {
+class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv: BenchFlowEnv) {
 
-  var benchflowBenchmark = BenchFlowBenchmark.fromYaml(benchFlowBenchmark)
-  var dockerCompose = DockerCompose.fromYaml(dockercompose)
+  val bb = BenchFlowBenchmark.fromYaml(bbyaml)
 
-  def build() = {
-      val resolvedServices = dockerCompose.services.map(generateForService)
-      val benchFlowServices = resolvedServices.flatMap(resolveBoundBenchFlowServices)
-      dockerCompose = resolveBenchFlowVariables(dockerCompose.copy(services = resolvedServices ++ benchFlowServices))
+  type DCTransformer[T] = T => DockerCompose => DockerCompose
+  type ServiceTransformer[T] = T => Service => Service
+  type BenchFlowServiceTransformer[T] = T => ServiceTransformer[BenchFlowBenchmark]
+
+  abstract class BenchFlowVariable(val name: String) {
+    type Source
+    def resolve(implicit source: Source): String
   }
 
+  case class BenchFlowEnvVariable(override val name: String) extends BenchFlowVariable(name) {
+    type Source = BenchFlowEnv
+    override def resolve(implicit source: Source): String = source.getVariable[String](s"BENCHFLOW_$name")
+  }
+  object BenchFlowEnvVariable {
+    val prefix = "(BENCHFLOW_ENV_)(.*)".r
+  }
 
-  private def resolveBenchFlowVariables(dc: DockerCompose): DockerCompose = {
+  case class BenchFlowBoundServiceVariable(override val name: String) extends BenchFlowVariable(name) {
+    override type Source = Service
 
-    def updateEntry(entry: String, resolvedValue: (String, String)): String = {
-      entry.replace(s"$${${resolvedValue._1}}", resolvedValue._2)
+    override def resolve(implicit source: Source): String = {
+      name match {
+        case "IP" => bb.getAliasForService(source.name).getOrElse(BenchFlowBoundServiceVariable.prefix + "_IP")
+        case "PORT" => "port" //best way to get the port?
+        case "CONTAINER_NAME" => source.containerName.map(_.container_name)
+                                       .getOrElse(BenchFlowBoundServiceVariable + "_CONTAINER_NAME")
+        case other => s"BENCHFLOW_BENCHMARK_BOUNDSERVICE_$other"
+      }
+    }
+  }
+  object BenchFlowBoundServiceVariable {
+    val prefix = "(BENCHFLOW_BENCHMARK_BOUNDSERVICE_)(.*)".r
+  }
+
+  /***
+    * Generates a constraint:node for a service
+    */
+  private def generateConstraint: ServiceTransformer[BenchFlowBenchmark] = bb => service => {
+    bb.getAliasForService(service.name) match {
+      case Some(alias) => service.copy(environment = Some(service.environment.get :+ s"constraint:node==$alias"))
+      case None =>  throw new Exception(s"Server alias not found for service ${service.name}")
+    }
+  }
+
+  /***
+    * Generates constraint:node for all services in a DockerCompose
+    */
+  private def generateConstraints: DCTransformer[BenchFlowBenchmark] = bb => dc => {
+    dc.copy(services = dc.services.map(generateConstraint(bb)))
+  }
+
+  /***
+    * Given a collector name, returns the corresponding service
+    */
+  private def resolveCollector(name: String): Service = {
+    import scala.io.Source._
+    val yaml = fromFile(benv.getBenchFlowServicesPath + s"/$name.collector.yml").mkString
+    Service.fromYaml(yaml)
+  }
+
+  /***
+    * Given a service, returns a list of bound benchflow services
+    */
+  private def resolveBoundServices(service: Service) = {
+    val bindings = bb.getBindingsForService(service.name).map(_.boundService)
+    bindings.map(resolveCollector)
+  }
+
+  /***
+    *  Generates constraint for a bound benchflow service
+    */
+  private def generateBenchFlowServiceConstraint: BenchFlowServiceTransformer[Service] =
+      boundservice => bb => bfservice => {
+        val alias = bb.getAliasForService(boundservice.name).get
+        bfservice.copy(
+           name = s"${bfservice.name}_collector_${boundservice.name}",
+           environment = Some(bfservice.environment.get :+ s"constraint:node==$alias"))
+      }
+
+  private def generateBenchFlowServiceConstraints(bound: Service, bfservices: Seq[Service]): Seq[Service] =
+    bfservices.map(bfservice => generateBenchFlowServiceConstraint(bound)(bb)(bfservice))
+
+  /***
+    * Resolves bound benchflow services
+    */
+  private def resolveBenchFlowServices: DCTransformer[BenchFlowBenchmark] = bb => dc => {
+    val bindings = dc.services.map(service => (service, resolveBoundServices(service)))
+    val bfservices: Seq[Service] = bindings.flatMap(binding => generateBenchFlowServiceConstraints(binding._1, binding._2))
+    dc.copy(services = dc.services ++ bfservices)
+  }
+
+  /***
+    * resolves all benchflow variables in a docker compose
+    */
+  private def resolveBenchFlowVariables: DCTransformer[BenchFlowBenchmark] = bb => dc => {
+
+    /** *
+      * Given the name of a bound collector, returns the service it is bound to
+      */
+    def getBoundService(bfservice: Service): Service = {
+      val boundTo = bfservice.name.split("_")(2)
+      dc.services.filter(s => s.name == boundTo).head
     }
 
-    //resolves all the benchflow variables in a service
-    def resolveService(s: Service) = {
+    /***
+      * Resolves benchflow variables in a service
+      */
+    def resolveBenchFlowVariablesForService: ServiceTransformer[Unit] = Unit => service => {
 
-      def benchflowEnvResolver(variable: String, dc: DockerCompose) =
-        bfEnv.getVariable[String](s"BENCHFLOW_$variable")
+      def resolveBenchFlowVariablesForEntry(entry: String): String = {
 
-      //given a variable, it returns the value
-      def resolveSingleVariable(variable: String) = {
-        val benchflow_env = "(BENCHFLOW_ENV_)(.*)".r
-        variable match {
-          case benchflow_env(prefix, name) => benchflowEnvResolver(name, dc)
-          case other =>  s"$${$other}"
+        implicit val env = benv
+
+        def updateEntry(resolved: (String, String))(entry: String) =
+          entry.replace(s"$${${resolved._1}}", resolved._2)
+
+        val values = entry.findBenchFlowVars.getOrElse(Seq()).map(bfvar => (bfvar, bfvar match {
+          case BenchFlowEnvVariable.prefix(prefix, name) => BenchFlowEnvVariable(name).resolve
+          case BenchFlowBoundServiceVariable.prefix(prefix, name) => {
+            implicit val boundTo = getBoundService(service)
+            BenchFlowBoundServiceVariable(name).resolve
+          }
+          case other => s"$${$bfvar}"
+        }))
+
+        values.map(value => updateEntry(value)_).reduceOption(_ compose _) match {
+          case None => entry
+          case Some(cumulativeUpdate) => cumulativeUpdate(entry)
         }
+
       }
 
-      //given an environment entry, returns the entry with benchflow variables resolved
-      def resolveEnvironmentEntry(entry: String) = {
-        val resolvedValues = entry.findBenchFlowVars
-                                  .getOrElse(Seq())
-                                  .map(v => (v, resolveSingleVariable(v)))
-
-        var resolvedString = entry
-        for(resolvedValue <- resolvedValues) {
-          resolvedString = updateEntry(resolvedString, resolvedValue)
-        }
-        resolvedString
-      }
-
-      s.copy(environment = Some(Environment(s.environment.get.environment.map(resolveEnvironmentEntry))))
+      service.copy(environment = Some(Environment(
+        service.environment.getOrElse(Environment(Seq()))
+               .environment.map(resolveBenchFlowVariablesForEntry))))
     }
 
-    DockerCompose(dc.services.map(resolveService))
-
+    dc.copy(services = dc.services.map(resolveBenchFlowVariablesForService()))
   }
 
   /***
-    *
-    * Given an environment and a constraint, adds the constraint to the environment
+    * Generates a DockerCompose with bound benchflow services and resolved variables
     */
-  private def resolveNodeConstraint(env: Environment, constraint: String): Environment = {
-    val resolved: String = "constraint:node==" + constraint
-    env :+ resolved
-  }
-
-  /***
-    *
-    * returns a service rapresentation for a collector, given its name
-    *
-    */
-  private def resolveBenchFlowCollector(collectorName: String): Service = {
-    val collector = scala.io.Source
-                            .fromFile(bfEnv.getBenchFlowServicesPath + s"/$collectorName.collector.yml")
-                            .mkString
-    Service.fromYaml(collector)
-  }
-
-  /***
-    *
-    * resolves all the bindings for a given service
-    */
-  private def resolveBoundBenchFlowServices(service: Service): Seq[Service] = {
-    val toBind = benchflowBenchmark.`sut-configuration`.bfConfig.bindings(service.name)
-
-    def getServiceForBinding(boundTo: Service)(binding: Binding) = {
-      var bfService = resolveBenchFlowCollector(binding.boundService)
-      bfService = bfService.copy(name = s"${bfService.name}_${boundTo.name}")
-
-      val serverAlias = benchflowBenchmark.`sut-configuration`.deploy.get(service.name) match {
-        case None => throw new Exception(s"Service ${service.name} doesn't feature a deploy alias")
-        case Some(alias) => alias
-      }
-
-      bfService.copy(environment =
-        Some(resolveNodeConstraint(bfService.environment.getOrElse(Environment(List())),
-                                   serverAlias)))
-    }
-
-    toBind match {
-      case None => Seq()
-      case Some(bindings) => bindings.map(getServiceForBinding(service))
-    }
-  }
-
-  /***
-    *
-    * Generates the necessary fields for a service
-    */
-  private def generateForService(service: Service): Service = {
-
-    val serverAlias = benchflowBenchmark.`sut-configuration`.deploy.get(service.name) match {
-      case None => throw new Exception(s"cannot generate constraint for service ${service.name}")
-      case Some(alias) => alias
-    }
-
-    service.copy(
-      environment = Some(resolveNodeConstraint(
-                          service.environment.getOrElse(Environment(List())
-                         ), serverAlias)))
+  def build: DockerCompose = {
+    val dc = DockerCompose.fromYaml(dcyaml)
+    val transformations = List(resolveBenchFlowVariables(bb), resolveBenchFlowServices(bb), generateConstraints(bb))
+    val transform = transformations.reduce(_ compose _)
+    transform(dc)
   }
 
 }

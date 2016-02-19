@@ -18,7 +18,7 @@ case class Deploy(deploy: Map[String, String]) {
 }
 case class Binding(boundService: String, config: Option[Properties])
 case class BenchFlowConfig(benchflow_config: Map[String, Seq[Binding]]) {
-  def bindings(serviceName: String) = benchflow_config.get(serviceName)
+  def bindings(serviceName: String) = benchflow_config.getOrElse(serviceName, Seq())
 }
 case class TargetService(name: String, endpoint: String)
 case class SutConfiguration(targetService: TargetService,
@@ -30,6 +30,10 @@ case class BenchFlowBenchmark(name: String,
                               suts_type: SutsType,
                               properties: Properties,
                               `sut-configuration`: SutConfiguration)
+{
+  def getAliasForService(serviceName: String) = `sut-configuration`.deploy.get(serviceName)
+  def getBindingsForService(serviceName: String) = `sut-configuration`.bfConfig.bindings(serviceName)
+}
 
 
 //TODO: add drivers to BenchFlowBenchmark

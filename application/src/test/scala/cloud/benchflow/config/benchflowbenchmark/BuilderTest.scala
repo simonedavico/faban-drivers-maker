@@ -14,8 +14,10 @@ object BuilderTest extends App {
     """camunda:
       |    image: camundaImage
       |    environment: [ camundavar ]
+      |    container_name: mycontainername
       |bubu:
       |    image: bubuImage
+      |    environment: [ bubuvar ]
     """.stripMargin
   val completeConfiguration =
     """sut_name: camunda
@@ -45,10 +47,6 @@ object BuilderTest extends App {
 
   val bfEnv = new BenchFlowEnv("./application/src/test/resources/app/config.yml",
                                "./application/src/test/resources/app/benchflow-services")
-  val builder = new BenchFlowConfigurationBuilder(bfEnv = bfEnv,
-                                                  dockercompose = dockerCompose,
-                                                  benchFlowBenchmark = completeConfiguration)
-
-  builder.build()
-  println(builder.dockerCompose)
+  val builder = new BenchFlowConfigurationBuilder(dockerCompose, completeConfiguration, bfEnv)
+  println(builder.build)
 }
