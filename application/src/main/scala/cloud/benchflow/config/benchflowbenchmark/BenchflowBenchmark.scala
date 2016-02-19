@@ -33,6 +33,8 @@ case class BenchFlowBenchmark(name: String,
 {
   def getAliasForService(serviceName: String) = `sut-configuration`.deploy.get(serviceName)
   def getBindingsForService(serviceName: String) = `sut-configuration`.bfConfig.bindings(serviceName)
+  def getBindingConfiguration(from: String, to: String): Option[Properties] =
+    `sut-configuration`.bfConfig.bindings(from).find(b => b.boundService == to).flatMap(_.config)
 }
 
 

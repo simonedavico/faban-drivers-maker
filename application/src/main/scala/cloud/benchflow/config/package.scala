@@ -29,7 +29,18 @@ package object config {
                      environment: Option[Environment] = None,
                      volumes: Option[Volumes] = None,
                      ports: Option[Ports] = None,
-                     expose: Option[Expose] = None)
+                     expose: Option[Expose] = None) {
+    /***
+      * Returns the port, taking into account the formats "ip:port" and "port"
+      */
+    def getPort: Option[String] = {
+      val pattern = "(.*):([0-9]*)".r
+      ports.flatMap(_.ports.head match {
+        case pattern(ip, p) => Some(p)
+        case other => ports.map(_.ports.head)
+      })
+    }
+  }
 
   object ServiceYamlProtocol extends DefaultYamlProtocol {
 

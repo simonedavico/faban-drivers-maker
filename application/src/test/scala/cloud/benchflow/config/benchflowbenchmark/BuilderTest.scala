@@ -15,6 +15,8 @@ object BuilderTest extends App {
       |    image: camundaImage
       |    environment: [ camundavar ]
       |    container_name: mycontainername
+      |    ports:
+      |        - '8080'
       |bubu:
       |    image: bubuImage
       |    environment: [ bubuvar ]
@@ -37,7 +39,10 @@ object BuilderTest extends App {
       |        camunda: alias1
       |        bubu: alias2
       |    benchflow-config:
-      |        camunda: [ stats ]
+      |        camunda:
+      |            - stats:
+      |                 config:
+      |                      FOO: resolvedFoo
       |        foo:
       |            - bar:
       |                 config:

@@ -13,9 +13,9 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
 
   val bb = BenchFlowBenchmark.fromYaml(bbyaml)
 
-  type DCTransformer[T] = T => DockerCompose => DockerCompose
-  type ServiceTransformer[T] = T => Service => Service
-  type BenchFlowServiceTransformer[T] = T => ServiceTransformer[BenchFlowBenchmark]
+  type DCTransformer = DockerCompose => DockerCompose
+  type ServiceTransformer = Service => Service
+  type BenchFlowServiceTransformer = Service => ServiceTransformer
 
   abstract class BenchFlowVariable(val name: String) {
     type Source
@@ -36,7 +36,7 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
     override def resolve(implicit source: Source): String = {
       name match {
         case "IP" => bb.getAliasForService(source.name).getOrElse(BenchFlowBoundServiceVariable.prefix + "_IP")
-        case "PORT" => "port" //best way to get the port?
+        case "PORT" => source.getPort.getOrElse("BENCHFLOW_BENCHMARK_BOUNDSERVICE_PORT")
         case "CONTAINER_NAME" => source.containerName.map(_.container_name)
                                        .getOrElse(BenchFlowBoundServiceVariable + "_CONTAINER_NAME")
         case other => s"BENCHFLOW_BENCHMARK_BOUNDSERVICE_$other"
@@ -47,10 +47,27 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
     val prefix = "(BENCHFLOW_BENCHMARK_BOUNDSERVICE_)(.*)".r
   }
 
+  case class BenchFlowConfigVariable(override val name: String) extends BenchFlowVariable(name) {
+    override type Source = (Service, Service)
+
+    override def resolve(implicit source: Source): String = {
+      val bfservice = source._2
+      val boundTo = source._1
+      bb.getBindingConfiguration(boundTo.name, bfservice.name.split("_")(0)) match {
+        case Some(config) =>
+          config.properties.get(name).get.toString
+        case None => name
+      }
+    }
+  }
+  object BenchFlowConfigVariable {
+    val prefix = "(BENCHFLOW_BENCHMARK_CONFIG_)(.*)".r
+  }
+
   /***
     * Generates a constraint:node for a service
     */
-  private def generateConstraint: ServiceTransformer[BenchFlowBenchmark] = bb => service => {
+  private def generateConstraint: ServiceTransformer = service => {
     bb.getAliasForService(service.name) match {
       case Some(alias) => service.copy(environment = Some(service.environment.get :+ s"constraint:node==$alias"))
       case None =>  throw new Exception(s"Server alias not found for service ${service.name}")
@@ -60,8 +77,8 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
   /***
     * Generates constraint:node for all services in a DockerCompose
     */
-  private def generateConstraints: DCTransformer[BenchFlowBenchmark] = bb => dc => {
-    dc.copy(services = dc.services.map(generateConstraint(bb)))
+  private def generateConstraints: DCTransformer = dc => {
+    dc.copy(services = dc.services.map(generateConstraint))
   }
 
   /***
@@ -84,8 +101,8 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
   /***
     *  Generates constraint for a bound benchflow service
     */
-  private def generateBenchFlowServiceConstraint: BenchFlowServiceTransformer[Service] =
-      boundservice => bb => bfservice => {
+  private def generateBenchFlowServiceConstraint: BenchFlowServiceTransformer =
+      boundservice => bfservice => {
         val alias = bb.getAliasForService(boundservice.name).get
         bfservice.copy(
            name = s"${bfservice.name}_collector_${boundservice.name}",
@@ -93,12 +110,12 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
       }
 
   private def generateBenchFlowServiceConstraints(bound: Service, bfservices: Seq[Service]): Seq[Service] =
-    bfservices.map(bfservice => generateBenchFlowServiceConstraint(bound)(bb)(bfservice))
+    bfservices.map(bfservice => generateBenchFlowServiceConstraint(bound)(bfservice))
 
   /***
     * Resolves bound benchflow services
     */
-  private def resolveBenchFlowServices: DCTransformer[BenchFlowBenchmark] = bb => dc => {
+  private def resolveBenchFlowServices: DCTransformer = dc => {
     val bindings = dc.services.map(service => (service, resolveBoundServices(service)))
     val bfservices: Seq[Service] = bindings.flatMap(binding => generateBenchFlowServiceConstraints(binding._1, binding._2))
     dc.copy(services = dc.services ++ bfservices)
@@ -107,7 +124,7 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
   /***
     * resolves all benchflow variables in a docker compose
     */
-  private def resolveBenchFlowVariables: DCTransformer[BenchFlowBenchmark] = bb => dc => {
+  private def resolveBenchFlowVariables: DCTransformer = dc => {
 
     /** *
       * Given the name of a bound collector, returns the service it is bound to
@@ -120,7 +137,7 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
     /***
       * Resolves benchflow variables in a service
       */
-    def resolveBenchFlowVariablesForService: ServiceTransformer[Unit] = Unit => service => {
+    def resolveBenchFlowVariablesForService: ServiceTransformer = service => {
 
       def resolveBenchFlowVariablesForEntry(entry: String): String = {
 
@@ -134,6 +151,10 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
           case BenchFlowBoundServiceVariable.prefix(prefix, name) => {
             implicit val boundTo = getBoundService(service)
             BenchFlowBoundServiceVariable(name).resolve
+          }
+          case BenchFlowConfigVariable.prefix(prefix, name) => {
+            implicit val source = (getBoundService(service), service)
+            BenchFlowConfigVariable(name).resolve
           }
           case other => s"$${$bfvar}"
         }))
@@ -150,7 +171,7 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
                .environment.map(resolveBenchFlowVariablesForEntry))))
     }
 
-    dc.copy(services = dc.services.map(resolveBenchFlowVariablesForService()))
+    dc.copy(services = dc.services.map(resolveBenchFlowVariablesForService))
   }
 
   /***
@@ -158,7 +179,7 @@ class BenchFlowConfigurationBuilder(val dcyaml: String, bbyaml: String, val benv
     */
   def build: DockerCompose = {
     val dc = DockerCompose.fromYaml(dcyaml)
-    val transformations = List(resolveBenchFlowVariables(bb), resolveBenchFlowServices(bb), generateConstraints(bb))
+    val transformations = List(resolveBenchFlowVariables, resolveBenchFlowServices, generateConstraints)
     val transform = transformations.reduce(_ compose _)
     transform(dc)
   }
