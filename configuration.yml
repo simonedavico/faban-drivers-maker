@@ -1,6 +1,7 @@
 benchflow.env:
   config.yml: /app/config.yml
   benchflow.services: /app/benchflow-services
+  benchflow.compose: ${env.BENCHFLOW_COMPOSE_ADDRESS}
 
 faban.config:
   javaHome: /usr/lib/jvm/java7

@@ -1,5 +1,6 @@
 package cloud.benchflow.config.docker.compose
 import cloud.benchflow.config._
+import cloud.benchflow.config.collectors.CollectorAPI
 import net.jcazevedo.moultingyaml._
 import cloud.benchflow.config.benchflowbenchmark._
 
@@ -23,6 +24,7 @@ object YamlTest extends App {
   )
 
   import cloud.benchflow.config.benchflowbenchmark.BenchFlowBenchmarkYamlProtocol._
+  import cloud.benchflow.config.collectors.CollectorYamlProtocol._
 
   println("""suts_name: [a, b, c]""".stripMargin.parseYaml.convertTo[SutsNames])
   println("""sut_name: a""".stripMargin.parseYaml.convertTo[SutsNames])
@@ -91,6 +93,10 @@ object YamlTest extends App {
       |    three:
       |        four: five
       |    six: [ seven ]
+      |drivers:
+      |    - driver1:
+      |          key1: val1
+      |          key2: val2
       |sut-configuration:
       |    target-service:
       |        name: camunda
@@ -106,6 +112,34 @@ object YamlTest extends App {
     """
 
   println(BenchFlowBenchmark.fromYaml(completeConfiguration))
+
+  val driver =
+    """fooDriver:
+      |    prop1:
+      |        nested1:
+      |            - list
+      |    prop2: val2
+    """.stripMargin.parseYaml.convertTo[Driver]
+
+  println(driver)
+
+  val collectorAPI =
+    """endpoints:
+      |    start: /start
+      |    stop: /stop
+    """.stripMargin.parseYaml.convertTo[CollectorAPI]
+
+  println(collectorAPI)
+
+  val benchflowCollector =
+    """stats:
+      |    foo: bar
+      |endpoints:
+      |    start: /start
+      |    stop: /stop
+    """.stripMargin.parseYaml.convertTo[CollectorAPI]
+
+  println(benchflowCollector)
 
 
 }

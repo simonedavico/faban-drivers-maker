@@ -16,10 +16,12 @@ public class BenchFlowEnv {
     private Map<String, Object> env;
     private String configPath;
     private String benchFlowServicesPath;
+    private String benchFlowComposePath;
 
-    public BenchFlowEnv(String configPath, String benchFlowServicesPath) throws FileNotFoundException {
+    public BenchFlowEnv(String configPath, String benchFlowServicesPath, String benchFlowComposePath) throws FileNotFoundException {
         this.configPath = configPath;
         this.benchFlowServicesPath = benchFlowServicesPath;
+        this.benchFlowComposePath = benchFlowComposePath;
         reload();
     }
 
@@ -42,5 +44,9 @@ public class BenchFlowEnv {
 
     public String getBenchFlowServicesPath() {
         return benchFlowServicesPath;
+    }
+
+    public String getBenchFlowComposePath() {
+        return benchFlowComposePath;
     }
 }

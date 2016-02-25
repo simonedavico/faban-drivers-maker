@@ -25,7 +25,8 @@ public class BenchFlowEnvModule extends AbstractModule {
     public BenchFlowEnv providesBenchFlowEnv(DriversMakerConfiguration dmc) throws FileNotFoundException {
         String config = dmc.getBenchFlowEnvConfiguration().getConfigPath();
         String bfServices = dmc.getBenchFlowEnvConfiguration().getBenchFlowServicesPath();
-        return new BenchFlowEnv(config, bfServices);
+        String bfCompose = dmc.getBenchFlowEnvConfiguration().getBenchFlowComposeAddress();
+        return new BenchFlowEnv(config, bfServices, bfCompose);
     }
 
 }

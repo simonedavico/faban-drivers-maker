@@ -54,7 +54,7 @@ object FabanXML {
       "timeSync" -> "fh"
     )
 
-  private def specialCases = List("drivers", "sut", "runControl");
+  private def specialCases = List("drivers", "sut", "runControl")
 
   private def addFabanNamespace(defaultNS: String)(elem: Node): Node = {
     elem match {
@@ -116,7 +116,7 @@ class BenchFlowBenchmarkConfigConverter(val javaHome: String, val javaOpts: Stri
   import XMLGenerator._
 
   private val removeNewlinesRule = new RewriteRule {
-    val minimizeEmpty = false;
+    val minimizeEmpty = false
     override def transform(n: Node): Seq[Node] = n match {
       case Elem(prefix, label, attribs, scope, _, Text(content)) =>
         Elem(prefix, label, attribs, scope, minimizeEmpty, Text(content.trim))

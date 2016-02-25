@@ -16,6 +16,9 @@ public class BenchFlowEnvConfiguration {
     @NotEmpty
     private String benchFlowServicesPath;
 
+    @NotEmpty
+    private String benchFlowComposeAddress;
+
     @JsonProperty("config.yml")
     public String getConfigPath() {
         return configPath;
@@ -34,5 +37,15 @@ public class BenchFlowEnvConfiguration {
     @JsonProperty("benchflow.services")
     public void setBenchFlowServicesPath(String benchFlowServicesPath) {
         this.benchFlowServicesPath = benchFlowServicesPath;
+    }
+
+    @JsonProperty("benchflow.compose")
+    public String getBenchFlowComposeAddress() {
+        return benchFlowComposeAddress;
+    }
+
+    @JsonProperty("benchflow.compose")
+    public void setBenchFlowComposeAddress(String benchFlowComposeAddress) {
+        this.benchFlowComposeAddress = benchFlowComposeAddress;
     }
 }

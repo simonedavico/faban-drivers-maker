@@ -13,6 +13,7 @@ object SutsNames {
 }
 case class SutsType(`suts_type`: String)
 case class Properties(properties: Map[String, Any])
+case class Driver(name: String, properties: Properties)
 case class Deploy(deploy: Map[String, String]) {
   def get(serviceName: String) = deploy.get(serviceName)
 }
@@ -28,6 +29,7 @@ case class BenchFlowBenchmark(name: String,
                               description: String,
                               suts_name: SutsNames,
                               suts_type: SutsType,
+                              drivers: Seq[Driver],
                               properties: Properties,
                               `sut-configuration`: SutConfiguration)
 {
@@ -110,6 +112,17 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
 
   }
 
+  implicit object DriverYamlFormat extends YamlFormat[Driver] {
+    override def write(obj: Driver): YamlValue = ???
+
+    override def read(yaml: YamlValue): Driver = {
+      val driver = yaml.asYamlObject.fields.head
+      val driverName = driver._1.convertTo[String]
+      val properties = YamlObject(YamlString("properties") -> driver._2.asYamlObject).convertTo[Properties]
+      Driver(driverName, properties)
+    }
+  }
+
   implicit object BenchFlowConfigFormat extends YamlFormat[BenchFlowConfig] {
     override def write(obj: BenchFlowConfig): YamlValue = ???
 
@@ -160,11 +173,14 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
       val description = bfBmark.get(YamlString("description")).get.convertTo[String]
       val properties = getObject("properties").convertTo[Properties]
       val sutConfig = getObject("sut-configuration").convertTo[SutConfiguration]
+      val drivers = bfBmark.get(YamlString("drivers")).get.asInstanceOf[YamlArray].elements.map(driver => driver.convertTo[Driver])
+
       BenchFlowBenchmark(
         name = name,
         description = description,
         suts_name = sutName,
         suts_type = sutType,
+        drivers = drivers,
         properties = properties,
         `sut-configuration` = sutConfig
       )

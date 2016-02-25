@@ -29,3 +29,7 @@ stats:
   ports:
     - '8080'
     #ip::8080
+
+endpoints:
+  start: /statsstart
+  stop: /statsstop

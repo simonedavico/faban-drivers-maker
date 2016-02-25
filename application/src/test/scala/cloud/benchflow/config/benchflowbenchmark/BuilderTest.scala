@@ -1,6 +1,7 @@
 package cloud.benchflow.config.benchflowbenchmark
 
-import cloud.benchflow.config.BenchFlowConfigurationBuilder
+import cloud.benchflow.config.{BenchFlowBenchmarkConfigurationBuilder, FabanBenchmarkConfigurationBuilder, DeploymentDescriptorBuilder}
+import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.BenchFlowEnv
 
 /**
@@ -17,41 +18,52 @@ object BuilderTest extends App {
       |    container_name: mycontainername
       |    ports:
       |        - '8080'
-      |bubu:
-      |    image: bubuImage
-      |    environment: [ bubuvar ]
+      |service2:
+      |    image: s2Image
+      |    environment: [ s2var ]
+      |    ports:
+      |        - '6060'
     """.stripMargin
-  val completeConfiguration =
+
+  val benchFlowBenchmark =
     """sut_name: camunda
       |suts_type: WfMS
-      |benchmark_name: myBenchmark
+      |benchmark_name: fooBenchmark
       |description: configuration for testing
       |properties:
       |    one: two
       |    three:
       |        four: five
-      |    six: [ seven ]
+      |    six: seven
+      |drivers:
+      |    - driver1:
+      |        foo: bar
       |sut-configuration:
       |    target-service:
       |        name: camunda
       |        endpoint: /engine-rest
       |    deploy:
       |        camunda: alias1
-      |        bubu: alias2
+      |        service2: alias2
       |    benchflow-config:
       |        camunda:
       |            - stats:
       |                 config:
       |                      FOO: resolvedFoo
-      |        foo:
-      |            - bar:
-      |                 config:
-      |                      one: two
     """.stripMargin
 
+  val trial = new Trial
+  trial.setBenchmarkId("fooBenchmark")
+  trial.setExperimentNumber(1)
+  trial.setTrialNumber(1)
+  trial.setTotalTrials(3)
+  val benchFlowEnv = new BenchFlowEnv("./application/src/test/resources/app/config.yml",
+                               "./application/src/test/resources/app/benchflow-services",
+                               "benchFlowComposeAddress")
 
-  val bfEnv = new BenchFlowEnv("./application/src/test/resources/app/config.yml",
-                               "./application/src/test/resources/app/benchflow-services")
-  val builder = new BenchFlowConfigurationBuilder(dockerCompose, completeConfiguration, bfEnv)
-  println(builder.build)
+  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, dockerCompose, benchFlowEnv)
+  println(builder.buildDeploymentDescriptor(trial))
+  println(builder.buildFabanBenchmarkConfiguration(trial))
+
+
 }
