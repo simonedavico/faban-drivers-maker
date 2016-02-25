@@ -11,7 +11,7 @@ import cloud.benchflow.driversmaker.utils.BenchFlowEnv
   */
 object BuilderTest extends App {
 
-  val dockerCompose =
+  val deploymentDescriptor =
     """camunda:
       |    image: camundaImage
       |    environment: [ camundavar ]
@@ -61,7 +61,7 @@ object BuilderTest extends App {
                                "./application/src/test/resources/app/benchflow-services",
                                "benchFlowComposeAddress")
 
-  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, dockerCompose, benchFlowEnv)
+  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv)
   println(builder.buildDeploymentDescriptor(trial))
   println(builder.buildFabanBenchmarkConfiguration(trial))
 

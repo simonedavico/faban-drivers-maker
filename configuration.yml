@@ -3,7 +3,7 @@ benchflow.env:
   benchflow.services: /app/benchflow-services
   benchflow.compose: ${env.BENCHFLOW_COMPOSE_ADDRESS}
 
-faban.config:
+faban.defaults:
   javaHome: /usr/lib/jvm/java7
   javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
 

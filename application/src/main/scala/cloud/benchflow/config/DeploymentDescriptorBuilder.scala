@@ -10,9 +10,7 @@ import cloud.benchflow.driversmaker.utils.BenchFlowEnv
   *
   * Created on 16/02/16.
   */
-class DeploymentDescriptorBuilder(val dcyaml: String, bbyaml: String, val benv: BenchFlowEnv) {
-
-  val bb = BenchFlowBenchmark.fromYaml(bbyaml)
+class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: BenchFlowEnv) {
 
   type DCTransformer = DockerCompose => DockerCompose
   type ServiceTransformer = Service => Service
@@ -207,8 +205,7 @@ class DeploymentDescriptorBuilder(val dcyaml: String, bbyaml: String, val benv: 
   /***
     * Generates a DockerCompose with bound benchflow services and resolved variables
     */
-  def build(trial: Trial): DockerCompose = {
-    val dc = DockerCompose.fromYaml(dcyaml)
+  def build(dc: DockerCompose, trial: Trial): DockerCompose = {
     val transformations = List(addTrialInfo(trial), resolveBenchFlowVariables,
                                resolveBenchFlowServices, generateConstraints)
     val transform = transformations.reduce(_ compose _)
