@@ -18,7 +18,7 @@
         <scala.xml.version>1.0.5</scala.xml.version>
         <scala.parser.combinators.version>1.0.4</scala.parser.combinators.version>
         <moultingyaml.version>0.2</moultingyaml.version>
-        <snakeyaml.version>1.17-SNAPSHOT</snakeyaml.version>
+        <snakeyaml.version>1.16</snakeyaml.version>
         <jersey.multipart.version>2.19</jersey.multipart.version>
     </properties>
 
@@ -29,13 +29,13 @@
         <!--</repository>-->
     <!--</repositories>-->
 
-    <repositories>
-        <repository>
-            <id>Sonatype-public</id>
-            <name>SnakeYAML repository</name>
-            <url>http://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-    </repositories>
+    <!--<repositories>-->
+    <!--    <repository>-->
+    <!--        <id>Sonatype-public</id>-->
+    <!--        <name>SnakeYAML repository</name>-->
+    <!--        <url>http://oss.sonatype.org/content/groups/public/</url>-->
+    <!--    </repository>-->
+    <!--</repositories>-->
 
     <dependencies>
 
