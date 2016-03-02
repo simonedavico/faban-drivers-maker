@@ -1,7 +1,7 @@
 #The service name should be "benchflowServiceName_BoundServiceName"
-mysqldump:
-  image: 'benchflow/collectors:mysqldump_dev'
-  # container_name: mysqldump_db_TRIAL_ID
+mysql:
+  image: 'benchflow/collectors:mysql_dev'
+  # container_name: mysql_db_TRIAL_ID
   environment:
     - KAFKA_HOST=${BENCHFLOW_ENV_KAFKA_IP}
     - MINIO_HOST=http://${BENCHFLOW_ENV_MINIO_IP}:${BENCHFLOW_ENV_MINIO_PORT}
@@ -20,9 +20,9 @@ mysqldump:
     - MYSQL_USER=${BENCHFLOW_BENCHMARK_CONFIG_MYSQL_USER}
     - MYSQL_USER_PASSWORD=${BENCHFLOW_BENCHMARK_CONFIG_MYSQL_USER_PASSWORD}
 
-    # - BENCHFLOW_CONTAINER_NAME=mysqldump_db_TRIAL_ID
-    - BENCHFLOW_COLLECTOR_NAME=mysqldump
-    - BENCHFLOW_DATA_NAME=mysqldump
+    # - BENCHFLOW_CONTAINER_NAME=mysql_db_TRIAL_ID
+    - BENCHFLOW_COLLECTOR_NAME=mysql
+    - BENCHFLOW_DATA_NAME=mysql
 
     # - "constraint:node==alias"
   expose:
