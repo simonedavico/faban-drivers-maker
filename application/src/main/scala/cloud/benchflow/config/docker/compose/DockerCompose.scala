@@ -36,7 +36,8 @@ case class DockerCompose(services: List[Service]) {
     DockerCompose(services ++ newServices)
 
   override def toString: String = {
-    this.toYaml.prettyPrint
+    this.toYaml.print(scalarStyle = DoubleQuoted)
+//    this.toYaml.prettyPrint
   }
 }
 object DockerCompose {

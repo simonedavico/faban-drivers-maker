@@ -2,6 +2,7 @@ package cloud.benchflow.config
 
 import cloud.benchflow.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.config.docker.compose.DockerCompose
+import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.BenchFlowEnv
 import scala.xml.PrettyPrinter
@@ -13,7 +14,8 @@ import scala.xml.PrettyPrinter
   */
 class BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark: String,
                                              deploymentDescriptor: String,
-                                             val benchFlowEnv: BenchFlowEnv) {
+                                             val benchFlowEnv: BenchFlowEnv,
+                                             val fabanDefaults: FabanDefaults) {
 
   val bb = BenchFlowBenchmark.fromYaml(benchFlowBenchmark)
   val dd = DockerCompose.fromYaml(deploymentDescriptor)
@@ -24,7 +26,7 @@ class BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark: String,
 
 
   def buildFabanBenchmarkConfiguration(trial: Trial) = {
-    val config = new FabanBenchmarkConfigurationBuilder(bb, benchFlowEnv).build(trial)
+    val config = new FabanBenchmarkConfigurationBuilder(bb, benchFlowEnv, fabanDefaults).build(trial)
     new PrettyPrinter(400, 2).format(config)
   }
 

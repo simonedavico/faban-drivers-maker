@@ -26,7 +26,8 @@ public class BenchFlowEnvModule extends AbstractModule {
         String config = dmc.getBenchFlowEnvConfiguration().getConfigPath();
         String bfServices = dmc.getBenchFlowEnvConfiguration().getBenchFlowServicesPath();
         String bfCompose = dmc.getBenchFlowEnvConfiguration().getBenchFlowComposeAddress();
-        return new BenchFlowEnv(config, bfServices, bfCompose);
+        String skeleton = dmc.getBenchFlowEnvConfiguration().getDriverSkeletonPath();
+        return new BenchFlowEnv(config, bfServices, bfCompose, skeleton);
     }
 
 }

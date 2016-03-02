@@ -1,6 +1,7 @@
 benchflow.env:
   config.yml: /app/config.yml
   benchflow.services: /app/benchflow-services
+  driver.skeleton: /app/skeleton
   benchflow.compose: ${env.BENCHFLOW_COMPOSE_ADDRESS}
 
 faban.defaults:
@@ -22,6 +23,7 @@ logging:
   level: INFO
   loggers:
     io.dropwizard: INFO
+    cloud.benchflow.driversmaker.resources.FabanBenchmarkGeneratorResource: ALL
   appenders:
     - type: console
       threshold: ALL

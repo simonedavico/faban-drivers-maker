@@ -2,6 +2,7 @@ package cloud.benchflow.config
 
 import cloud.benchflow.config.benchflowbenchmark._
 import cloud.benchflow.config.collectors.CollectorAPI
+import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.BenchFlowEnv
 
@@ -13,7 +14,7 @@ import scala.xml.transform.{RuleTransformer, RewriteRule}
   *
   * Created on 23/02/16.
   */
-class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: BenchFlowEnv) {
+class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: BenchFlowEnv, fd: FabanDefaults) {
 
   private val removeNewlinesRule = new RewriteRule {
     val minimizeEmpty = false
@@ -76,8 +77,8 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: BenchFlow
       <xml>
 
         <jvmConfig xmlns:fh="http://faban.sunsource.net/ns/fabanharness">
-          <fh:javaHome>/usr/lib/jvm/java7</fh:javaHome>
-          <fh:jvmOptions>-Xmx1g -Xms256m -XX:+DisableExplicitGC</fh:jvmOptions>
+          <fh:javaHome>{fd.getJavaHome}</fh:javaHome>
+          <fh:jvmOptions>{fd.getJavaOpts}</fh:jvmOptions>
         </jvmConfig>
 
         <fa:runConfig definition="cloud.benchflow.wfmsbenchmark.driver.WfMSBenchmarkDriver"

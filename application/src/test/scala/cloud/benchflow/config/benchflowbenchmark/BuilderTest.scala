@@ -1,6 +1,7 @@
 package cloud.benchflow.config.benchflowbenchmark
 
-import cloud.benchflow.config.{BenchFlowBenchmarkConfigurationBuilder, FabanBenchmarkConfigurationBuilder, DeploymentDescriptorBuilder}
+import cloud.benchflow.config.BenchFlowBenchmarkConfigurationBuilder
+import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.BenchFlowEnv
 
@@ -59,11 +60,12 @@ object BuilderTest extends App {
   trial.setTotalTrials(3)
   val benchFlowEnv = new BenchFlowEnv("./application/src/test/resources/app/config.yml",
                                "./application/src/test/resources/app/benchflow-services",
-                               "benchFlowComposeAddress")
-
-  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv)
+                               "benchFlowComposeAddress",
+                               "./application/src/test/resources/app/skeleton")
+  val defaults = new FabanDefaults
+  defaults.setJavaHome("testJavaHome")
+  defaults.setJavaOpts("testJavaOpts")
+  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
   println(builder.buildDeploymentDescriptor(trial))
   println(builder.buildFabanBenchmarkConfiguration(trial))
-
-
 }

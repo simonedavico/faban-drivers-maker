@@ -9,6 +9,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Trial {
 
+    public Trial() {}
+
+    public Trial(String benchmarkId, int experimentNumber, int trialNumber, int totalTrials) {
+        this.benchmarkId = benchmarkId;
+        this.experimentNumber = experimentNumber;
+        this.trialNumber = trialNumber;
+        this.totalTrials = totalTrials;
+    }
+
     @JsonProperty("benchmarkId")
     private String benchmarkId;
 

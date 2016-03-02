@@ -17,11 +17,14 @@ public class BenchFlowEnv {
     private String configPath;
     private String benchFlowServicesPath;
     private String benchFlowComposePath;
+    private String driverSkeletonPath;
 
-    public BenchFlowEnv(String configPath, String benchFlowServicesPath, String benchFlowComposePath) throws FileNotFoundException {
+    public BenchFlowEnv(String configPath, String benchFlowServicesPath,
+                        String benchFlowComposePath, String driverSkeletonPath) throws FileNotFoundException {
         this.configPath = configPath;
         this.benchFlowServicesPath = benchFlowServicesPath;
         this.benchFlowComposePath = benchFlowComposePath;
+        this.driverSkeletonPath = driverSkeletonPath;
         reload();
     }
 
@@ -48,5 +51,13 @@ public class BenchFlowEnv {
 
     public String getBenchFlowComposePath() {
         return benchFlowComposePath;
+    }
+
+    public String getDriverSkeletonPath() {
+        return driverSkeletonPath;
+    }
+
+    public void setDriverSkeletonPath(String driverSkeletonPath) {
+        this.driverSkeletonPath = driverSkeletonPath;
     }
 }
