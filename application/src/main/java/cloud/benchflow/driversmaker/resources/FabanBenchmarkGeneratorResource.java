@@ -14,6 +14,7 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -66,6 +67,14 @@ public class FabanBenchmarkGeneratorResource {
         p.executeTarget("build");
     }
 
+    private void changeBenchmarkName(final java.nio.file.Path driverPath, final String experimentId) throws IOException {
+        java.nio.file.Path driverClassPath =
+                driverPath.resolve("src/cloud/benchflow/wfmsbenchmark/driver/WfMSBenchmarkDriver.java");
+        String src = FileUtils.readFileToString(driverClassPath.toFile(), Charsets.UTF_8);
+        src = src.replaceFirst("WfMSBenchmark Workload", "[" + experimentId + "] WfMSBenchmark Workload");
+        FileUtils.writeStringToFile(driverClassPath.toFile(), src, Charsets.UTF_8);
+    }
+
     @POST
     public Response generateBenchmark(Experiment experiment) throws IOException {
         //temporary user id
@@ -75,7 +84,6 @@ public class FabanBenchmarkGeneratorResource {
 
         //temporary: get zip of sources and copy in temporary folder
         InputStream sources = minio.getBenchmarkSources(benchmarkId);
-
         logger.debug("Retrieved driver sources from minio");
 
         try(ManagedDirectory managedDriverPath =
@@ -115,6 +123,9 @@ public class FabanBenchmarkGeneratorResource {
             }
 
             logger.debug("About to build generated driver");
+
+            //temporary: change benchmark name in driver class
+            changeBenchmarkName(driverPath, experiment.getExperimentId());
 
             //TODO: catch BuildException
             buildDriver(driverPath, experiment.getExperimentId());

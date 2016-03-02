@@ -88,6 +88,7 @@ object YamlTest extends App {
       |suts_type: WfMS
       |benchmark_name: myBenchmark
       |description: configuration for testing
+      |trials: 5
       |properties:
       |    one: two
       |    three:
