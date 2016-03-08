@@ -1,4 +1,4 @@
-package cloud.benchflow.driversmaker.utils;
+package cloud.benchflow.driversmaker.utils.minio;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)

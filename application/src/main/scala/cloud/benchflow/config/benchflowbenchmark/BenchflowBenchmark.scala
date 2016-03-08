@@ -177,7 +177,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
       val properties = getObject("properties").convertTo[Properties]
       val sutConfig = getObject("sut-configuration").convertTo[SutConfiguration]
       val drivers = bfBmark.get(YamlString("drivers")).get.asInstanceOf[YamlArray].elements.map(driver => driver.convertTo[Driver])
-      //val trials = bfBmark.get(YamlString("trials")).get.convertTo[Int]
+//      val trials = bfBmark.get(YamlString("trials")).get.convertTo[Int]
       val trials = getObject("trials").convertTo[TotalTrials]
 
       BenchFlowBenchmark(

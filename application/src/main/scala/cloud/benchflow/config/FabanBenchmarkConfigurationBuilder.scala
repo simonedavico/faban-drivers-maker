@@ -4,7 +4,7 @@ import cloud.benchflow.config.benchflowbenchmark._
 import cloud.benchflow.config.collectors.CollectorAPI
 import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
-import cloud.benchflow.driversmaker.utils.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv
 
 import scala.xml.{Text, Node, Elem}
 import scala.xml.transform.{RuleTransformer, RewriteRule}
@@ -14,7 +14,7 @@ import scala.xml.transform.{RuleTransformer, RewriteRule}
   *
   * Created on 23/02/16.
   */
-class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: BenchFlowEnv, fd: FabanDefaults) {
+class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMakerBenchFlowEnv, fd: FabanDefaults) {
 
   private val removeNewlinesRule = new RewriteRule {
     val minimizeEmpty = false
@@ -25,6 +25,31 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: BenchFlow
     }
   }
   private object removeNewlines extends RuleTransformer(removeNewlinesRule)
+
+  private def propertyToNamespace =
+    Map(
+      "hostConfig" -> "fa",
+      "hostPorts" -> "fa",
+      "host" -> "fa",
+      "tools" -> "fh",
+      "scale" -> "fa",
+      "runControl" -> "fa",
+      "rampUp" -> "fa",
+      "steadyState" -> "fa",
+      "rampDown" -> "fa",
+      "cpus" -> "fh",
+      "enabled" -> "fh",
+      "timeSync" -> "fh"
+    )
+
+  private def addFabanNamespace(elem: Node): Node = {
+    elem match {
+      case elem: Elem =>
+        val ns = propertyToNamespace.getOrElse(elem.label, "")
+        <xml>{elem.child.map(addFabanNamespace)}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label)
+      case _ => elem
+    }
+  }
 
   private def convert(property: (String, Any)): Elem =
     <xml>{
@@ -87,7 +112,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: BenchFlow
                       xmlns="http://faban.sunsource.net/ns/fabandriver">
            <fh:description>{ bb.description }</fh:description>
 
-           { convert(bb.properties) ++ bb.drivers.map(convert) }
+           { convert(bb.properties).map(addFabanNamespace) ++ bb.drivers.map(convert).map(addFabanNamespace) }
 
           <sutConfiguration>
             <serviceName>{bb.`sut-configuration`.targetService.name}</serviceName>

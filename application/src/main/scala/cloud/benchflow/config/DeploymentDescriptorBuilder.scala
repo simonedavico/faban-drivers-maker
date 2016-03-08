@@ -3,14 +3,14 @@ package cloud.benchflow.config
 import cloud.benchflow.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.requests.Trial
-import cloud.benchflow.driversmaker.utils.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
   * Created on 16/02/16.
   */
-class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: BenchFlowEnv) {
+class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversMakerBenchFlowEnv) {
 
   type DCTransformer = DockerCompose => DockerCompose
   type ServiceTransformer = Service => Service
@@ -22,7 +22,7 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: BenchFlo
   }
 
   case class BenchFlowEnvVariable(override val name: String) extends BenchFlowVariable(name) {
-    type Source = BenchFlowEnv
+    type Source = DriversMakerBenchFlowEnv
     override def resolve(implicit source: Source): String = source.getVariable[String](s"BENCHFLOW_$name")
   }
   object BenchFlowEnvVariable {

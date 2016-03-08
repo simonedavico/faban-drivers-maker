@@ -1,4 +1,4 @@
-package cloud.benchflow.driversmaker.utils;
+package cloud.benchflow.driversmaker.utils.minio;
 
 import io.minio.MinioClient;
 import io.minio.errors.*;

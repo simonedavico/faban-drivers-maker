@@ -4,8 +4,9 @@ import cloud.benchflow.config.BenchFlowBenchmarkConfigurationBuilder;
 import cloud.benchflow.driversmaker.configurations.FabanDefaults;
 import cloud.benchflow.driversmaker.requests.Experiment;
 import cloud.benchflow.driversmaker.requests.Trial;
-import cloud.benchflow.driversmaker.utils.BenchFlowEnv;
-import cloud.benchflow.driversmaker.utils.BenchFlowMinioClient;
+import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv;
+import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv;
+import cloud.benchflow.driversmaker.utils.minio.BenchFlowMinioClient;
 
 import cloud.benchflow.driversmaker.utils.ManagedDirectory;
 import com.google.inject.Inject;
@@ -14,7 +15,6 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -40,13 +40,13 @@ import java.util.Iterator;
 @Path("makedriver")
 public class FabanBenchmarkGeneratorResource {
 
-    private BenchFlowEnv benv;
+    private DriversMakerBenchFlowEnv benv;
     private FabanDefaults fabanDefaults;
     private BenchFlowMinioClient minio;
     private Logger logger;
 
     @Inject
-    public FabanBenchmarkGeneratorResource(@Named("bfEnv") BenchFlowEnv benv,
+    public FabanBenchmarkGeneratorResource(@Named("bfEnv") DriversMakerBenchFlowEnv benv,
                                            @Named("fabanDefaults") FabanDefaults defaults,
                                            @Named("minio") BenchFlowMinioClient minio) {
         this.benv = benv;

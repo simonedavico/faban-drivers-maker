@@ -3,7 +3,7 @@ package cloud.benchflow.config.benchflowbenchmark
 import cloud.benchflow.config.BenchFlowBenchmarkConfigurationBuilder
 import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
-import cloud.benchflow.driversmaker.utils.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.{DriversMakerBenchFlowEnv, BenchFlowEnv}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -31,8 +31,9 @@ object BuilderTest extends App {
       |suts_type: WfMS
       |benchmark_name: fooBenchmark
       |description: configuration for testing
+      |trials: 5
       |properties:
-      |    one: two
+      |    timeSync: "false"
       |    three:
       |        four: five
       |    six: seven
@@ -58,10 +59,10 @@ object BuilderTest extends App {
   trial.setExperimentNumber(1)
   trial.setTrialNumber(1)
   trial.setTotalTrials(3)
-  val benchFlowEnv = new BenchFlowEnv("./application/src/test/resources/app/config.yml",
-                               "./application/src/test/resources/app/benchflow-services",
-                               "benchFlowComposeAddress",
-                               "./application/src/test/resources/app/skeleton")
+  val benchFlowEnv = new DriversMakerBenchFlowEnv("./application/src/test/resources/app/config.yml",
+                                                  "./application/src/test/resources/app/benchflow-services",
+                                                  "benchFlowComposeAddress",
+                                                  "./application/src/test/resources/app/skeleton")
   val defaults = new FabanDefaults
   defaults.setJavaHome("testJavaHome")
   defaults.setJavaOpts("testJavaOpts")
