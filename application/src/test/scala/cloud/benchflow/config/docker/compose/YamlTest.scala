@@ -76,7 +76,7 @@ object YamlTest extends App {
       |    deploy:
       |        camunda: alias1
       |    benchflow-config:
-      |        camunda: [ stats, mysqldump ]
+      |        camunda: [ stats, mysql ]
       |        foo:
       |            - bar:
       |                 config:
@@ -105,7 +105,7 @@ object YamlTest extends App {
       |    deploy:
       |        camunda: lisa1
       |    benchflow-config:
-      |        camunda: [stats, mysqldump]
+      |        camunda: [stats, mysql]
       |        foo:
       |            - bar:
       |                 config:
