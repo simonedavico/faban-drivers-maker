@@ -1,7 +1,9 @@
 package cloud.benchflow.config
 
+import cloud.benchflow.config
 import cloud.benchflow.config.benchflowbenchmark._
 import cloud.benchflow.config.collectors.CollectorAPI
+import cloud.benchflow.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv
@@ -14,7 +16,8 @@ import scala.xml.transform.{RuleTransformer, RewriteRule}
   *
   * Created on 23/02/16.
   */
-class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMakerBenchFlowEnv, fd: FabanDefaults) {
+class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMakerBenchFlowEnv,
+                                         fd: FabanDefaults, dd: DockerCompose) {
 
   private val removeNewlinesRule = new RewriteRule {
     val minimizeEmpty = false
@@ -46,7 +49,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
     elem match {
       case elem: Elem =>
         val ns = propertyToNamespace.getOrElse(elem.label, "")
-        <xml>{elem.child.map(addFabanNamespace)}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label)
+        <xml>{elem.child.map(addFabanNamespace)}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label, attributes = elem.attributes)
       case _ => elem
     }
   }
@@ -68,7 +71,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
     properties.properties.map(convert)
 
   private def convert(driver: Driver): Elem =
-    <driverConfig name={driver.name}>{ convert(driver.properties) }</driverConfig>
+    <driverConfig name={driver.name.substring(driver.name.lastIndexOf(".")+1)}>{ convert(driver.properties) }</driverConfig>
 
   private def retrieveCollectors(bfConfig: BenchFlowConfig) = {
 
@@ -78,22 +81,52 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
       CollectorAPI.fromYaml(src)
     }
 
+//
+//    def convert(collector: Binding): Elem = {
+//      val api = getCollectorAPI(collector.boundService)
+//      <collector>
+//        {
+//          api.start.map(s => <start>{s}</start>).getOrElse(scala.xml.Null) ++
+//          <stop>{api.stop}</stop>
+//        }
+//      </collector>.copy(label = collector.boundService)
+//    }
 
-    def convert(collector: Binding): Elem = {
-      val api = getCollectorAPI(collector.boundService)
+    def convertCollector(collectorName: String): Elem = {
+
+      def getBindings(a: String, b: Seq[Binding]): Option[String] = {
+        b.map(_.boundService).contains(collectorName) match {
+          case true => Some(a)
+          case _ => None
+        }
+      }
+
+      val bindings = bfConfig.benchflow_config.flatMap(t => getBindings(t._1, t._2))
+
+      val api = getCollectorAPI(collectorName)
       <collector>
         {
           api.start.map(s => <start>{s}</start>).getOrElse(scala.xml.Null) ++
           <stop>{api.stop}</stop>
+          <privatePort>{api.privatePort}</privatePort>
+          <bindings>{bindings mkString "," }</bindings>
         }
-      </collector>.copy(label = collector.boundService)
+      </collector>.copy(label = collectorName)
     }
 
 
-    def convertCollectors(collectors: Set[Binding]) = collectors.map(convert)
-
+    def convertCollectors(collectors: Set[String]) = collectors.map(convertCollector)
     val collectors = bfConfig.benchflow_config.values.foldLeft(Set[Binding]())((v1,v2) => v1 union v2.toSet)
-    convertCollectors(collectors)
+    val uniqueCollectorsNames = collectors.map(_.boundService)
+
+//    convertCollectors(collectors)
+    convertCollectors(uniqueCollectorsNames)
+  }
+
+  def resolvePrivatePort = {
+    val targetServiceName = bb.`sut-configuration`.targetService.name
+    val targetService = dd.services.filter(_.name.equalsIgnoreCase(targetServiceName)).head
+    targetService.getPrivatePort
   }
 
   def build(trial: Trial) = {
@@ -115,6 +148,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
            { convert(bb.properties).map(addFabanNamespace) ++ bb.drivers.map(convert).map(addFabanNamespace) }
 
           <sutConfiguration>
+            <privatePort>{ resolvePrivatePort.get }</privatePort>
             <serviceName>{bb.`sut-configuration`.targetService.name}</serviceName>
             <endpoint>{bb.`sut-configuration`.targetService.endpoint}</endpoint>
           </sutConfiguration>
@@ -124,6 +158,9 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
               <collectors>
                 { retrieveCollectors(bb.`sut-configuration`.bfConfig) }
               </collectors>
+              <monitors>
+                <mysql>http://192.168.41.105:9303/status</mysql>
+              </monitors>
            </benchFlowServices>
 
            <benchFlowRunConfiguration>

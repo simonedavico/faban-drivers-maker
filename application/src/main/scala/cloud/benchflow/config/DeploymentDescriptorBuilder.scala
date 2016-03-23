@@ -35,7 +35,7 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
     override def resolve(implicit source: Source): String = {
       name match {
         case "IP" => getLocalIp(bb.getAliasForService(source.name).get)
-        case "PORT" => source.getPort.getOrElse("BENCHFLOW_BENCHMARK_BOUNDSERVICE_PORT")
+        case "PORT" => source.getPorts.getOrElse("BENCHFLOW_BENCHMARK_BOUNDSERVICE_PORT")
         case "CONTAINER_NAME" => source.containerName.map(_.container_name)
                                        .getOrElse("BENCHFLOW_BENCHMARK_BOUNDSERVICE_CONTAINER_NAME")
         case other => s"BENCHFLOW_BENCHMARK_BOUNDSERVICE_$other"
@@ -192,7 +192,7 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
 
     service.copy(containerName = Some(ContainerName(cName)),
                  environment = Some(service.environment.get :+ expId :+ trialId :+ total :+
-                                                            s"BENCHFLOW_CONTAINER_NAME=$cName"))
+                                                            s"CONTAINER_NAME=$cName"))
   }
 
   /***

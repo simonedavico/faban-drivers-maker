@@ -10,8 +10,8 @@ import cloud.benchflow.config.benchflowbenchmark._
   * Created on 05/02/16.
   */
 object YamlTest extends App {
-  val dc = DockerCompose(Service("camunda", image = Some(Image("ciao"))))
-//  println(dc)
+  val dc = DockerCompose(Service("camunda", image = Some(Image("ciao")), net = Some(Network("host")), extra_hosts = Some(ExtraHosts(Seq("bla")))))
+  println(dc)
 
   val tests = List(
     "http://${BENCHFLOW_HELLO}/ciao/${BENCHFLOW_GOODBYE}",

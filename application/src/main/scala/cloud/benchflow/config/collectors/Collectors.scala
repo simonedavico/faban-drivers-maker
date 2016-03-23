@@ -7,7 +7,7 @@ import net.jcazevedo.moultingyaml._
   *
   * Created on 24/02/16.
   */
-case class CollectorAPI(start: Option[String], stop: String)
+case class CollectorAPI(start: Option[String], stop: String, privatePort: Int)
 
 object CollectorYamlProtocol extends DefaultYamlProtocol {
 
@@ -18,7 +18,8 @@ object CollectorYamlProtocol extends DefaultYamlProtocol {
       val endpoints = yaml.asYamlObject.fields.get(YamlString("endpoints")).get.asYamlObject.fields
       val start = endpoints.get(YamlString("start")).map(_.convertTo[String])
       val stop = endpoints.get(YamlString("stop")).map(_.convertTo[String]).get
-      CollectorAPI(start, stop)
+      val privatePort = endpoints.get(YamlString("privatePort")).map(_.convertTo[Int]).get
+      CollectorAPI(start, stop, privatePort)
     }
   }
 

@@ -26,7 +26,7 @@ class BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark: String,
 
 
   def buildFabanBenchmarkConfiguration(trial: Trial) = {
-    val config = new FabanBenchmarkConfigurationBuilder(bb, benchFlowEnv, fabanDefaults).build(trial)
+    val config = new FabanBenchmarkConfigurationBuilder(bb, benchFlowEnv, fabanDefaults, dd).build(trial)
     new PrettyPrinter(400, 2).format(config)
   }
 

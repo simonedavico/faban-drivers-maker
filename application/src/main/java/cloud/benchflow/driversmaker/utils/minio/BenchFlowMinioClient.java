@@ -1,7 +1,9 @@
 package cloud.benchflow.driversmaker.utils.minio;
 
 import io.minio.MinioClient;
+import io.minio.Result;
 import io.minio.errors.*;
+import io.minio.messages.Item;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.xmlpull.v1.XmlPullParserException;
@@ -12,12 +14,16 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
  *
  * Created on 26/02/16.
  */
+@SuppressWarnings("unused")
 public class BenchFlowMinioClient {
 
     private MinioClient mc;
@@ -31,16 +37,31 @@ public class BenchFlowMinioClient {
         this.mc = new MinioClient(address, accessKey, privateKey);
     }
 
-    //TODO: implement this
+    //TODO: implement this?
     public void saveOriginalBenchmark(final String benchmarkId, final byte[] benchmark) {
         Exception e = new NotImplementedException("Can't save original benchmark yet");
         throw new BenchFlowMinioClientException(e.getMessage(), e);
     }
 
-    //TODO: implement this
+    //TODO: implement this?
     public void getOriginalBenchmark(final String benchmarkId) {
         Exception e = new NotImplementedException("Can't retrieve original benchmark yet");
         throw new BenchFlowMinioClientException(e.getMessage(), e);
+    }
+
+    /***
+     * Removes object at
+     * benchmarks/{id}, if it exists
+     */
+    private void removeIfExists(final String id) {
+        try {
+            mc.removeObject(BENCHMARKS_BUCKET, id);
+        } catch (ErrorResponseException e) {
+            /* happens if the object to remove doesn't exist, do nothing */
+        } catch (MinioException | XmlPullParserException | NoSuchAlgorithmException |
+                InvalidKeyException | IOException e) {
+            throw new BenchFlowMinioClientException(e.getMessage(), e);
+        }
     }
 
     /***
@@ -63,6 +84,21 @@ public class BenchFlowMinioClient {
         try {
             mc.putObject(BENCHMARKS_BUCKET, id, new ByteArrayInputStream(toSave), toSave.length, "application/octet-stream");
         } catch (MinioException | NoSuchAlgorithmException | XmlPullParserException | InvalidKeyException | IOException e) {
+            throw new BenchFlowMinioClientException(e.getMessage(), e);
+        }
+    }
+
+    /***
+     * Saves an inputstream at
+     * benchmarks/{id}
+     */
+    private void saveInputStream(final InputStream content, final String id) {
+        try {
+            byte[] bytes = IOUtils.toByteArray(content);
+            InputStream stream = new ByteArrayInputStream(bytes);
+            mc.putObject(BENCHMARKS_BUCKET,id,stream,bytes.length,"application/octet-stream");
+        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException |
+                XmlPullParserException | IOException e) {
             throw new BenchFlowMinioClientException(e.getMessage(), e);
         }
     }
@@ -95,9 +131,20 @@ public class BenchFlowMinioClient {
         return getTextFile(benchmarkId + "/original/benchflow-benchmark.yml");
     }
 
-    public void saveOriginalDeploymentDescriptor(String benchmarkId) {
-        Exception e = new NotImplementedException("Can't save original deployment descriptor yet");
-        throw new BenchFlowMinioClientException(e.getMessage(), e);
+    /***
+     * Saves the original deployment descriptor for an experiment,
+     * at benchmarks/{benchmarkId}/original/docker-compose.yml
+     */
+    public void saveOriginalDeploymentDescriptor(final String benchmarkId, final String deploymentDescriptor) {
+        saveTextFile(deploymentDescriptor, benchmarkId + "/original/docker-compose.yml");
+    }
+
+    /***
+     * Saves the original benchmark configuration for an experiment,
+     * at benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
+     */
+    public void saveOriginalBenchFlowBenchmark(final String benchmarkId, final String benchFlowBenchmark) {
+        saveTextFile(benchFlowBenchmark, benchmarkId + "/original/benchflow-benchmark.yml");
     }
 
     /***
@@ -155,10 +202,18 @@ public class BenchFlowMinioClient {
 
     /***
      * Returns a .zip file containing the sources of a benchmark,
-     * from benchmarks/{benchmarkId}/src.zip
+     * from benchmarks/{benchmarkId}/sources.zip
      */
     public InputStream getBenchmarkSources(final String benchmarkId) {
-        return getFile(benchmarkId + "/src.zip");
+        return getFile(benchmarkId + "/sources.zip");
+    }
+
+    /***
+     * Saves a .zip file containing the sources of a benchmark,
+     * at benchmarks/{benchmarkId}/sources.zip
+     */
+    public void saveBenchmarkSources(final InputStream sources, final String benchmarkId) {
+        saveInputStream(sources, benchmarkId + "/sources.zip");
     }
 
     /***
@@ -177,8 +232,77 @@ public class BenchFlowMinioClient {
         try {
             mc.putObject(BENCHMARKS_BUCKET, benchmarkId + "/" + experimentNUmber + "/driver.jar", driverPath);
         } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException | XmlPullParserException e) {
-           throw new BenchFlowMinioClientException(e.getMessage(), e);
+            throw new BenchFlowMinioClientException(e.getMessage(), e);
         }
+    }
+
+    /***
+     * Saves a model,
+     * at benchmarks/{benchmarkId}/models/{modelName}
+     */
+    public void saveModel(final String benchmarkId, final String modelName, final InputStream model) throws IOException {
+        String modelContent = IOUtils.toString(model, "UTF-8");
+        saveTextFile(modelContent, benchmarkId + "/models/" + modelName);
+    }
+
+    /***
+     * Removes benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
+     */
+    public void removeOriginalBenchFlowBenchmark(final String benchmarkId) {
+        removeIfExists(benchmarkId + "/original/benchflow-benchmark.yml");
+    }
+
+    /***
+     * Removes benchmarks/{benchmarkId}/original/docker-compose.yml
+     */
+    public void removeOriginalDeploymentDescriptor(final String benchmarkId) {
+        removeIfExists(benchmarkId + "/original/docker-compose.yml");
+    }
+
+    /***
+     * Removes benchmarks/{benchmarkId}/sources.zip
+     */
+    public void removeSources(final String benchmarkId) {
+        removeIfExists(benchmarkId + "/sources.zip");
+    }
+
+
+    /***
+     * Removes all models at benchmark/{benchmarkId}/models
+     */
+    public void removeModels(final String benchmarkId) {
+        try {
+            for(Result<Item> item : mc.listObjects(BENCHMARKS_BUCKET, benchmarkId + "/models")) {
+                mc.removeObject(BENCHMARKS_BUCKET, item.get().objectName());
+            }
+        } catch (MinioException | XmlPullParserException | NoSuchAlgorithmException |
+                InvalidKeyException | IOException e) {
+            throw new BenchFlowMinioClientException(e.getMessage(), e);
+        }
+    }
+
+    /***
+     * Returns all models at benchmark/{benchmarkId}/models
+     */
+    public List<String> listModels(final String benchmarkId) {
+        List<String> modelNames = new LinkedList<>();
+        try {
+            for(Result<Item> item : mc.listObjects(BENCHMARKS_BUCKET, benchmarkId + "/models")) {
+                modelNames.add(item.get().objectName());
+            }
+        } catch (MinioException | XmlPullParserException | NoSuchAlgorithmException |
+                InvalidKeyException | IOException e) {
+            throw new BenchFlowMinioClientException(e.getMessage(), e);
+        }
+        return modelNames;
+    }
+
+    /***
+     * Returns a model for a benchmark,
+     * from benchmarks/{benchmarkId}/models/{modelName}
+     */
+    public String getModel(final String benchmarkId, final String modelName) {
+        return getTextFile(benchmarkId + "/models/" + modelName);
     }
 
 }

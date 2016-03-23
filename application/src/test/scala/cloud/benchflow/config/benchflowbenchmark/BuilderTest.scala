@@ -66,7 +66,11 @@ object BuilderTest extends App {
   val defaults = new FabanDefaults
   defaults.setJavaHome("testJavaHome")
   defaults.setJavaOpts("testJavaOpts")
-  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
+
+  val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
+  val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
+  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv, defaults)
+//  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
   println(builder.buildDeploymentDescriptor(trial))
-  println(builder.buildFabanBenchmarkConfiguration(trial))
+//  println(builder.buildFabanBenchmarkConfiguration(trial))
 }

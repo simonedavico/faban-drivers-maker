@@ -1,0 +1,58 @@
+sut_name: camunda
+suts_type: WfMS
+benchmark_name: WfMSBenchmark
+description: A WfMS benchmark
+trials: 2
+properties:
+    timeSync: "false"
+    hostConfig:
+        host: 10.7.0.10
+        tools: NONE
+    scale: "10"
+    runControl:
+        rampUp: "0"
+        steadyState: "60"
+        rampDown: "0"
+    threadStart:
+        delay: "100"
+        simultaneous: "false"
+        parallel: "false"
+    stats:
+        maxRunTime: "6"
+        interval: "30"
+drivers:
+    - cloud.benchflow.wfmsbenchmark.driver.WfMSBenchmarkDriver:
+        agents: 10.7.0.10:1
+        stats:
+            interval: "30"
+sut-configuration:
+    target-service:
+        name: camunda
+        endpoint: /engine-rest
+    deploy:
+        camunda: bull
+        db: lisa1
+        mysql_monitor_db: lisa1
+    benchflow-config:
+        camunda:
+            - stats:
+                config:
+                    SUT_NAME: camunda
+                    SUT_VERSION: "0"
+                    COLLECTOR_NAME: camunda
+        db:
+            - mysql:
+                config:
+                    DB_NAME: process-engine
+                    DB_USER: camunda
+                    DB_PASSWORD: camunda
+                    TABLE_NAMES: "ACT_HI_PROCINST,ACT_HI_ACTINST"
+                    DB_PORT: "3306"
+                    SUT_NAME: camunda
+                    SUT_VERSION: "0"
+                    COLLECTOR_NAME: db
+            - stats:
+                config:
+                    SUT_NAME: camunda
+                    SUT_VERSION: "0"
+                    COLLECTOR_NAME: db

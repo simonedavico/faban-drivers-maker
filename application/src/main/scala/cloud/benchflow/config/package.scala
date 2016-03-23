@@ -19,6 +19,8 @@ package object config {
   case class Ports(ports: Seq[String])
   case class Image(image: String)
   case class Expose(expose: Seq[Int])
+  case class Network(net: String)
+  case class ExtraHosts(extra_hosts: Seq[String])
   case class Service(name: String,
                      image: Option[Image] = None,
                      containerName: Option[ContainerName] = None,
@@ -26,18 +28,39 @@ package object config {
                      environment: Option[Environment] = None,
                      volumes: Option[Volumes] = None,
                      ports: Option[Ports] = None,
+                     net: Option[Network] = None,
+                     extra_hosts: Option[ExtraHosts] = None,
                      expose: Option[Expose] = None) {
-    /***
-      * Returns the port, taking into account the possible formats "ip:port" and "port"
-      */
-    def getPort: Option[String] = {
-      val pattern = "(.*):([0-9]*)".r
+
+    private val ipAndPorts = "(.*):([0-9]+):([0-9]+)".r
+    private val ipAndSinglePort = "(.*):([0-9]+)".r
+    private val onlyPorts = "([0-9]+):([0-9]+)".r
+    private val onlySinglePort = "([0-9]+)".r
+
+    def getPorts: Option[String] = {
+        ports.flatMap(_.ports.head match {
+          case ipAndPorts(ip, publicPort, privatePort) => Some(s"$publicPort:$privatePort")
+          case onlyPorts(publicPort, privatePort) => Some(s"$publicPort:$privatePort")
+          case ipAndSinglePort(ip, publicPort) => Some(publicPort)
+          case onlySinglePort(publicPort) => Some(publicPort)
+        })
+//      ports.flatMap(_.ports.head match {
+//        //case singlePort(ip, p) => Some(p)
+//        case other => ports.map(_.ports.head)
+//      })
+    }
+
+    def getPrivatePort: Option[String] = {
       ports.flatMap(_.ports.head match {
-        case pattern(ip, p) => Some(p)
-        case other => ports.map(_.ports.head)
+        case ipAndPorts(ip, publicPort, privatePort) => Some(s"$privatePort")
+        case onlyPorts(publicPort, privatePort) => Some(s"$privatePort")
+        case ipAndSinglePort(ip, publicPort) => None
+        case onlySinglePort(publicPort) => None
       })
     }
   }
+
+
 
   object ServiceYamlProtocol extends DefaultYamlProtocol {
 
@@ -48,6 +71,8 @@ package object config {
     implicit val volumesFormat = yamlFormat1(Volumes)
     implicit val portsFormat = yamlFormat1(Ports)
     implicit val exposeFormat = yamlFormat1(Expose)
+    implicit val networkFormat = yamlFormat1(Network)
+    implicit val extraHostsFormat = yamlFormat1(ExtraHosts)
 
     implicit object ServiceYamlFormat extends YamlFormat[Service] {
 
@@ -104,6 +129,20 @@ package object config {
                 case _ => emptyMap
               })
 
+              ++
+
+              (c.net match {
+                case Some(_) => c.net.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
+
+              ++
+
+              (c.extra_hosts match {
+                case Some(_) => c.extra_hosts.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
+
             )
         )
       }
@@ -153,10 +192,23 @@ package object config {
               case _ => None
             }
 
+            val extra_hosts = params.fields.get(YamlString("extra_hosts"))
+            match {
+              case Some(YamlArray(eh)) =>
+                Some(ExtraHosts(eh.map(h => h.convertTo[String])))
+              case _ => None
+            }
+
             val expose = params.fields.get(YamlString("expose"))
             match {
               case Some(YamlArray(exp)) =>
                 Some(Expose(exp.map(e => e.convertTo[Int])))
+              case _ => None
+            }
+
+            val network = params.fields.get(YamlString("net"))
+            match {
+              case Some(YamlString(net)) => Some(Network(net))
               case _ => None
             }
 
@@ -167,7 +219,9 @@ package object config {
               environment = environment,
               volumes = volumes,
               ports = ports,
-              expose = expose
+              expose = expose,
+              net = network,
+              extra_hosts = extra_hosts
             )
           case _ => throw DeserializationException("Invalid Docker compose file")
         }

@@ -2,6 +2,7 @@ package cloud.benchflow.driversmaker.resources;
 
 import cloud.benchflow.config.BenchFlowBenchmarkConfigurationBuilder;
 import cloud.benchflow.driversmaker.configurations.FabanDefaults;
+import cloud.benchflow.driversmaker.exceptions.BenchmarkGenerationException;
 import cloud.benchflow.driversmaker.requests.Experiment;
 import cloud.benchflow.driversmaker.requests.Trial;
 import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv;
@@ -15,6 +16,8 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -30,6 +33,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -80,10 +84,11 @@ public class FabanBenchmarkGeneratorResource {
         //temporary user id
         experiment.setUserId("BenchFlow");
         String benchmarkId = experiment.getBenchmarkId();
+        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
         int experimentNumber = experiment.getExperimentNumber();
 
         //temporary: get zip of sources and copy in temporary folder
-        InputStream sources = minio.getBenchmarkSources(benchmarkId);
+        InputStream sources = minio.getBenchmarkSources(minioBenchmarkId);
         logger.debug("Retrieved driver sources from minio");
 
         try(ManagedDirectory managedDriverPath =
@@ -96,8 +101,8 @@ public class FabanBenchmarkGeneratorResource {
             logger.debug("About to generate benchmark for experiment " + experiment.getExperimentId());
 
             Iterator<Trial> trials = experiment.getAllTrials();
-            String defaultDeploymentDescriptor = minio.getOriginalDeploymentDescriptor(benchmarkId);
-            String defaultBenchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(benchmarkId);
+            String defaultDeploymentDescriptor = minio.getOriginalDeploymentDescriptor(minioBenchmarkId);
+            String defaultBenchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
 
             java.nio.file.Path descriptorsPath = driverPath.resolve("build/sut/");
 
@@ -113,29 +118,38 @@ public class FabanBenchmarkGeneratorResource {
 
                 logger.debug("Generated deployment descriptor and configuration for trial " + trial.getTrialId());
 
-                java.nio.file.Path descriptorPath = descriptorsPath.resolve("docker-compose" + trial.getTrialId() + ".yml");
+                java.nio.file.Path descriptorPath = descriptorsPath.resolve("docker-compose-" + trial.getTrialId() + ".yml");
                 FileUtils.writeStringToFile(descriptorPath.toFile(), dd, Charsets.UTF_8);
 
-                minio.saveDeploymentDescriptor(benchmarkId, experimentNumber, trial.getTrialNumber(), dd);
-                minio.saveFabanConfiguration(benchmarkId, experimentNumber, trial.getTrialNumber(), runXml);
+                minio.saveDeploymentDescriptor(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), dd);
+                minio.saveFabanConfiguration(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), runXml);
 
                 logger.debug("Saved on minio deployment descriptor and configuration for trial " + trial.getTrialId());
+            }
+
+            java.nio.file.Path modelsPath = driverPath.resolve("build/models");
+            List<String> models = minio.listModels(benchmarkId);
+            for(String modelName : models) {
+                String model = minio.getModel(benchmarkId, modelName);
+                java.nio.file.Path modelPath = modelsPath.resolve(modelName);
+                FileUtils.writeStringToFile(modelPath.toFile(), model, Charsets.UTF_8);
+                logger.debug("Retrieved model " + modelName);
             }
 
             logger.debug("About to build generated driver");
 
             //temporary: change benchmark name in driver class
             changeBenchmarkName(driverPath, experiment.getExperimentId());
-
-            //TODO: catch BuildException
             buildDriver(driverPath, experiment.getExperimentId());
 
             //save generated driver to minio
             java.nio.file.Path generatedDriverPath = driverPath.resolve("build/" + experiment.getExperimentId() + ".jar");
-            minio.saveGeneratedDriver(benchmarkId, experimentNumber, generatedDriverPath.toAbsolutePath().toString());
+            minio.saveGeneratedDriver(minioBenchmarkId, experimentNumber, generatedDriverPath.toAbsolutePath().toString());
 
             logger.debug("Successfully saved generated driver on Minio");
 
+        } catch (Exception e) {
+            throw new BenchmarkGenerationException(e.getMessage(), e);
         }
 
         return Response.ok().build();
