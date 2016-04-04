@@ -71,9 +71,9 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
   private def getPublicIp(alias: String) = benv.getVariable[String](s"BENCHFLOW_SERVER_${alias.toUpperCase}_PUBLICIP")
 
   /***
-    * Generates a constraint:node for a service
+    * Adds fields needed by BenchFlow to a service
     */
-  private def generateConstraint: ServiceTransformer = service => {
+  private def generateBenchFlowFieldsForService: ServiceTransformer = service => {
     bb.getAliasForService(service.name) match {
       case Some(alias) => service.copy(environment = Some(service.environment.get :+ s"constraint:node==$alias"),
         ports = Some(Ports(Seq(getLocalIp(alias) + ":" + service.ports.get.ports.head))))
@@ -82,10 +82,10 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
   }
 
   /***
-    * Generates constraint:node for all services in a DockerCompose
+    * Generates fields needed by BenchFlow for all services in a DockerCompose
     */
-  private def generateConstraints: DCTransformer = dc => {
-    dc.copy(services = dc.services.map(generateConstraint))
+  private def generateBenchFlowFields: DCTransformer = dc => {
+    dc.copy(services = dc.services.map(generateBenchFlowFieldsForService))
   }
 
   /***
@@ -106,9 +106,9 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
   }
 
   /***
-    *  Generates constraint for a bound benchflow service
+    *  Generates fields required by BenchFlow for a bound benchflow service
     */
-  private def generateBenchFlowServiceConstraint: BenchFlowServiceTransformer =
+  private def generateFieldsForBenchFlowService: BenchFlowServiceTransformer =
       boundservice => bfservice => {
         val alias = bb.getAliasForService(boundservice.name).get
         bfservice.copy(
@@ -117,15 +117,15 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
            ports = Some(Ports(Seq(getLocalIp(alias) + ":" + bfservice.ports.get.ports.head))))
       }
 
-  private def generateBenchFlowServiceConstraints(bound: Service, bfservices: Seq[Service]): Seq[Service] =
-    bfservices.map(bfservice => generateBenchFlowServiceConstraint(bound)(bfservice))
+  private def generateFieldsForBenchFlowServices(bound: Service, bfservices: Seq[Service]): Seq[Service] =
+    bfservices.map(bfservice => generateFieldsForBenchFlowService(bound)(bfservice))
 
   /***
     * Resolves bound benchflow services
     */
   private def resolveBenchFlowServices: DCTransformer = dc => {
     val bindings = dc.services.map(service => (service, resolveBoundServices(service)))
-    val bfservices: Seq[Service] = bindings.flatMap(b => generateBenchFlowServiceConstraints(b._1, b._2))
+    val bfservices: Seq[Service] = bindings.flatMap(b => generateFieldsForBenchFlowServices(b._1, b._2))
     dc.copy(services = dc.services ++ bfservices)
   }
 
@@ -165,6 +165,8 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
           case other => s"$${$bfvar}"
         }))
 
+        //since each entry could have more than one benchflow variable, this mapping
+        //cumulatively resolves them
         values.map(value => updateEntry(value)_).reduceOption(_ compose _) match {
           case None => entry
           case Some(cumulativeUpdate) => cumulativeUpdate(entry)
@@ -206,8 +208,8 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
     * Generates a DockerCompose with bound benchflow services and resolved variables
     */
   def build(dc: DockerCompose, trial: Trial): DockerCompose = {
-    val transformations = List(addTrialInfo(trial), resolveBenchFlowVariables,
-                               resolveBenchFlowServices, generateConstraints)
+    val transformations = List(resolveBenchFlowVariables, addTrialInfo(trial),
+                               resolveBenchFlowServices, generateBenchFlowFields)
     val transform = transformations.reduce(_ compose _)
     transform(dc)
   }

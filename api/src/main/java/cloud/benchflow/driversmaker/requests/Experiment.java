@@ -18,7 +18,7 @@ public class Experiment {
     private String benchmarkName;
 
     @JsonProperty("experimentNumber")
-    private int experimentNumber;
+    private long experimentNumber;
 
     @JsonProperty("trials")
     private int totalTrials;
@@ -31,11 +31,11 @@ public class Experiment {
         this.benchmarkName = benchmarkName;
     }
 
-    public int getExperimentNumber() {
+    public long getExperimentNumber() {
         return experimentNumber;
     }
 
-    public void setExperimentNumber(int experimentNumber) {
+    public void setExperimentNumber(long experimentNumber) {
         this.experimentNumber = experimentNumber;
     }
 

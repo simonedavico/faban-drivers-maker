@@ -32,32 +32,32 @@ public class BenchFlowEnvConfiguration {
         this.configPath = configPath;
     }
 
-    @JsonProperty("benchflow.services")
+    @JsonProperty("benchflowServices")
     public String getBenchFlowServicesPath() {
         return benchFlowServicesPath;
     }
 
-    @JsonProperty("benchflow.services")
+    @JsonProperty("benchflowServices")
     public void setBenchFlowServicesPath(String benchFlowServicesPath) {
         this.benchFlowServicesPath = benchFlowServicesPath;
     }
 
-    @JsonProperty("benchflow.compose")
+    @JsonProperty("benchflowCompose")
     public String getBenchFlowComposeAddress() {
         return benchFlowComposeAddress;
     }
 
-    @JsonProperty("benchflow.compose")
+    @JsonProperty("benchflowCompose")
     public void setBenchFlowComposeAddress(String benchFlowComposeAddress) {
         this.benchFlowComposeAddress = benchFlowComposeAddress;
     }
 
-    @JsonProperty("driver.skeleton")
+    @JsonProperty("driverSkeleton")
     public String getDriverSkeletonPath() {
         return driverSkeletonPath;
     }
 
-    @JsonProperty("driver.skeleton")
+    @JsonProperty("driverSkeleton")
     public void setDriverSkeletonPath(String driverSkeletonPath) {
         this.driverSkeletonPath = driverSkeletonPath;
     }

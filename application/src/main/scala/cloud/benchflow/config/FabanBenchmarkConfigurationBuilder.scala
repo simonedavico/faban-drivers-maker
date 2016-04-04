@@ -1,6 +1,5 @@
 package cloud.benchflow.config
 
-import cloud.benchflow.config
 import cloud.benchflow.config.benchflowbenchmark._
 import cloud.benchflow.config.collectors.CollectorAPI
 import cloud.benchflow.config.docker.compose.DockerCompose
@@ -19,6 +18,8 @@ import scala.xml.transform.{RuleTransformer, RewriteRule}
 class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMakerBenchFlowEnv,
                                          fd: FabanDefaults, dd: DockerCompose) {
 
+  //Faban doesn't like when there are newlines in the content of the tags,
+  //so we remove them
   private val removeNewlinesRule = new RewriteRule {
     val minimizeEmpty = false
     override def transform(n: Node): Seq[Node] = n match {
@@ -154,7 +155,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
           </sutConfiguration>
 
           <benchFlowServices>
-              <benchFlowCompose>{ benv.getBenchFlowComposePath }</benchFlowCompose>
+              <benchFlowCompose>{ benv.getBenchFlowComposeAddress }</benchFlowCompose>
               <collectors>
                 { retrieveCollectors(bb.`sut-configuration`.bfConfig) }
               </collectors>

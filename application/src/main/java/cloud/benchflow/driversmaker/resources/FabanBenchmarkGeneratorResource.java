@@ -41,7 +41,7 @@ import java.util.List;
  *
  * Created on 25/02/16.
  */
-@Path("makedriver")
+@Path("generatedriver")
 public class FabanBenchmarkGeneratorResource {
 
     private DriversMakerBenchFlowEnv benv;
@@ -79,13 +79,26 @@ public class FabanBenchmarkGeneratorResource {
         FileUtils.writeStringToFile(driverClassPath.toFile(), src, Charsets.UTF_8);
     }
 
+    private void cleanUp(Experiment experiment) {
+        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
+        long experimentNumber = experiment.getExperimentNumber();
+        Iterator<Trial> trials = experiment.getAllTrials();
+        minio.removeBenchFlowBenchmark(minioBenchmarkId, experimentNumber);
+        while(trials.hasNext()) {
+            Trial trial = trials.next();
+            int trialNumber = trial.getTrialNumber();
+            minio.removeDeploymentDescriptor(minioBenchmarkId, experimentNumber, trialNumber);
+            minio.removeFabanConfiguration(minioBenchmarkId, experimentNumber, trialNumber);
+        }
+    }
+
     @POST
     public Response generateBenchmark(Experiment experiment) throws IOException {
         //temporary user id
         experiment.setUserId("BenchFlow");
         String benchmarkId = experiment.getBenchmarkId();
         String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
-        int experimentNumber = experiment.getExperimentNumber();
+        long experimentNumber = experiment.getExperimentNumber();
 
         //temporary: get zip of sources and copy in temporary folder
         InputStream sources = minio.getBenchmarkSources(minioBenchmarkId);
@@ -149,6 +162,7 @@ public class FabanBenchmarkGeneratorResource {
             logger.debug("Successfully saved generated driver on Minio");
 
         } catch (Exception e) {
+            cleanUp(experiment);
             throw new BenchmarkGenerationException(e.getMessage(), e);
         }
 

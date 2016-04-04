@@ -1,10 +1,10 @@
-benchflow.env:
+benchflowEnv:
   config.yml: /app/config.yml
-  benchflow.services: /app/benchflow-services
-  driver.skeleton: /app/skeleton
-  benchflow.compose: ${env.BENCHFLOW_COMPOSE_ADDRESS}
+  benchflowServices: /app/benchflow-services
+  driverSkeleton: /app/skeleton
+  benchflowCompose: ${env.BENCHFLOW_COMPOSE_ADDRESS}
 
-faban.defaults:
+fabanDefaults:
   javaHome: /usr/lib/jvm/java7
   javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
 

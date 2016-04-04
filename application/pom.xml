@@ -24,6 +24,7 @@
         <zt-zip.version>1.9</zt-zip.version>
         <commons-io.version>2.4</commons-io.version>
         <minio-java.version>1.0.1</minio-java.version>
+        <ant.version>1.9.6</ant.version>
     </properties>
 
     <repositories>
@@ -106,7 +107,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.9.6</version>
+            <version>${ant.version}</version>
         </dependency>
 
         <dependency>

@@ -11,7 +11,7 @@ public class Trial {
 
     public Trial() {}
 
-    public Trial(String benchmarkId, int experimentNumber, int trialNumber, int totalTrials) {
+    public Trial(String benchmarkId, long experimentNumber, int trialNumber, int totalTrials) {
         this.benchmarkId = benchmarkId;
         this.experimentNumber = experimentNumber;
         this.trialNumber = trialNumber;
@@ -22,7 +22,7 @@ public class Trial {
     private String benchmarkId;
 
     @JsonProperty("experimentNumber")
-    private int experimentNumber;
+    private long experimentNumber;
 
     @JsonProperty("trialNumber")
     private int trialNumber;
@@ -47,11 +47,11 @@ public class Trial {
         this.trialNumber = trialNumber;
     }
 
-    public int getExperimentNumber() {
+    public long getExperimentNumber() {
         return experimentNumber;
     }
 
-    public void setExperimentNumber(int experimentNumber) {
+    public void setExperimentNumber(long experimentNumber) {
         this.experimentNumber = experimentNumber;
     }
 

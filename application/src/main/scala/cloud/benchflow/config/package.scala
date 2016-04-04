@@ -32,8 +32,10 @@ package object config {
                      extra_hosts: Option[ExtraHosts] = None,
                      expose: Option[Expose] = None) {
 
-    private val ipAndPorts = "(.*):([0-9]+):([0-9]+)".r
-    private val ipAndSinglePort = "(.*):([0-9]+)".r
+//    private val ipAndPorts = "(.*):([0-9]+):([0-9]+)".r
+//    private val ipAndSinglePort = "(.*):([0-9]+)".r
+    private val ipAndPorts = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}:([0-9]+):([0-9]+)".r
+    private val ipAndSinglePort = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}:([0-9]+)".r
     private val onlyPorts = "([0-9]+):([0-9]+)".r
     private val onlySinglePort = "([0-9]+)".r
 
@@ -44,10 +46,6 @@ package object config {
           case ipAndSinglePort(ip, publicPort) => Some(publicPort)
           case onlySinglePort(publicPort) => Some(publicPort)
         })
-//      ports.flatMap(_.ports.head match {
-//        //case singlePort(ip, p) => Some(p)
-//        case other => ports.map(_.ports.head)
-//      })
     }
 
     def getPrivatePort: Option[String] = {
