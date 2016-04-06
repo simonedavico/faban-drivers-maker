@@ -1,4 +1,4 @@
-package cloud.benchflow.driversmaker.utils;
+package cloud.benchflow.driversmaker.utils.env;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -15,11 +15,9 @@ public class BenchFlowEnv {
 
     private Map<String, Object> env;
     private String configPath;
-    private String benchFlowServicesPath;
 
-    public BenchFlowEnv(String configPath, String benchFlowServicesPath) throws FileNotFoundException {
+    public BenchFlowEnv(String configPath) throws FileNotFoundException {
         this.configPath = configPath;
-        this.benchFlowServicesPath = benchFlowServicesPath;
         reload();
     }
 
@@ -38,9 +36,5 @@ public class BenchFlowEnv {
 
     public void reload() throws FileNotFoundException {
         this.env = loadFromFile();
-    }
-
-    public String getBenchFlowServicesPath() {
-        return benchFlowServicesPath;
     }
 }

@@ -1,0 +1,48 @@
+camunda:
+  image: 'camunda/camunda-bpm-platform:tomcat-7.4.0'
+  command: bash -c "sleep 20 && /usr/local/bin/configure-and-run.sh"
+  environment:
+    - DB_DRIVER=com.mysql.jdbc.Driver
+    - DB_PASSWORD=camunda
+    # the IP Must be the local IP
+    - 'DB_URL=jdbc:mysql://192.168.41.105:3306/process-engine'
+    -  DB_USERNAME=camunda
+    - 'JAVA_OPTS=-Djava.security.egd=file:/dev/./urandom'
+  volumes:
+    - /home/vferme/webapps:/camunda/webapps/camunda-invoice/
+    - /home/vferme/webapps:/camunda/webapps/examples/
+  net: host
+  ports:
+    - '8080:8080'
+
+db:
+  image: 'mysql:latest'
+  environment:
+    - MYSQL_DATABASE=process-engine
+    - MYSQL_PASSWORD=camunda
+    - MYSQL_ROOT_PASSWORD=camunda
+    - MYSQL_USER=camunda
+  net: host
+  ports:
+    - '3306:3306'
+
+mysql_monitor_db:
+  image: 'benchflow/monitors:querymysql_dev'
+#  container_name: mysql__monitor_db_camunda_HQ
+  environment:
+    - MYSQL_DB_NAME=process-engine
+
+    # the IP can be the local IP
+    - MYSQL_HOST=lisa1
+    - MYSQL_PORT=3306
+    - MYSQL_USER=camunda
+    - MYSQL_USER_PASSWORD=camunda
+
+#    - "constraint:node==lisa1"
+  expose:
+    - 8080
+  extra_hosts:
+    - "lisa1:192.168.41.105"
+  ports:
+     - '9303:8080'
+#    - '192.168.41.105:9303:8080'

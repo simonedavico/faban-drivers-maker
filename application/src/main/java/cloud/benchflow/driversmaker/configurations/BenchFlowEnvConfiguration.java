@@ -16,6 +16,12 @@ public class BenchFlowEnvConfiguration {
     @NotEmpty
     private String benchFlowServicesPath;
 
+    @NotEmpty
+    private String benchFlowComposeAddress;
+
+    @NotEmpty
+    private String driverSkeletonPath;
+
     @JsonProperty("config.yml")
     public String getConfigPath() {
         return configPath;
@@ -26,13 +32,33 @@ public class BenchFlowEnvConfiguration {
         this.configPath = configPath;
     }
 
-    @JsonProperty("benchflow.services")
+    @JsonProperty("benchflowServices")
     public String getBenchFlowServicesPath() {
         return benchFlowServicesPath;
     }
 
-    @JsonProperty("benchflow.services")
+    @JsonProperty("benchflowServices")
     public void setBenchFlowServicesPath(String benchFlowServicesPath) {
         this.benchFlowServicesPath = benchFlowServicesPath;
+    }
+
+    @JsonProperty("benchflowCompose")
+    public String getBenchFlowComposeAddress() {
+        return benchFlowComposeAddress;
+    }
+
+    @JsonProperty("benchflowCompose")
+    public void setBenchFlowComposeAddress(String benchFlowComposeAddress) {
+        this.benchFlowComposeAddress = benchFlowComposeAddress;
+    }
+
+    @JsonProperty("driverSkeleton")
+    public String getDriverSkeletonPath() {
+        return driverSkeletonPath;
+    }
+
+    @JsonProperty("driverSkeleton")
+    public void setDriverSkeletonPath(String driverSkeletonPath) {
+        this.driverSkeletonPath = driverSkeletonPath;
     }
 }

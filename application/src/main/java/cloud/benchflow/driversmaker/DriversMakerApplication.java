@@ -3,6 +3,8 @@ package cloud.benchflow.driversmaker;
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
 import cloud.benchflow.driversmaker.modules.BenchFlowConfigConverterModule;
 import cloud.benchflow.driversmaker.modules.BenchFlowEnvModule;
+import cloud.benchflow.driversmaker.modules.FabanDefaultsModule;
+import cloud.benchflow.driversmaker.modules.MinioModule;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -33,7 +35,9 @@ public class DriversMakerApplication extends Application<DriversMakerConfigurati
         GuiceBundle<DriversMakerConfiguration> guiceBundle =
                 GuiceBundle.<DriversMakerConfiguration>builder()
                         .enableAutoConfig("cloud.benchflow.driversmaker")
-                        .modules(/*new BenchFlowEnvModule(),*/
+                        .modules(new BenchFlowEnvModule(),
+                                 new FabanDefaultsModule(),
+                                 new MinioModule(),
                                  new BenchFlowConfigConverterModule())
                         .build();
 

@@ -15,24 +15,24 @@ public class DriversMakerConfiguration extends Configuration {
 
     @Valid
     @NotNull
-    private FabanConfiguration fabanConfiguration = new FabanConfiguration();
+    private FabanDefaults fabanDefaults = new FabanDefaults();
 
     @Valid
     @NotNull
     private BenchFlowEnvConfiguration benchFlowEnvConfiguration = new BenchFlowEnvConfiguration();
 
-    @JsonProperty("faban.config")
-    public FabanConfiguration getFabanConfiguration() { return fabanConfiguration; }
+    @JsonProperty("fabanDefaults")
+    public FabanDefaults getFabanDefaults() { return fabanDefaults; }
 
-    @JsonProperty("faban.config")
-    public void setFabanConfiguration(FabanConfiguration fc) { this.fabanConfiguration = fc; }
+    @JsonProperty("fabanDefaults")
+    public void setFabanDefaults(FabanDefaults fc) { this.fabanDefaults = fc; }
 
-    @JsonProperty("benchflow.env")
+    @JsonProperty("benchflowEnv")
     public BenchFlowEnvConfiguration getBenchFlowEnvConfiguration() {
         return benchFlowEnvConfiguration;
     }
 
-    @JsonProperty("benchflow.env")
+    @JsonProperty("benchflowEnv")
     public void setBenchFlowEnvConfiguration(BenchFlowEnvConfiguration benchFlowEnvConfiguration) {
         this.benchFlowEnvConfiguration = benchFlowEnvConfiguration;
     }

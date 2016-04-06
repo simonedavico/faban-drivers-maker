@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  * Created on 06/01/16.
  */
-public class FabanConfiguration {
+public class FabanDefaults {
 
     @NotEmpty
     private String javaHome;

@@ -1,28 +1,31 @@
 #The service name should be "benchflowServiceName_BoundServiceName"
 stats:
   image: 'benchflow/collectors:stats_dev'
-  # container_name: stats_camunda_TRIAL_ID
   environment:
-    - "KAFKA_HOST=${BENCHFLOW_ENV_KAFKA_IP}"
-    - "MINIO_HOST=http://${BENCHFLOW_ENV_MINIO_IP}:${BENCHFLOW_ENV_MINIO_PORT}"
-    - "MINIO_ACCESSKEYID=${BENCHFLOW_ENV_MINIO_ACCESS_KEY}"
-    - MINIO_SECRETACCESSKEY=${BENCHFLOW_ENV_MINIO_SECRET_KEY}
 
-    # - BENCHFLOW_EXPERIMENT_ID=camunda
-    # - BENCHFLOW_TRIAL_ID=camunda_1O
-    # - BENCHFLOW_TRIAL_TOTAL_NUM=1
+    - MINIO_ALIAS=benchflow
+    - "MINIO_HOST=http://${BENCHFLOW_ENV_MINIO_IP}:${BENCHFLOW_ENV_MINIO_PORT}"
+    - MINIO_ACCESSKEYID=${BENCHFLOW_ENV_MINIO_ACCESS_KEY}
+    - MINIO_SECRETACCESSKEY=${BENCHFLOW_ENV_MINIO_SECRET_KEY}
+    - KAFKA_HOST="${BENCHFLOW_ENV_KAFKA_IP}:${BENCHFLOW_ENV_KAFKA_PORT}"
+    - KAFKA_TOPIC=stats
+
     - CONTAINERS=${BENCHFLOW_BENCHMARK_BOUNDSERVICE_CONTAINER_NAME}
 
-    # - BENCHFLOW_CONTAINER_NAME=stats_camunda_TRIAL_ID
-    - BENCHFLOW_COLLECTOR_NAME=stats
-    - BENCHFLOW_DATA_NAME=stats
 
-    # - "constraint:node==alias1"
+    - SUT_NAME=${BENCHFLOW_BENCHMARK_CONFIG_SUT_NAME}
+    - SUT_VERSION=${BENCHFLOW_BENCHMARK_CONFIG_SUT_VERSION}
 
+    - COLLECTOR_NAME=stats_collector_${BENCHFLOW_BENCHMARK_CONFIG_COLLECTOR_NAME}
+    - DATA_NAME=stats
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
   expose:
     - 8080
   ports:
     - '8080'
-    #ip::8080
+
+endpoints:
+  privatePort: 8080
+  start: /start
+  stop: /stop

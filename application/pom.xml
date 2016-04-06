@@ -17,10 +17,22 @@
         <scala.major>2.11.7</scala.major>
         <scala.xml.version>1.0.5</scala.xml.version>
         <scala.parser.combinators.version>1.0.4</scala.parser.combinators.version>
+        <simonedavico.moultingyaml.version>v0.3</simonedavico.moultingyaml.version>
         <moultingyaml.version>0.2</moultingyaml.version>
         <snakeyaml.version>1.16</snakeyaml.version>
         <jersey.multipart.version>2.19</jersey.multipart.version>
+        <zt-zip.version>1.9</zt-zip.version>
+        <commons-io.version>2.4</commons-io.version>
+        <minio-java.version>1.0.1</minio-java.version>
+        <ant.version>1.9.6</ant.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <!--<repositories>-->
         <!--<repository>-->
@@ -28,15 +40,6 @@
             <!--<url>file://${project.basedir}/lib</url>-->
         <!--</repository>-->
     <!--</repositories>-->
-
-    <!--<repositories>-->
-    <!--    <repository>-->
-    <!--        <id>Sonatype-public</id>-->
-    <!--        <name>SnakeYAML repository</name>-->
-    <!--        <url>http://oss.sonatype.org/content/groups/public/</url>-->
-    <!--    </repository>-->
-    <!--</repositories>-->
-
     <dependencies>
 
         <dependency>
@@ -70,22 +73,47 @@
             <version>${scala.xml.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>${snakeyaml.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.jcazevedo</groupId>
-            <artifactId>moultingyaml_2.11</artifactId>
-            <version>${moultingyaml.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>net.jcazevedo</groupId>-->
+            <!--<artifactId>moultingyaml_2.11</artifactId>-->
+            <!--<version>${moultingyaml.version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-parser-combinators_2.11</artifactId>
             <version>${scala.parser.combinators.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+            <version>${zt-zip.version}</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio-java.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>${ant.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.simonedavico</groupId>
+            <artifactId>moultingyaml</artifactId>
+            <version>${simonedavico.moultingyaml.version}</version>
         </dependency>
 
     </dependencies>

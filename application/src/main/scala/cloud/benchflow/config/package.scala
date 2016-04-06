@@ -5,9 +5,6 @@ package cloud.benchflow
   *
   * Created on 10/02/16.
   */
-//TODO: fork moultingyaml, set protected visibility on YamlValue's asYamlObject function
-//TODO: and all subclasses (YamlObject, ...)
-//TODO: then define a pretty print that escapes values with double quotes
 package object config {
 
   import scala.util.parsing.combinator._
@@ -22,6 +19,8 @@ package object config {
   case class Ports(ports: Seq[String])
   case class Image(image: String)
   case class Expose(expose: Seq[Int])
+  case class Network(net: String)
+  case class ExtraHosts(extra_hosts: Seq[String])
   case class Service(name: String,
                      image: Option[Image] = None,
                      containerName: Option[ContainerName] = None,
@@ -29,7 +28,37 @@ package object config {
                      environment: Option[Environment] = None,
                      volumes: Option[Volumes] = None,
                      ports: Option[Ports] = None,
-                     expose: Option[Expose] = None)
+                     net: Option[Network] = None,
+                     extra_hosts: Option[ExtraHosts] = None,
+                     expose: Option[Expose] = None) {
+
+//    private val ipAndPorts = "(.*):([0-9]+):([0-9]+)".r
+//    private val ipAndSinglePort = "(.*):([0-9]+)".r
+    private val ipAndPorts = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}:([0-9]+):([0-9]+)".r
+    private val ipAndSinglePort = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}:([0-9]+)".r
+    private val onlyPorts = "([0-9]+):([0-9]+)".r
+    private val onlySinglePort = "([0-9]+)".r
+
+    def getPorts: Option[String] = {
+        ports.flatMap(_.ports.head match {
+          case ipAndPorts(ip, publicPort, privatePort) => Some(s"$publicPort:$privatePort")
+          case onlyPorts(publicPort, privatePort) => Some(s"$publicPort:$privatePort")
+          case ipAndSinglePort(ip, publicPort) => Some(publicPort)
+          case onlySinglePort(publicPort) => Some(publicPort)
+        })
+    }
+
+    def getPrivatePort: Option[String] = {
+      ports.flatMap(_.ports.head match {
+        case ipAndPorts(ip, publicPort, privatePort) => Some(s"$privatePort")
+        case onlyPorts(publicPort, privatePort) => Some(s"$privatePort")
+        case ipAndSinglePort(ip, publicPort) => None
+        case onlySinglePort(publicPort) => None
+      })
+    }
+  }
+
+
 
   object ServiceYamlProtocol extends DefaultYamlProtocol {
 
@@ -40,6 +69,8 @@ package object config {
     implicit val volumesFormat = yamlFormat1(Volumes)
     implicit val portsFormat = yamlFormat1(Ports)
     implicit val exposeFormat = yamlFormat1(Expose)
+    implicit val networkFormat = yamlFormat1(Network)
+    implicit val extraHostsFormat = yamlFormat1(ExtraHosts)
 
     implicit object ServiceYamlFormat extends YamlFormat[Service] {
 
@@ -96,12 +127,26 @@ package object config {
                 case _ => emptyMap
               })
 
+              ++
+
+              (c.net match {
+                case Some(_) => c.net.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
+
+              ++
+
+              (c.extra_hosts match {
+                case Some(_) => c.extra_hosts.toYaml.asYamlObject.fields
+                case _ => emptyMap
+              })
+
             )
         )
       }
 
       override def read(value: YamlValue) =  {
-        val fields = value.asYamlObject.fields
+        val fields = value.asYamlObject.fields.filter(f => f._1 != YamlString("endpoints"))
         fields.seq.head match {
           case (YamlString(serviceName), content) =>
             val params = content.asYamlObject
@@ -145,10 +190,23 @@ package object config {
               case _ => None
             }
 
+            val extra_hosts = params.fields.get(YamlString("extra_hosts"))
+            match {
+              case Some(YamlArray(eh)) =>
+                Some(ExtraHosts(eh.map(h => h.convertTo[String])))
+              case _ => None
+            }
+
             val expose = params.fields.get(YamlString("expose"))
             match {
               case Some(YamlArray(exp)) =>
                 Some(Expose(exp.map(e => e.convertTo[Int])))
+              case _ => None
+            }
+
+            val network = params.fields.get(YamlString("net"))
+            match {
+              case Some(YamlString(net)) => Some(Network(net))
               case _ => None
             }
 
@@ -159,7 +217,9 @@ package object config {
               environment = environment,
               volumes = volumes,
               ports = ports,
-              expose = expose
+              expose = expose,
+              net = network,
+              extra_hosts = extra_hosts
             )
           case _ => throw DeserializationException("Invalid Docker compose file")
         }
@@ -179,8 +239,6 @@ package object config {
 
   implicit class BenchFlowEnvString(val s: String) extends AnyVal {
     def findBenchFlowVars = BenchFlowVariableFinder.findIn(s)
-
-    def resolve = ???
   }
 
   class BenchFlowVariableParser extends RegexParsers {
@@ -208,28 +266,11 @@ package object config {
   }
 
   object BenchFlowVariableFinder extends BenchFlowVariableParser { parser =>
-
     def findIn(s: String) = parseAll(exprWithVars, s) match {
       case parser.NoSuccess(_, _) => None
       case parser.Success(result, _) => Some(result)
     }
-
   }
-  //templates for variable resolution
-//  abstract class BFVar(val s: String) { v =>
-//    def resolve(implicit r: Resolver[v.type]) = r.resolve(v)
-//  }
-//
-//  class BFEnvVar(override val s: String) extends BFVar(s) {
-//
-//  }
-//
-//  abstract class Source[T <: BFVar] {
-//    def resolve(v: T)
-//  }
-//
-//  abstract class Resolver[T <: BFVar] {
-//    def resolve(v: T)(implicit r: Resolver[T])
-//  }
+
 
 }

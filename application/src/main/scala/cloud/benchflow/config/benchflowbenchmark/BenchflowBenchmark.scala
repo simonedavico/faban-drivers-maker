@@ -13,12 +13,14 @@ object SutsNames {
 }
 case class SutsType(`suts_type`: String)
 case class Properties(properties: Map[String, Any])
+case class Driver(name: String, properties: Properties)
+case class TotalTrials(trials: Int)
 case class Deploy(deploy: Map[String, String]) {
   def get(serviceName: String) = deploy.get(serviceName)
 }
 case class Binding(boundService: String, config: Option[Properties])
 case class BenchFlowConfig(benchflow_config: Map[String, Seq[Binding]]) {
-  def bindings(serviceName: String) = benchflow_config.get(serviceName)
+  def bindings(serviceName: String) = benchflow_config.getOrElse(serviceName, Seq())
 }
 case class TargetService(name: String, endpoint: String)
 case class SutConfiguration(targetService: TargetService,
@@ -28,8 +30,16 @@ case class BenchFlowBenchmark(name: String,
                               description: String,
                               suts_name: SutsNames,
                               suts_type: SutsType,
+                              drivers: Seq[Driver],
+                              trials: TotalTrials,
                               properties: Properties,
                               `sut-configuration`: SutConfiguration)
+{
+  def getAliasForService(serviceName: String) = `sut-configuration`.deploy.get(serviceName)
+  def getBindingsForService(serviceName: String) = `sut-configuration`.bfConfig.bindings(serviceName)
+  def getBindingConfiguration(from: String, to: String): Option[Properties] =
+    `sut-configuration`.bfConfig.bindings(from).find(b => b.boundService == to).flatMap(_.config)
+}
 
 
 //TODO: add drivers to BenchFlowBenchmark
@@ -39,6 +49,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   implicit val sutsTypeFormat = yamlFormat1(SutsType)
   implicit val deployFormat = yamlFormat1(Deploy)
   implicit val targetServiceFormat = yamlFormat2(TargetService)
+  implicit val totalTrialsFormat = yamlFormat1(TotalTrials)
 
   implicit object SutsNamesYamlFormat extends YamlFormat[SutsNames] {
     override def write(obj: SutsNames): YamlValue = YamlObject()
@@ -104,6 +115,17 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
 
   }
 
+  implicit object DriverYamlFormat extends YamlFormat[Driver] {
+    override def write(obj: Driver): YamlValue = ???
+
+    override def read(yaml: YamlValue): Driver = {
+      val driver = yaml.asYamlObject.fields.head
+      val driverName = driver._1.convertTo[String]
+      val properties = YamlObject(YamlString("properties") -> driver._2.asYamlObject).convertTo[Properties]
+      Driver(driverName, properties)
+    }
+  }
+
   implicit object BenchFlowConfigFormat extends YamlFormat[BenchFlowConfig] {
     override def write(obj: BenchFlowConfig): YamlValue = ???
 
@@ -154,12 +176,18 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
       val description = bfBmark.get(YamlString("description")).get.convertTo[String]
       val properties = getObject("properties").convertTo[Properties]
       val sutConfig = getObject("sut-configuration").convertTo[SutConfiguration]
+      val drivers = bfBmark.get(YamlString("drivers")).get.asInstanceOf[YamlArray].elements.map(driver => driver.convertTo[Driver])
+//      val trials = bfBmark.get(YamlString("trials")).get.convertTo[Int]
+      val trials = getObject("trials").convertTo[TotalTrials]
+
       BenchFlowBenchmark(
         name = name,
         description = description,
         suts_name = sutName,
         suts_type = sutType,
+        drivers = drivers,
         properties = properties,
+        trials = trials,
         `sut-configuration` = sutConfig
       )
     }
