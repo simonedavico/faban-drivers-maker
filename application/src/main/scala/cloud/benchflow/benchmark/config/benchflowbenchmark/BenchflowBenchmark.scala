@@ -15,55 +15,35 @@ object SutsNames {
 /**
   * Possible types for a SUT
   */
-sealed trait SutsType {
-  def typeId: String
-  def driverType: Class[_]
-  def getType = driverType
-}
+sealed trait SutsType
 object SutsType {
-  def apply(sutsType: String) = sutsType.toLowerCase match {
-    case WfMS.typeId => WfMS
-    case Http.typeId => Http
+
+  def apply(sutsType: String): SutsType = sutsType.toLowerCase match {
+    case "wfms" => WfMS
+    case "http" => Http
     case _ => throw new Exception("Illegal value for field suts_type; possible values: wfms, http")
   }
-
-  def getType(sutsType: String) = SutsType(sutsType).driverType
 }
-case object WfMS extends SutsType {
-  val typeId = "wfms"
-  val driverType = classOf[WfMSDriver]
-}
-case object Http extends SutsType {
-  val typeId = "http"
-  val driverType = classOf[HttpDriver]
-}
+case object WfMS extends SutsType
+case object Http extends SutsType
 
 /**
   * Http methods values
   */
-sealed trait HttpMethod { def methodId: String }
+sealed trait HttpMethod
 object HttpMethod {
-  def apply(method: String) = method.toUpperCase match {
-    case Get.methodId => Get
-    case Put.methodId => Put
-    case Delete.methodId => Delete
-    case Post.methodId => Post
+  def apply(method: String) = method.toLowerCase match {
+    case "get" => Get
+    case "put" => Put
+    case "delete" => Delete
+    case "post" => Post
     case _ => throw new Exception("Invalid http method specified.")
   }
 }
-case object Get extends HttpMethod {
-  val methodId = "GET"
-}
-case object Put extends HttpMethod {
-  val methodId = "PUT"
-}
-case object Delete extends HttpMethod {
-  val methodId = "DELETE"
-}
-case object Post extends HttpMethod {
-  val methodId = "POST"
-}
-
+case object Get extends HttpMethod
+case object Put extends HttpMethod
+case object Delete extends HttpMethod
+case object Post extends HttpMethod
 case class Properties(properties: Map[String, Any])
 
 /**

@@ -66,7 +66,7 @@ object BuilderTest extends App {
 
 
 //  println(benchFlowBenchmark.parseYaml.convertTo[BenchFlowBenchmark])
-//  println(BenchFlowBenchmark.fromYaml(benchFlowBenchmark))
+  println(BenchFlowBenchmark.fromYaml(benchFlowBenchmark))
 
   val httpOperation =
     """myOperation:
@@ -146,5 +146,5 @@ object BuilderTest extends App {
   val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv, defaults)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
 //  println(builder.buildDeploymentDescriptor(trial))
-  println(builder.buildFabanBenchmarkConfiguration(trial))
+//  println(builder.buildFabanBenchmarkConfiguration(trial))
 }

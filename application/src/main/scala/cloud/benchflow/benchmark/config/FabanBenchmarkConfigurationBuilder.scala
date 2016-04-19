@@ -79,7 +79,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
         driver.properties match {
           case None => scala.xml.Null
           case Some(properties) => convert(properties)
-        } 
+        }
       }
     </driverConfig>
 
