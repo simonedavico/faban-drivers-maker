@@ -1,4 +1,4 @@
-package cloud.benchflow
+package cloud.benchflow.benchmark
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)

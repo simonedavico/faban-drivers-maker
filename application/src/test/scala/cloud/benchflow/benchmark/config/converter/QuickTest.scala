@@ -1,4 +1,4 @@
-package cloud.benchflow.config.converter
+package cloud.benchflow.benchmark.config.converter
 
 import java.io.FileInputStream
 

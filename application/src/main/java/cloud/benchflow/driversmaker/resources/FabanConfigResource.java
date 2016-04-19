@@ -6,7 +6,7 @@ import com.google.inject.name.Named;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import cloud.benchflow.config.converter.BenchFlowBenchmarkConfigConverter;
+import cloud.benchflow.benchmark.config.converter.BenchFlowBenchmarkConfigConverter;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;

@@ -1,8 +1,8 @@
-package cloud.benchflow.config.docker.compose
+package cloud.benchflow.benchmark.config.docker.compose
 
-import cloud.benchflow.config._
+
 import net.jcazevedo.moultingyaml._
-import ServiceYamlProtocol._
+import cloud.benchflow.benchmark.config._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -10,6 +10,8 @@ import ServiceYamlProtocol._
   * Created on 05/02/16.
   */
 object DockerComposeYamlProtocol extends DefaultYamlProtocol {
+
+  import ServiceYamlProtocol._
 
   implicit object DockerComposeYamlFormat extends YamlFormat[DockerCompose] {
 

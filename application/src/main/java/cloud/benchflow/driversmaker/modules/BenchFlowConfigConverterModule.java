@@ -1,6 +1,6 @@
 package cloud.benchflow.driversmaker.modules;
 
-import cloud.benchflow.config.converter.BenchFlowBenchmarkConfigConverter;
+import cloud.benchflow.benchmark.config.converter.BenchFlowBenchmarkConfigConverter;
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
 import cloud.benchflow.driversmaker.configurations.FabanDefaults;
 import com.google.inject.AbstractModule;

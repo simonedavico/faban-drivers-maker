@@ -1,12 +1,13 @@
-package cloud.benchflow.config.converter
+package cloud.benchflow.benchmark.config.converter
 
 import java.io.InputStream
+
 import org.yaml.snakeyaml.Yaml
-import scala.xml.transform.{RuleTransformer, RewriteRule}
-import util.Properties
 
 import scala.collection.JavaConverters._
+import scala.util.Properties
 import scala.xml._
+import scala.xml.transform.{RewriteRule, RuleTransformer}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)

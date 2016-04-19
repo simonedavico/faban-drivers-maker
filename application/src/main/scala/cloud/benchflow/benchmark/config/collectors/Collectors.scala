@@ -1,4 +1,4 @@
-package cloud.benchflow.config.collectors
+package cloud.benchflow.benchmark.config.collectors
 
 import net.jcazevedo.moultingyaml._
 

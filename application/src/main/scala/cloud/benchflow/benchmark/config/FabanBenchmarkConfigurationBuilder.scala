@@ -1,8 +1,9 @@
-package cloud.benchflow.config
+package cloud.benchflow.benchmark.config
 
-import cloud.benchflow.config.benchflowbenchmark._
-import cloud.benchflow.config.collectors.CollectorAPI
-import cloud.benchflow.config.docker.compose.DockerCompose
+import cloud.benchflow.benchmark.config._
+import cloud.benchflow.benchmark.config.benchflowbenchmark._
+import cloud.benchflow.benchmark.config.collectors._
+import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv
@@ -71,8 +72,16 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
   private def convert(properties: Properties): Iterable[Elem] =
     properties.properties.map(convert)
 
-  private def convert(driver: Driver): Elem =
-    <driverConfig name={driver.name.substring(driver.name.lastIndexOf(".")+1)}>{ convert(driver.properties) }</driverConfig>
+  //TODO: fix drivers
+  private def convertDriver(driver: Driver[_ <: Operation]): Elem =
+    <driverConfig name={driver.getClass.getSimpleName}>
+      {
+        driver.properties match {
+          case None => scala.xml.Null
+          case Some(properties) => convert(properties)
+        } 
+      }
+    </driverConfig>
 
   private def retrieveCollectors(bfConfig: BenchFlowConfig) = {
 
@@ -140,13 +149,13 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
           <fh:jvmOptions>{fd.getJavaOpts}</fh:jvmOptions>
         </jvmConfig>
 
-        <fa:runConfig definition="cloud.benchflow.wfmsbenchmark.driver.WfMSBenchmarkDriver"
+        <fa:runConfig definition={s"cloud.benchflow.wfmsbenchmark.driver.${bb.drivers.head.getClass.getSimpleName}"}
                       xmlns:fa="http://faban.sunsource.net/ns/faban"
                       xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                       xmlns="http://faban.sunsource.net/ns/fabandriver">
            <fh:description>{ bb.description }</fh:description>
 
-           { convert(bb.properties).map(addFabanNamespace) ++ bb.drivers.map(convert).map(addFabanNamespace) }
+           { convert(bb.properties).map(addFabanNamespace) ++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
 
           <sutConfiguration>
             <privatePort>{ resolvePrivatePort.get }</privatePort>

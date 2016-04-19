@@ -1,7 +1,7 @@
-package cloud.benchflow.config
+package cloud.benchflow.benchmark.config
 
-import cloud.benchflow.config.benchflowbenchmark.BenchFlowBenchmark
-import cloud.benchflow.config.docker.compose.DockerCompose
+import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
+import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.{DriversMakerBenchFlowEnv, BenchFlowEnv}
