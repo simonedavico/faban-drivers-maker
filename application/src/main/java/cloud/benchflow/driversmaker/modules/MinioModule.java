@@ -30,9 +30,10 @@ public class MinioModule extends AbstractModule {
     public BenchFlowMinioClient provideMinio(DriversMakerConfiguration dc, @Named("bfEnv")DriversMakerBenchFlowEnv benv)
             throws InvalidPortException, InvalidEndpointException {
 
-        String minioIp = benv.<String>getVariable("BENCHFLOW_MINIO_IP");
-        String minioPort = benv.<String>getVariable("BENCHFLOW_MINIO_PORT");
-        String minioAddress = "http://" + minioIp + ":" + minioPort;
+//        String minioIp = benv.<String>getVariable("BENCHFLOW_MINIO_IP");
+//        String minioPort = benv.<String>getVariable("BENCHFLOW_MINIO_PORT");
+//        String minioAddress = "http://" + minioIp + ":" + minioPort;
+        String minioAddress = dc.getMinioConfiguration().getAddress();
         String accessKey = benv.<String>getVariable("BENCHFLOW_MINIO_ACCESS_KEY");
         String secretKey = benv.<String>getVariable("BENCHFLOW_MINIO_SECRET_KEY");
         return new BenchFlowMinioClient(minioAddress,accessKey,secretKey);

@@ -4,6 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+
+
     <parent>
         <groupId>cloud.benchflow</groupId>
         <artifactId>drivers-maker</artifactId>
@@ -25,23 +27,21 @@
         <commons-io.version>2.4</commons-io.version>
         <minio-java.version>1.0.1</minio-java.version>
         <ant.version>1.9.6</ant.version>
+        <spoon.core.version>5.1.0</spoon.core.version>
     </properties>
 
     <repositories>
+        <!--<repository>-->
+        <!--<id>localRepository</id>-->
+        <!--<url>file://${project.basedir}/lib</url>-->
+        <!--</repository>-->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
-    <!--<repositories>-->
-        <!--<repository>-->
-            <!--<id>localRepository</id>-->
-            <!--<url>file://${project.basedir}/lib</url>-->
-        <!--</repository>-->
-    <!--</repositories>-->
     <dependencies>
-
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-jersey</artifactId>
@@ -116,6 +116,23 @@
             <version>${simonedavico.moultingyaml.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>fr.inria.gforge.spoon</groupId>
+            <artifactId>spoon-core</artifactId>
+            <version>${spoon.core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cloud.benchflow</groupId>
+            <artifactId>faban-driver</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cloud.benchflow</groupId>
+            <artifactId>faban-agents</artifactId>
+            <version>0.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -139,6 +156,13 @@
                 <artifactId>scala-maven-plugin</artifactId>
                 <configuration>
                     <recompileMode>incremental</recompileMode>
+                    <!--
+                    required to avoid pulling multiple scala versions
+                    since the current version of combinators library
+                    pulls scala 2.11.6; see also
+                    http://www.daodecode.com/blog/2014/10/27/scala-maven-plugin-and-multiple-versions-of-scala-libraries-detected/
+                    -->
+                    <scalaCompatVersion>2.11</scalaCompatVersion>
                     <!--<compileOrder>ScalaThenJava</compileOrder>-->
                     <args>
                         <arg>-feature</arg>
@@ -169,12 +193,48 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>install-faban-agents</id>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <groupId>cloud.benchflow</groupId>
+                            <artifactId>faban-agents</artifactId>
+                            <version>0.1</version>
+                            <packaging>jar</packaging>
+                            <file>${project.basedir}/lib/fabanagents.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-faban-driver</id>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <groupId>cloud.benchflow</groupId>
+                            <artifactId>faban-driver</artifactId>
+                            <version>0.1</version>
+                            <packaging>jar</packaging>
+                            <file>${project.basedir}/lib/fabandriver.jar</file>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

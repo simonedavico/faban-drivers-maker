@@ -1,7 +1,6 @@
 package cloud.benchflow.driversmaker.modules;
 
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv;
 import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -26,9 +25,8 @@ public class BenchFlowEnvModule extends AbstractModule {
     public DriversMakerBenchFlowEnv providesBenchFlowEnv(DriversMakerConfiguration dmc) throws FileNotFoundException {
         String config = dmc.getBenchFlowEnvConfiguration().getConfigPath();
         String bfServices = dmc.getBenchFlowEnvConfiguration().getBenchFlowServicesPath();
-        String bfCompose = dmc.getBenchFlowEnvConfiguration().getBenchFlowComposeAddress();
-        String skeleton = dmc.getBenchFlowEnvConfiguration().getDriverSkeletonPath();
-        return new DriversMakerBenchFlowEnv(config, bfServices, bfCompose, skeleton);
+        String skeleton = dmc.getBenchFlowEnvConfiguration().getGenerationResourcesPath();
+        return new DriversMakerBenchFlowEnv(config, bfServices, skeleton);
     }
 
 }

@@ -1,8 +1,11 @@
-sut_name: camunda
-suts_type: WfMS
+sut:
+    name: camunda
+    version: v1
+    type: WfMS
 benchmark_name: WfMSBenchmark
 description: A WfMS benchmark
 trials: 2
+virtualUsers: 1000
 properties:
     timeSync: "false"
     hostConfig:
@@ -29,6 +32,10 @@ drivers:
         operations:
             - myModel:
                  data: ciaociao
+        configuration:
+            mix:
+                fixedSequence: [ myModel ]
+                deviation: 5
 sut-configuration:
     target-service:
         name: camunda

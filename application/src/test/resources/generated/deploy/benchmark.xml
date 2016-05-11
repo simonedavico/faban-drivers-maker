@@ -1,0 +1,12 @@
+<benchmark>
+  <name>MyBenchmark</name>
+  <version></version>
+  <config-form></config-form>
+  <config-stylesheet></config-stylesheet>
+  <config-file-name>run.xml</config-file-name>
+  <benchmark-class>cloud.benchflow.benchmark.harness.WfMSBenchmark</benchmark-class>
+  <result-file-path></result-file-path>
+  <metric></metric>
+  <scaleName></scaleName>
+  <scaleUnit></scaleUnit>
+</benchmark>

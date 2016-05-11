@@ -21,6 +21,10 @@ public class DriversMakerConfiguration extends Configuration {
     @NotNull
     private BenchFlowEnvConfiguration benchFlowEnvConfiguration = new BenchFlowEnvConfiguration();
 
+    @Valid
+    @NotNull
+    private MinioConfiguration minioConfiguration = new MinioConfiguration();
+
     @JsonProperty("fabanDefaults")
     public FabanDefaults getFabanDefaults() { return fabanDefaults; }
 
@@ -35,5 +39,15 @@ public class DriversMakerConfiguration extends Configuration {
     @JsonProperty("benchflowEnv")
     public void setBenchFlowEnvConfiguration(BenchFlowEnvConfiguration benchFlowEnvConfiguration) {
         this.benchFlowEnvConfiguration = benchFlowEnvConfiguration;
+    }
+
+    @JsonProperty("minio")
+    public MinioConfiguration getMinioConfiguration() {
+        return minioConfiguration;
+    }
+
+    @JsonProperty("minio")
+    public void setMinioConfiguration(MinioConfiguration minioConfiguration) {
+        this.minioConfiguration = minioConfiguration;
     }
 }

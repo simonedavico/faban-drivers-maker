@@ -31,7 +31,7 @@ object BuilderTest extends App {
 
   val benchFlowBenchmark =
     """sut_name: camunda
-      |suts_type: http
+      |suts_type: wfms
       |benchmark_name: fooBenchmark
       |description: configuration for testing
       |trials: 5
@@ -41,14 +41,12 @@ object BuilderTest extends App {
       |        four: five
       |    six: seven
       |drivers:
-      |    - driver1:
+      |    - start:
       |        properties:
       |            foo: bar
       |        operations:
-      |            - myOperation:
-      |                  method: get
+      |            - myModel1:
       |                  data: payload
-      |                  endpoint: /operation
       |sut-configuration:
       |    target-service:
       |        name: camunda
@@ -66,13 +64,13 @@ object BuilderTest extends App {
 
 
 //  println(benchFlowBenchmark.parseYaml.convertTo[BenchFlowBenchmark])
-  println(BenchFlowBenchmark.fromYaml(benchFlowBenchmark))
+  //println(BenchFlowBenchmark.fromYaml(benchFlowBenchmark))
 
   val httpOperation =
     """myOperation:
       |    method: get
       |    headers:
-      |        Accept: stocazzo
+      |        Accept: bla
       |    data: payload
     """.stripMargin
 
@@ -86,19 +84,86 @@ object BuilderTest extends App {
 
 //  println(wfmsOperation.parseYaml.convertTo[WfMSOperation])
 
+  val matrixDriverConfiguration =
+    """
+      |mix:
+      |    matrix:
+      |        - [ 1, 2, 3 ]
+      |        - [ 4, 5, 6 ]
+      |    deviation: 5
+      |max90th: 2
+    """.stripMargin
+
+  //println(matrixDriverConfiguration.parseYaml.convertTo[DriverConfiguration])
+
+  val flatDriverConfiguration =
+    """
+      |mix:
+      |    flat: [ 33, 33, 33 ]
+      |    deviation: 2
+    """.stripMargin
+
+  //println(flatDriverConfiguration.parseYaml.convertTo[DriverConfiguration])
+
+  val flatSequenceDriverConfiguration =
+    """
+      |mix:
+      |    flatSequence:
+      |        sequences:
+      |            - [ myOp1, myOp2 ]
+      |            - [ myOp2, myOp1 ]
+      |        flat: [ 50, 50 ]
+      |    deviation: 5
+    """.stripMargin
+
+//  println(flatSequenceDriverConfiguration.parseYaml.convertTo[DriverConfiguration])
+
+  val sequenceDriverConfiguration =
+    """
+      |mix:
+      |    fixedSequence: [ op1, op2, op3 ]
+    """.stripMargin
+
+//  println(sequenceDriverConfiguration.parseYaml.convertTo[DriverConfiguration])
+
   val httpDriver =
     """
-      |httpDriverName:
+      |http:
       |    operations:
       |        - myOperation:
       |              method: get
       |              headers:
-      |                  Accept: stocazzo
+      |                  Accept: foo
       |              data: payload
       |              endpoint: /operation
     """.stripMargin
 
 //  println(httpDriver.parseYaml.convertTo[HttpDriver])
+
+  val httpDriverWithConfiguration =
+    """
+      |http:
+      |    operations:
+      |        - op1:
+      |             method: get
+      |             headers:
+      |                 Accept: foo
+      |             data: payload
+      |             endpoint: /op1
+      |        - op2:
+      |             method: put
+      |             headers:
+      |                 Accept: bar
+      |             data: payload
+      |             endpoint: /op2
+      |    configuration:
+      |        mix:
+      |            fixedSequence: [ op2, op1 ]
+      |        max90th: 2
+    """.stripMargin
+
+//  println(httpDriverWithConfiguration.parseYaml.convertTo[HttpDriver])
+
 
   val httpDriverWithProperties =
     """
@@ -109,7 +174,7 @@ object BuilderTest extends App {
       |        - myOperation:
       |              method: get
       |              headers:
-      |                  Accept: stocazzo
+      |                  Accept: foo
       |              data: payload
       |              endpoint: /operation
     """.stripMargin
@@ -126,6 +191,14 @@ object BuilderTest extends App {
       |             data: payload
     """.stripMargin
 
+  val newSutDefinition =
+    """
+      |name: camunda
+      |version: myVersion
+    """.stripMargin
+
+  println(newSutDefinition.parseYaml.convertTo[Sut])
+
 //  println(wfmsDriver.parseYaml.convertTo[WfMSDriver])
 
   val trial = new Trial
@@ -135,8 +208,7 @@ object BuilderTest extends App {
   trial.setTotalTrials(3)
   val benchFlowEnv = new DriversMakerBenchFlowEnv("./application/src/test/resources/app/config.yml",
                                                   "./application/src/test/resources/app/benchflow-services",
-                                                  "benchFlowComposeAddress",
-                                                  "./application/src/test/resources/app/skeleton")
+                                                  "./application/src/test/resources/app/drivers/templates/skeleton/benchmark")
   val defaults = new FabanDefaults
   defaults.setJavaHome("testJavaHome")
   defaults.setJavaOpts("testJavaOpts")
@@ -144,6 +216,7 @@ object BuilderTest extends App {
   val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
   val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
   val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv, defaults)
+  println(builder.bb)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
 //  println(builder.buildDeploymentDescriptor(trial))
 //  println(builder.buildFabanBenchmarkConfiguration(trial))

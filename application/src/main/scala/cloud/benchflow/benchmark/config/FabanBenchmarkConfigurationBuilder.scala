@@ -73,7 +73,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
     properties.properties.map(convert)
 
   //TODO: fix drivers
-  private def convertDriver(driver: Driver[_ <: Operation]): Elem =
+  private def convertDriver(driver: Driver[_]): Elem =
     <driverConfig name={driver.getClass.getSimpleName}>
       {
         driver.properties match {
@@ -90,17 +90,6 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
       val src = fromFile(benv.getBenchFlowServicesPath + s"/$collectorName.collector.yml").mkString
       CollectorAPI.fromYaml(src)
     }
-
-//
-//    def convert(collector: Binding): Elem = {
-//      val api = getCollectorAPI(collector.boundService)
-//      <collector>
-//        {
-//          api.start.map(s => <start>{s}</start>).getOrElse(scala.xml.Null) ++
-//          <stop>{api.stop}</stop>
-//        }
-//      </collector>.copy(label = collector.boundService)
-//    }
 
     def convertCollector(collectorName: String): Elem = {
 
@@ -129,12 +118,11 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
     val collectors = bfConfig.benchflow_config.values.foldLeft(Set[Binding]())((v1,v2) => v1 union v2.toSet)
     val uniqueCollectorsNames = collectors.map(_.boundService)
 
-//    convertCollectors(collectors)
     convertCollectors(uniqueCollectorsNames)
   }
 
   def resolvePrivatePort = {
-    val targetServiceName = bb.`sut-configuration`.targetService.name
+    val targetServiceName = bb.sutConfiguration.targetService.name
     val targetService = dd.services.filter(_.name.equalsIgnoreCase(targetServiceName)).head
     targetService.getPrivatePort
   }
@@ -159,14 +147,14 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
 
           <sutConfiguration>
             <privatePort>{ resolvePrivatePort.get }</privatePort>
-            <serviceName>{bb.`sut-configuration`.targetService.name}</serviceName>
-            <endpoint>{bb.`sut-configuration`.targetService.endpoint}</endpoint>
+            <serviceName>{bb.sutConfiguration.targetService.name}</serviceName>
+            <endpoint>{bb.sutConfiguration.targetService.endpoint}</endpoint>
           </sutConfiguration>
 
           <benchFlowServices>
               <benchFlowCompose>{ benv.getBenchFlowComposeAddress }</benchFlowCompose>
               <collectors>
-                { retrieveCollectors(bb.`sut-configuration`.bfConfig) }
+                { retrieveCollectors(bb.sutConfiguration.bfConfig) }
               </collectors>
               <monitors>
                 <mysql>http://192.168.41.105:9303/status</mysql>

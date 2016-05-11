@@ -10,17 +10,14 @@ import java.io.FileNotFoundException;
 public class DriversMakerBenchFlowEnv extends BenchFlowEnv {
 
     private String benchFlowServicesPath;
-    private String benchFlowComposeAddress;
-    private String driverSkeletonPath;
+    private String generationResourcesPath;
 
     public DriversMakerBenchFlowEnv(String configPath,
                                     String benchFlowServicesPath,
-                                    String benchFlowComposeAddress,
-                                    String driverSkeletonPath) throws FileNotFoundException {
+                                    String generationResourcesPath) throws FileNotFoundException {
         super(configPath);
         this.benchFlowServicesPath = benchFlowServicesPath;
-        this.benchFlowComposeAddress = benchFlowComposeAddress;
-        this.driverSkeletonPath = driverSkeletonPath;
+        this.generationResourcesPath = generationResourcesPath;
     }
 
     public String getBenchFlowServicesPath() {
@@ -28,15 +25,17 @@ public class DriversMakerBenchFlowEnv extends BenchFlowEnv {
     }
 
     public String getBenchFlowComposeAddress() {
-        return benchFlowComposeAddress;
+        return this.<String>getVariable("BENCHFLOW_COMPOSE_ADDRESS");
+//        return benchFlowComposeAddress;
     }
 
-    public String getDriverSkeletonPath() {
-        return driverSkeletonPath;
+
+    public String getGenerationResourcesPath() {
+        return generationResourcesPath;
     }
 
-    public void setDriverSkeletonPath(String driverSkeletonPath) {
-        this.driverSkeletonPath = driverSkeletonPath;
+    public void setGenerationResourcesPath(String generationResourcesPath) {
+        this.generationResourcesPath = generationResourcesPath;
     }
 
 }
