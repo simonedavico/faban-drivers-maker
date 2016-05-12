@@ -137,7 +137,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
           <fh:jvmOptions>{fd.getJavaOpts}</fh:jvmOptions>
         </jvmConfig>
 
-        <fa:runConfig definition={s"cloud.benchflow.wfmsbenchmark.driver.${bb.drivers.head.getClass.getSimpleName}"}
+        <fa:runConfig definition={s"cloud.benchflow.benchmark.drivers.${bb.drivers.head.getClass.getSimpleName}"}
                       xmlns:fa="http://faban.sunsource.net/ns/faban"
                       xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                       xmlns="http://faban.sunsource.net/ns/fabandriver">

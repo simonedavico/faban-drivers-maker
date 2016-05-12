@@ -197,7 +197,7 @@ object BuilderTest extends App {
       |version: myVersion
     """.stripMargin
 
-  println(newSutDefinition.parseYaml.convertTo[Sut])
+ // println(newSutDefinition.parseYaml.convertTo[Sut])
 
 //  println(wfmsDriver.parseYaml.convertTo[WfMSDriver])
 
@@ -216,8 +216,8 @@ object BuilderTest extends App {
   val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
   val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
   val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv, defaults)
-  println(builder.bb)
+//  println(builder.bb)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
 //  println(builder.buildDeploymentDescriptor(trial))
-//  println(builder.buildFabanBenchmarkConfiguration(trial))
+  println(builder.buildFabanBenchmarkConfiguration(trial))
 }

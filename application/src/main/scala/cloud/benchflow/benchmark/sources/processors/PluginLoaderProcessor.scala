@@ -18,20 +18,21 @@ class PluginLoaderProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     val pluginType = getFactory.Type()
       .get(s"cloud.benchflow.plugins.${benchFlowBenchmark.sut.name}.${benchFlowBenchmark.sut.version}.WfMSPlugin")
 
-    val pluginField = getFactory.Code().createCtField("plugin", apiType.getReference, "null", ModifierKind.PRIVATE)
-    element.addFieldAtTop(pluginField)
-
     element.addNestedType(apiType)
     element.addNestedType(pluginType)
+
+    //I have to do this to fix the complete name of WfMSPlugin's superclass
+    val nestedPluginType: CtType[_] = element.getNestedType("WfMSPlugin")
+    val nestedApiType: CtType[_] = element.getNestedType("WfMSApi")
+
+    val pluginField = getFactory.Code().createCtField("plugin", nestedApiType.getReference, "null", ModifierKind.PRIVATE)
+    element.addFieldAtTop(pluginField)
 
     val validateMethodBody = element.getMethod("initialize").getBody
     validateMethodBody.addStatement(
       getFactory.Code().createCodeSnippetStatement("plugin = new WfMSPlugin(sutEndpoint)")
     )
 
-    //I have to do this to fix the complete name of WfMSPlugin's superclass
-    val nestedPluginType: CtType[_] = element.getNestedType("WfMSPlugin")
-    val nestedApiType: CtType[_] = element.getNestedType("WfMSApi")
     nestedPluginType.getSuperclass.replace(nestedApiType.getReference)
 
   }

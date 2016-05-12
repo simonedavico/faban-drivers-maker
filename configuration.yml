@@ -8,7 +8,7 @@ fabanDefaults:
   javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
 
 minio:
-  address: ${MINIO_ADDRESS}
+  address: ${env.MINIO_ADDRESS}
 
 server:
   type: default

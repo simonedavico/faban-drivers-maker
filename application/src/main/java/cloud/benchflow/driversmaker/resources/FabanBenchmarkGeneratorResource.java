@@ -72,13 +72,14 @@ public class FabanBenchmarkGeneratorResource {
         p.executeTarget("build");
     }
 
-//    private void changeBenchmarkName(final java.nio.file.Path driverPath, final String experimentId) throws IOException {
-//        java.nio.file.Path driverClassPath =
-//                driverPath.resolve("src/cloud/benchflow/wfmsbenchmark/driver/WfMSBenchmarkDriver.java");
-//        String src = FileUtils.readFileToString(driverClassPath.toFile(), Charsets.UTF_8);
-//        src = src.replaceFirst("WfMSBenchmark Workload", "[" + experimentId + "] WfMSBenchmark Workload");
-//        FileUtils.writeStringToFile(driverClassPath.toFile(), src, Charsets.UTF_8);
-//    }
+    @Deprecated
+    private void changeBenchmarkName(final java.nio.file.Path driverPath, final String experimentId) throws IOException {
+        java.nio.file.Path driverClassPath =
+                driverPath.resolve("src/cloud/benchflow/wfmsbenchmark/driver/WfMSBenchmarkDriver.java");
+        String src = FileUtils.readFileToString(driverClassPath.toFile(), Charsets.UTF_8);
+        src = src.replaceFirst("WfMSBenchmark Workload", "[" + experimentId + "] WfMSBenchmark Workload");
+        FileUtils.writeStringToFile(driverClassPath.toFile(), src, Charsets.UTF_8);
+    }
 
     private void cleanUp(Experiment experiment) {
         String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
@@ -105,8 +106,9 @@ public class FabanBenchmarkGeneratorResource {
 //        InputStream sources = minio.getBenchmarkSources(minioBenchmarkId);
 //        logger.debug("Retrieved driver sources from minio");
 
-        try(ManagedDirectory managedDriverPath =
-                    new ManagedDirectory("./tmp/" + benchmarkId + "/" + experiment.getExperimentId())) {
+        try(ManagedDirectory managedDriverPath = new ManagedDirectory(
+                "./tmp/" + benchmarkId + "/" + experiment.getExperimentId())
+            ) {
 
             Path driverPath = managedDriverPath.getPath();
 //            FileUtils.forceMkdir(driverPath.toFile());
@@ -130,7 +132,7 @@ public class FabanBenchmarkGeneratorResource {
                     new BenchFlowBenchmarkConfigurationBuilder(defaultBenchmarkConfiguration,
                             defaultDeploymentDescriptor, benv, fabanDefaults);
 
-            Path generatedBenchmarkOutputDir = driverPath.resolve("src");
+            Path generatedBenchmarkOutputDir = driverPath;//.resolve("src");
 
             BenchmarkSourcesGenerator.apply(
                     experiment.getExperimentId(),

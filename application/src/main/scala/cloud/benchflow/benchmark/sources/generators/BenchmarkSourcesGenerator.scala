@@ -207,7 +207,7 @@ abstract class BenchmarkSourcesGenerator(val benchFlowBenchmark: BenchFlowBenchm
       spoonLauncher.addTemplateResource(SpoonResourceHelper.createFile(resource.toFile))
     })
 
-    spoonLauncher.setSourceOutputDirectory(generatedBenchmarkOutputDir.toFile)
+    spoonLauncher.setSourceOutputDirectory(generatedBenchmarkOutputDir.resolve("src").toFile)
 
     benchmarkGenerationProcessors.foreach(processor =>
       spoonLauncher.addProcessor(processor)
@@ -252,7 +252,7 @@ class HttpBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
   override protected def generateDriversSources() = {
     val httpDriver = benchFlowBenchmark.drivers.find(_.isInstanceOf[HttpDriver]).get.asInstanceOf[HttpDriver]
     new HttpDriverGenerator(
-      generatedBenchmarkOutputDir,
+      generatedBenchmarkOutputDir.resolve("src"),
       generationResources,
       benchFlowBenchmark,
       experimentId,
@@ -290,7 +290,7 @@ class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
   override protected def generateDriversSources() = {
     val startDriver = benchFlowBenchmark.drivers.find(_.isInstanceOf[WfMSStartDriver]).get.asInstanceOf[WfMSStartDriver]
     new WfMSStartDriverGenerator(
-      generatedBenchmarkOutputDir,
+      generatedBenchmarkOutputDir.resolve("src"),
       generationResources,
       benchFlowBenchmark,
       experimentId,

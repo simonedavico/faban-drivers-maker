@@ -21,9 +21,9 @@
         <pathelement location="${faban.classes}"/>
     </path>
 
-    <taskdef name="deploy" classname="com.sun.faban.harness.util.DeployTask">
-        <classpath refid="taskclasspath" />
-    </taskdef>
+    <!--<taskdef name="deploy" classname="com.sun.faban.harness.util.DeployTask">-->
+        <!--<classpath refid="taskclasspath" />-->
+    <!--</taskdef>-->
     
     <target name="init">
         <mkdir dir="${classes.dir}"/>
