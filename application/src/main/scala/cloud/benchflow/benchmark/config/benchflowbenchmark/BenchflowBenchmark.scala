@@ -243,18 +243,18 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
 
     override def read(yaml: YamlValue): Sut = {
       val sutName = yaml.asYamlObject.fields.get(YamlString("name")) match {
-        case None => throw new Exception("No name specified in sut definition")
         case Some(YamlString(name)) => name
+        case _ => throw new Exception("No name specified in sut definition")
       }
 
       val version = yaml.asYamlObject.fields.get(YamlString("version")) match {
-        case None => throw new Exception("No version specified in sut definition")
         case Some(YamlString(v)) => Version(v)
+        case _ => throw new Exception("No version specified in sut definition")
       }
 
       val sutsType = yaml.asYamlObject.fields.get(YamlString("type")) match {
-        case None => throw new Exception("No type specified in sut definition")
         case Some(YamlString(t)) => SutsType(t)
+        case _ => throw new Exception("No type specified in sut definition")
       }
 
       Sut(sutName, version, sutsType)
@@ -396,7 +396,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
         YamlString("deviation")
       ).headOption match {
         case Some(YamlNumber(dev: Int)) => Some(dev)
-        case None => None
+        case _ => None
       }
 
       FlatSequenceMix(deviation = deviation, rows = sequences, opsMix = flat)
@@ -416,7 +416,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
         YamlString("deviation")
       ).headOption match {
         case Some(YamlNumber(dev: Int)) => Some(dev)
-        case None => None
+        case _ => None
       }
 
       MatrixMix(matrixRows, deviation)
@@ -432,7 +432,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
         YamlString("deviation")
       ).headOption match {
         case Some(YamlNumber(dev: Int)) => Some(dev)
-        case None => None
+        case _ => None
       }
 
       yaml.asYamlObject.getFields(
@@ -454,7 +454,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
         YamlString("deviation")
       ).headOption match {
         case Some(YamlNumber(dev: Int)) => Some(dev)
-        case None => None
+        case _ => None
       }
 
       yaml.asYamlObject.getFields(
