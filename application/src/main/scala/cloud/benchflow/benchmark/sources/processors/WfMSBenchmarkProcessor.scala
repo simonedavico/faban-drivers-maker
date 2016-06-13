@@ -1,6 +1,7 @@
 package cloud.benchflow.benchmark.sources.processors
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.harness.DefaultFabanBenchmark2
 import spoon.reflect.declaration.{CtType, ModifierKind, CtClass}
 import spoon.reflect.reference.CtTypeReference
@@ -10,8 +11,9 @@ import spoon.reflect.reference.CtTypeReference
   *
   * Created on 20/04/16.
   */
-class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowBenchmark, experimentId: String)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId) {
+class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowBenchmark,
+                             experimentId: String)(implicit env: DriversMakerEnv)
+  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
 
   override def isProcessable(element: CtClass[_]): Boolean = {
     super.isProcessable(element) &&

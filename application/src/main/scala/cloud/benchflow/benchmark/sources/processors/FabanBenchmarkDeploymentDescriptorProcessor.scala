@@ -3,6 +3,7 @@ package cloud.benchflow.benchmark.sources.processors
 import java.nio.file.Path
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.harness.DefaultFabanBenchmark2
 import org.apache.commons.io.{Charsets, FileUtils}
 import spoon.reflect.declaration.CtClass
@@ -17,8 +18,8 @@ import scala.xml.PrettyPrinter
   */
 class FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark: BenchFlowBenchmark,
                                                   experimentId: String,
-                                                  benchmarkOutputDir: Path)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId) {
+                                                  benchmarkOutputDir: Path)(implicit env: DriversMakerEnv)
+  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
 
   override def isProcessable(element: CtClass[_]): Boolean = {
     super.isProcessable(element) &&

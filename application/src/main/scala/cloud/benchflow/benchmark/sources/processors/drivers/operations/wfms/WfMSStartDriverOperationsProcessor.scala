@@ -2,6 +2,7 @@ package cloud.benchflow.benchmark.sources.processors.drivers.operations.wfms
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.{Operation, WfMSStartDriver, BenchFlowBenchmark}
 import cloud.benchflow.benchmark.sources.processors._
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.driver.{Timing, BenchmarkOperation}
 import spoon.reflect.code.{CtIf, CtFieldAccess, CtCodeSnippetExpression}
 import spoon.reflect.declaration.{ModifierKind, CtMethod, CtClass}
@@ -13,8 +14,10 @@ import spoon.reflect.reference.{CtFieldReference, CtTypeReference}
   * An implementation of [[WfMSDriverOperationsProcessor]] that generates
   * operations and related annotations for a wfms benchmark
   */
-class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark, driver: WfMSStartDriver, experimentId: String)
-  extends WfMSDriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)  {
+class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
+                                         driver: WfMSStartDriver,
+                                         experimentId: String)(implicit env: DriversMakerEnv)
+  extends WfMSDriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)(env)  {
 
   override def doProcess(e: CtClass[_]): Unit = {
 
@@ -46,7 +49,7 @@ class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
       val benchmarkOperationAnnotation = getFactory.Annotation().annotate(method, classOf[BenchmarkOperation])
       val benchmarkOperationName = getFactory.Code().createLiteral(op.name)
       benchmarkOperationAnnotation.addValue("name", benchmarkOperationName)
-      benchmarkOperationAnnotation.addValue("max90th", 20000)
+      benchmarkOperationAnnotation.addValue("max90th", driver.configuration.flatMap(_.max90th).getOrElse(WfMSStartDriverOperationsProcessor.DEFAULT_MAX90TH))
       val fieldRead: CtFieldAccess[Timing] = getFactory.Core().createFieldRead()
       val enumReference: CtTypeReference[Timing] = getFactory.Type().createReference(classOf[Timing])
       val fieldReference: CtFieldReference[Timing] = getFactory.Field()
@@ -61,5 +64,10 @@ class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
 
   }
 
+
+}
+object WfMSStartDriverOperationsProcessor {
+
+  val DEFAULT_MAX90TH = Double.MaxValue
 
 }

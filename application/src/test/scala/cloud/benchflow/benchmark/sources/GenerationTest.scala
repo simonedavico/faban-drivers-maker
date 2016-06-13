@@ -4,6 +4,7 @@ import java.nio.file.Paths
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.benchmark.sources.generators.BenchmarkSourcesGenerator
+import cloud.benchflow.driversmaker.utils.env.{DriversMakerEnv, BenchFlowEnv}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -21,7 +22,11 @@ object GenerationTest extends App {
       |description: A generated benchmark
       |benchmark_name: MyBenchmark
       |trials: 2
-      |virtualUsers: 50
+      |virtualUsers: 1000
+      |execution:
+      |    rampUp: 0
+      |    steadyState: 60
+      |    rampDown: 0
       |properties:
       |    timeSync: "false"
       |drivers:
@@ -43,11 +48,17 @@ object GenerationTest extends App {
 
   val parsedConfiguration = BenchFlowBenchmark.fromYaml(bb)
 
+  val configYml = new BenchFlowEnv("./application/src/test/resources/app/config.yml")
+  val benchFlowEnv = new DriversMakerEnv(configYml,
+    "./application/src/test/resources/app/benchflow-services",
+    "./application/src/test/resources/app/drivers/templates/skeleton/benchmark")
+
   BenchmarkSourcesGenerator(
     experimentId = "MyExperiment.1.1",
     benchFlowBenchmark = parsedConfiguration,
     generatedBenchmarkOutputDir = Paths.get("./application/src/test/resources/generated"),
-    generationResources = Paths.get("./application/src/test/resources/app/drivers")
+    env = benchFlowEnv
+    //generationResources = Paths.get("./application/src/test/resources/app/drivers")
   ).generate()
 
 }

@@ -6,7 +6,7 @@ import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmarkYam
 import cloud.benchflow.benchmark.config.BenchFlowBenchmarkConfigurationBuilder
 import cloud.benchflow.driversmaker.configurations.FabanDefaults
 import cloud.benchflow.driversmaker.requests.Trial
-import cloud.benchflow.driversmaker.utils.env.{DriversMakerBenchFlowEnv, BenchFlowEnv}
+import cloud.benchflow.driversmaker.utils.env.{DriversMakerEnv, BenchFlowEnv}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -206,18 +206,19 @@ object BuilderTest extends App {
   trial.setExperimentNumber(1)
   trial.setTrialNumber(1)
   trial.setTotalTrials(3)
-  val benchFlowEnv = new DriversMakerBenchFlowEnv("./application/src/test/resources/app/config.yml",
-                                                  "./application/src/test/resources/app/benchflow-services",
-                                                  "./application/src/test/resources/app/drivers/templates/skeleton/benchmark")
-  val defaults = new FabanDefaults
-  defaults.setJavaHome("testJavaHome")
-  defaults.setJavaOpts("testJavaOpts")
+  val configYml = new BenchFlowEnv("./application/src/test/resources/app/config.yml")
+  val benchFlowEnv = new DriversMakerEnv(configYml,
+                                         "./application/src/test/resources/app/benchflow-services",
+                                         "./application/src/test/resources/app/drivers/templates/skeleton/benchmark")
+//  val defaults = new FabanDefaults
+//  defaults.setJavaHome("testJavaHome")
+//  defaults.setJavaOpts("testJavaOpts")
 
   val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
   val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
-  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv, defaults)
+  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv)
 //  println(builder.bb)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
-//  println(builder.buildDeploymentDescriptor(trial))
-  println(builder.buildFabanBenchmarkConfiguration(trial))
+  println(builder.buildDeploymentDescriptor(trial))
+//  println(builder.buildFabanBenchmarkConfiguration(trial))
 }

@@ -4,8 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
-
     <parent>
         <groupId>cloud.benchflow</groupId>
         <artifactId>drivers-maker</artifactId>
@@ -133,6 +131,12 @@
             <artifactId>faban-agents</artifactId>
             <version>0.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -234,6 +238,20 @@
                             <version>0.1</version>
                             <packaging>jar</packaging>
                             <file>${project.basedir}/lib/fabandriver.jar</file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-apache-httpclient</id>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <groupId>org.apache</groupId>
+                            <artifactId>httpclient</artifactId>
+                            <version>3.1</version>
+                            <packaging>jar</packaging>
+                            <file>${project.basedir}/lib/commons-httpclient-3.1.jar</file>
                         </configuration>
                     </execution>
                 </executions>

@@ -17,6 +17,6 @@ public abstract class WfMSApi {
 
     public abstract Map<String, String> deploy(File model) throws IOException;
 
-    public abstract String startProcessDefinition(String processDefinitionId) throws IOException;
+    public abstract String startProcessDefinition(String processDefinitionId, String data) throws IOException;
 
 }

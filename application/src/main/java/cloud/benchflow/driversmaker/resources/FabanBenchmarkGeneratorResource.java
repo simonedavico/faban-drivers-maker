@@ -1,12 +1,10 @@
 package cloud.benchflow.driversmaker.resources;
 
-import cloud.benchflow.benchmark.config.BenchFlowBenchmarkConfigurationBuilder;
-import cloud.benchflow.benchmark.sources.generators.BenchmarkSourcesGenerator;
-import cloud.benchflow.driversmaker.configurations.FabanDefaults;
+import cloud.benchflow.benchmark.BenchmarkGenerator;
 import cloud.benchflow.driversmaker.exceptions.BenchmarkGenerationException;
 import cloud.benchflow.driversmaker.requests.Experiment;
 import cloud.benchflow.driversmaker.requests.Trial;
-import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv;
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv;
 import cloud.benchflow.driversmaker.utils.minio.BenchFlowMinioClient;
 
 import cloud.benchflow.driversmaker.utils.ManagedDirectory;
@@ -16,21 +14,16 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import org.zeroturnaround.zip.ZipUtil;
-
 import javax.ws.rs.POST;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -45,17 +38,14 @@ import java.util.List;
 @javax.ws.rs.Path("generatedriver")
 public class FabanBenchmarkGeneratorResource {
 
-    private DriversMakerBenchFlowEnv benv;
-    private FabanDefaults fabanDefaults;
+    private DriversMakerEnv benv;
     private BenchFlowMinioClient minio;
     private Logger logger;
 
     @Inject
-    public FabanBenchmarkGeneratorResource(@Named("bfEnv") DriversMakerBenchFlowEnv benv,
-                                           @Named("fabanDefaults") FabanDefaults defaults,
+    public FabanBenchmarkGeneratorResource(@Named("generationEnv") DriversMakerEnv benv,
                                            @Named("minio") BenchFlowMinioClient minio) {
         this.benv = benv;
-        this.fabanDefaults = defaults;
         this.minio = minio;
         this.logger = LoggerFactory.getLogger(this.getClass().getName());
     }
@@ -128,18 +118,28 @@ public class FabanBenchmarkGeneratorResource {
 
             Path descriptorsPath = driverPath.resolve("build/sut/");
 
-            BenchFlowBenchmarkConfigurationBuilder builder =
-                    new BenchFlowBenchmarkConfigurationBuilder(defaultBenchmarkConfiguration,
-                            defaultDeploymentDescriptor, benv, fabanDefaults);
+//            BenchFlowBenchmarkConfigurationBuilder builder =
+//                    new BenchFlowBenchmarkConfigurationBuilder(defaultBenchmarkConfiguration,
+//                            defaultDeploymentDescriptor, benv, fabanDefaults);
 
             Path generatedBenchmarkOutputDir = driverPath;//.resolve("src");
 
-            BenchmarkSourcesGenerator.apply(
-                    experiment.getExperimentId(),
-                    builder.bb(),
-                    generatedBenchmarkOutputDir,
-                    generationResources)
-            .generate();
+//            BenchmarkSourcesGenerator.apply(
+//                    experiment.getExperimentId(),
+//                    builder.bb(),
+//                    generatedBenchmarkOutputDir,
+//                    generationResources)
+//            .generate();
+
+            BenchmarkGenerator benchmarkGenerator =
+                    new BenchmarkGenerator(
+                            experiment.getExperimentId(),
+                            defaultBenchmarkConfiguration,
+                            defaultDeploymentDescriptor,
+                            generatedBenchmarkOutputDir,
+                            benv);
+
+            benchmarkGenerator.generateSources();
 
             logger.debug("Generated drivers sources");
 
@@ -149,8 +149,8 @@ public class FabanBenchmarkGeneratorResource {
             while(trials.hasNext()) {
 
                 Trial trial = trials.next();
-                String dd = builder.buildDeploymentDescriptor(trial);
-                String runXml = builder.buildFabanBenchmarkConfiguration(trial);
+                String dd = benchmarkGenerator.generateDeploymentDescriptorForTrial(trial);
+                String runXml = benchmarkGenerator.generateFabanConfigurationForTrial(trial);
 
                 logger.debug("Generated deployment descriptor and configuration for trial " + trial.getTrialId());
 

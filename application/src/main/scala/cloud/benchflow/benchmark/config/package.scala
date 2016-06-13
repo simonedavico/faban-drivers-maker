@@ -21,6 +21,8 @@ package object config {
   case class Expose(expose: Seq[Int])
   case class Network(net: String)
   case class ExtraHosts(extra_hosts: Seq[String])
+  //TODO: add cpuset
+  //TODO: add mem_limit
   case class Service(name: String,
                      image: Option[Image] = None,
                      containerName: Option[ContainerName] = None,

@@ -2,6 +2,7 @@ package cloud.benchflow.benchmark.sources.processors.drivers.annotations
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.benchmark.sources.processors.BenchmarkSourcesProcessor
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.driver.{NegativeExponential, CycleType, FixedTime}
 import spoon.reflect.code.CtFieldAccess
 import spoon.reflect.declaration.CtClass
@@ -13,8 +14,8 @@ import spoon.reflect.reference.{CtFieldReference, CtTypeReference}
   * Created on 01/05/16.
   */
 class TimeAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
-                              experimentId: String)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId) {
+                              experimentId: String)(implicit env: DriversMakerEnv)
+  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
 
   override def doProcess(e: CtClass[_]): Unit = {
 

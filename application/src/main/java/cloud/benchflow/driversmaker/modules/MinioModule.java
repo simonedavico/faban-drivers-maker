@@ -1,8 +1,7 @@
 package cloud.benchflow.driversmaker.modules;
 
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv;
-import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv;
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv;
 import cloud.benchflow.driversmaker.utils.minio.BenchFlowMinioClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -27,15 +26,13 @@ public class MinioModule extends AbstractModule {
     @Singleton
     @Named("minio")
     @Inject
-    public BenchFlowMinioClient provideMinio(DriversMakerConfiguration dc, @Named("bfEnv")DriversMakerBenchFlowEnv benv)
+    public BenchFlowMinioClient provideMinio(DriversMakerConfiguration dc,
+                                             @Named("generationEnv")DriversMakerEnv generationEnv)
             throws InvalidPortException, InvalidEndpointException {
 
-//        String minioIp = benv.<String>getVariable("BENCHFLOW_MINIO_IP");
-//        String minioPort = benv.<String>getVariable("BENCHFLOW_MINIO_PORT");
-//        String minioAddress = "http://" + minioIp + ":" + minioPort;
         String minioAddress = dc.getMinioConfiguration().getAddress();
-        String accessKey = benv.<String>getVariable("BENCHFLOW_MINIO_ACCESS_KEY");
-        String secretKey = benv.<String>getVariable("BENCHFLOW_MINIO_SECRET_KEY");
+        String accessKey = generationEnv.getConfigYml().<String>getVariable("BENCHFLOW_MINIO_ACCESS_KEY");
+        String secretKey = generationEnv.getConfigYml().<String>getVariable("BENCHFLOW_MINIO_SECRET_KEY");
         return new BenchFlowMinioClient(minioAddress,accessKey,secretKey);
     }
 }

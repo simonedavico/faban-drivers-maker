@@ -1,12 +1,12 @@
 package cloud.benchflow.benchmark.config
 
-import cloud.benchflow.benchmark.config._
+//import cloud.benchflow.benchmark.config._
 import cloud.benchflow.benchmark.config.benchflowbenchmark._
 import cloud.benchflow.benchmark.config.collectors._
 import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
-import cloud.benchflow.driversmaker.configurations.FabanDefaults
+import cloud.benchflow.benchmark.heuristics.GenerationDefaults
 import cloud.benchflow.driversmaker.requests.Trial
-import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 
 import scala.xml.{Text, Node, Elem}
 import scala.xml.transform.{RuleTransformer, RewriteRule}
@@ -16,8 +16,9 @@ import scala.xml.transform.{RuleTransformer, RewriteRule}
   *
   * Created on 23/02/16.
   */
-class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMakerBenchFlowEnv,
-                                         fd: FabanDefaults, dd: DockerCompose) {
+class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
+                                         benv: DriversMakerEnv,
+                                         dd: DockerCompose) {
 
   //Faban doesn't like when there are newlines in the content of the tags,
   //so we remove them
@@ -72,9 +73,21 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
   private def convert(properties: Properties): Iterable[Elem] =
     properties.properties.map(convert)
 
-  //TODO: fix drivers
   private def convertDriver(driver: Driver[_]): Elem =
     <driverConfig name={driver.getClass.getSimpleName}>
+      {
+        driver.properties match {
+          case None => scala.xml.Null
+          case Some(properties) => convert(properties)
+        }
+      }
+    </driverConfig>
+
+  private def convertDriver2(driver: Driver[_], agents: Set[(String, Int)]): Elem =
+    <driverConfig name={driver.getClass.getSimpleName}>
+      <fd:agents>
+        { agents.map { case (host, numOfAgents) => s"$host:$numOfAgents" }.mkString(" ") }
+      </fd:agents>
       {
         driver.properties match {
           case None => scala.xml.Null
@@ -123,32 +136,61 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark, benv: DriversMa
 
   def resolvePrivatePort = {
     val targetServiceName = bb.sutConfiguration.targetService.name
-    val targetService = dd.services.filter(_.name.equalsIgnoreCase(targetServiceName)).head
+    val targetService = dd.services.find(_.name.equalsIgnoreCase(targetServiceName)).get
+    //.filter(_.name.equalsIgnoreCase(targetServiceName)).head
     targetService.getPrivatePort
   }
 
+  private def getJavaOpts: String = {
+    val jvm = benv.getHeuristics.jvm
+    s"-Xmx${jvm.xmx(bb)}m -Xms${jvm.xms(bb)}m -XX:+DisableExplicitGC"
+  }
+
   def build(trial: Trial) = {
+
+    val scaleBalancer = benv.getHeuristics.scaleBalancer(bb)
+    val agents = benv.getHeuristics.allocationHeuristic.agents(bb)
+    val numOfUsedHosts = agents.values.reduce(_.union(_)).size
 
     removeNewlines(
       <xml>
 
         <jvmConfig xmlns:fh="http://faban.sunsource.net/ns/fabanharness">
-          <fh:javaHome>{fd.getJavaHome}</fh:javaHome>
-          <fh:jvmOptions>{fd.getJavaOpts}</fh:jvmOptions>
+          <fh:javaHome>/usr/lib/jvm/java7</fh:javaHome>
+          <fh:jvmOptions>{ getJavaOpts }</fh:jvmOptions>
         </jvmConfig>
 
         <fa:runConfig definition={s"cloud.benchflow.benchmark.drivers.${bb.drivers.head.getClass.getSimpleName}"}
                       xmlns:fa="http://faban.sunsource.net/ns/faban"
                       xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                       xmlns="http://faban.sunsource.net/ns/fabandriver">
-           <fh:description>{ bb.description }</fh:description>
+          <fh:description>{ bb.description }</fh:description>
+          <fa:scale>{ scaleBalancer.scale }</fa:scale>
+          <fh:timeSync>{ GenerationDefaults.timeSync }</fh:timeSync>
 
-           { convert(bb.properties).map(addFabanNamespace) ++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
+          {
+            convert(bb.properties).map(addFabanNamespace)
+            //++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
+          }
+
+          { agents.map { case (d, hosts) => convertDriver2(d, hosts) } }
+
+          <fa:runControl unit="time">
+            <fa:rampUp>{ bb.execution.rampUp }</fa:rampUp>
+            <fa:steadyState>{ bb.execution.steadyState }</fa:steadyState>
+            <fa:rampDown>{ bb.execution.rampDown }</fa:rampDown>
+          </fa:runControl>
+
+          <threadStart>
+            <delay>{ benv.getHeuristics.threadStart.delay(bb, numOfUsedHosts) }</delay>
+            <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(bb) }</simultaneous>
+            <parallel>{ benv.getHeuristics.threadStart.parallel(bb) }</parallel>
+          </threadStart>
 
           <sutConfiguration>
             <privatePort>{ resolvePrivatePort.get }</privatePort>
-            <serviceName>{bb.sutConfiguration.targetService.name}</serviceName>
-            <endpoint>{bb.sutConfiguration.targetService.endpoint}</endpoint>
+            <serviceName>{ bb.sutConfiguration.targetService.name }</serviceName>
+            <endpoint>{ bb.sutConfiguration.targetService.endpoint }</endpoint>
           </sutConfiguration>
 
           <benchFlowServices>

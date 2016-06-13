@@ -1,12 +1,14 @@
 package cloud.benchflow.benchmark.sources.generators
 
-import java.nio.file.Path
+import java.nio.file.{Paths, Path}
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark._
 import cloud.benchflow.benchmark.sources.processors._
+import cloud.benchflow.benchmark.sources.processors.drivers.ModelsLoaderProcessor
 import cloud.benchflow.benchmark.sources.processors.drivers.annotations.{BenchmarkDefinitionAnnotation, BenchmarkDriverAnnotationProcessor, MixAnnotationProcessor, TimeAnnotationProcessor}
 import cloud.benchflow.benchmark.sources.processors.drivers.operations.http.HttpDriverOperationsProcessor
 import cloud.benchflow.benchmark.sources.processors.drivers.operations.wfms.WfMSStartDriverOperationsProcessor
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 
 import spoon.Launcher
 import spoon.compiler.SpoonResourceHelper
@@ -75,15 +77,18 @@ abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val gen
                                                                          val generationResources: Path,
                                                                          val benchFlowBenchmark: BenchFlowBenchmark,
                                                                          val driver: Driver[_ <: Operation],
-                                                                         val experimentId: String)
+                                                                         val experimentId: String)(val env: DriversMakerEnv)
 {
   //JVM doesn't allow this, unfortunately
   //val driverOperationsProcessor = new A(benchFlowBenchmark)
   //so we do the same with a reflection workaround:
   private val driverOperationsProcessor =
     scala.reflect.classTag[A].runtimeClass
-                             .getConstructor(classOf[BenchFlowBenchmark], driver.getClass, classOf[String])
-                             .newInstance(benchFlowBenchmark, driver, experimentId)
+                             .getConstructor(classOf[BenchFlowBenchmark],
+                                             driver.getClass,
+                                             classOf[String],
+                                             classOf[DriversMakerEnv])
+                             .newInstance(benchFlowBenchmark, driver, experimentId, env)
                              .asInstanceOf[A]
 
   //each driver generator has to define what template resources has to be added to the spoon launcher
@@ -101,16 +106,15 @@ abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val gen
 
       //add processors applied to all drivers
       spoonLauncher.addProcessor(driverOperationsProcessor)
-      spoonLauncher.addProcessor(new TimeAnnotationProcessor(benchFlowBenchmark, experimentId))
-      spoonLauncher.addProcessor(new MixAnnotationProcessor(benchFlowBenchmark, driver, experimentId))
-      spoonLauncher.addProcessor(new BenchmarkDriverAnnotationProcessor(benchFlowBenchmark, driver, experimentId))
+      spoonLauncher.addProcessor(new TimeAnnotationProcessor(benchFlowBenchmark, experimentId)(env))
+      spoonLauncher.addProcessor(new MixAnnotationProcessor(benchFlowBenchmark, driver, experimentId)(env))
+      spoonLauncher.addProcessor(new BenchmarkDriverAnnotationProcessor(benchFlowBenchmark, driver, experimentId)(env))
 
       //apply driver specific processors
       additionalProcessors.foreach(additionalProcessor =>
         spoonLauncher.addProcessor(additionalProcessor)
       )
 
-      //spoonLauncher.setArgs(Seq("--level","OFF").toArray)
       spoonLauncher.addInputResource(driverClassTemplate.toString)
       spoonLauncher.run()
   }
@@ -120,29 +124,28 @@ class HttpDriverGenerator(generatedDriverClassOutputDir: Path,
                           generationResources: Path,
                           benchFlowBenchmark: BenchFlowBenchmark,
                           experimentId: String,
-                          driver: HttpDriver)
+                          driver: HttpDriver)(env: DriversMakerEnv)
   extends DriverGenerator[HttpDriverOperationsProcessor](generatedDriverClassOutputDir,
                                                          generationResources,
                                                          benchFlowBenchmark,
                                                          driver,
-                                                         experimentId) {
+                                                         experimentId)(env) {
 
   override def templateResources: Seq[Path] = Seq()
   override def additionalProcessors =
-    Seq(new BenchmarkDefinitionAnnotation(benchFlowBenchmark, experimentId))
+    Seq(new BenchmarkDefinitionAnnotation(benchFlowBenchmark, experimentId)(env))
 }
 
 abstract class WfMSDriverGenerator[A <: WfMSDriverOperationsProcessor: ClassTag](generatedDriverClassOutputDir: Path,
                                                                                  generationResources: Path,
                                                                                  benchFlowBenchmark: BenchFlowBenchmark,
                                                                                  experimentId: String,
-                                                                                 driver: WfMSDriver)
+                                                                                 driver: WfMSDriver)(env: DriversMakerEnv)
   extends DriverGenerator[A](generatedDriverClassOutputDir,
                              generationResources,
                              benchFlowBenchmark,
                              driver,
-                             experimentId) {
-
+                             experimentId)(env) {
 
   override def templateResources: Seq[Path] = {
     val pluginsPath = generationResources.resolve(s"plugins/${benchFlowBenchmark.sut.name}")
@@ -152,8 +155,8 @@ abstract class WfMSDriverGenerator[A <: WfMSDriverOperationsProcessor: ClassTag]
   }
 
   override def additionalProcessors: Seq[BenchmarkSourcesProcessor] =
-    Seq(new PluginLoaderProcessor(benchFlowBenchmark, experimentId))
-
+    Seq(new WfMSPluginLoaderProcessor(benchFlowBenchmark, experimentId)(env),
+        new ModelsLoaderProcessor(benchFlowBenchmark, experimentId)(env))
 }
 
 /**
@@ -169,14 +172,15 @@ class WfMSStartDriverGenerator(generatedDriverClassOutputDir: Path,
                                benchFlowBenchmark: BenchFlowBenchmark,
                                experimentId: String,
                                driver: WfMSStartDriver)
+                              (implicit env: DriversMakerEnv)
   extends WfMSDriverGenerator[WfMSStartDriverOperationsProcessor](generatedDriverClassOutputDir,
-                                                              generationResources,
-                                                              benchFlowBenchmark,
-                                                              experimentId,
-                                                              driver)
+                                                                  generationResources,
+                                                                  benchFlowBenchmark,
+                                                                  experimentId,
+                                                                  driver)(env)
 {
   override def additionalProcessors: Seq[BenchmarkSourcesProcessor] =
-    super.additionalProcessors :+ new BenchmarkDefinitionAnnotation(benchFlowBenchmark, experimentId)
+    super.additionalProcessors :+ new BenchmarkDefinitionAnnotation(benchFlowBenchmark, experimentId)(env)
 }
 
 
@@ -186,12 +190,14 @@ class WfMSStartDriverGenerator(generatedDriverClassOutputDir: Path,
   * @param benchFlowBenchmark configuration from which the benchmark will be generated
   * @param experimentId experiment id
   * @param generatedBenchmarkOutputDir directory where the benchmark will be saved
-  * @param generationResources location on file system of generation resources (libraries, plugins, templates)
+  * @param env env info (heuristics, resources location, config.yml)
   */
 abstract class BenchmarkSourcesGenerator(val benchFlowBenchmark: BenchFlowBenchmark,
                                          val experimentId: String,
                                          val generatedBenchmarkOutputDir: Path,
-                                         val generationResources: Path) {
+                                         implicit val env: DriversMakerEnv) {
+
+  val generationResources = Paths.get(env.getGenerationResourcesPath)
 
   protected def benchmarkTemplate: Path
   protected def generateDriversSources(): Unit
@@ -215,8 +221,12 @@ abstract class BenchmarkSourcesGenerator(val benchFlowBenchmark: BenchFlowBenchm
 
     //creates the file benchmark.xml
     spoonLauncher.addProcessor(
-      new FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark,experimentId,generatedBenchmarkOutputDir)
+      new FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark,experimentId,generatedBenchmarkOutputDir)(env)
     )
+
+//    val args = Seq("--source-classpath", classPath)
+//    spoonLauncher.setArgs(args.toArray)
+//    println(spoonLauncher.getEnvironment.getSourceClasspath)
 
     spoonLauncher.addInputResource(benchmarkTemplate.toAbsolutePath.toString)
     spoonLauncher.run()
@@ -231,10 +241,10 @@ object BenchmarkSourcesGenerator {
   def apply(experimentId: String,
             benchFlowBenchmark: BenchFlowBenchmark,
             generatedBenchmarkOutputDir: Path,
-            generationResources: Path) =
+            env: DriversMakerEnv) =
     benchFlowBenchmark.sut.sutsType match {
-      case Http => HttpBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, generationResources)
-      case WfMS => WfMSBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, generationResources)
+      case Http => HttpBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
+      case WfMS => WfMSBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
     }
 }
 
@@ -242,8 +252,8 @@ object BenchmarkSourcesGenerator {
 class HttpBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
                                     experimentId: String,
                                     generatedBenchmarkOutputDir: Path,
-                                    generationResources: Path)
-  extends BenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, generationResources) {
+                                    env: DriversMakerEnv)
+  extends BenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env) {
 
   val benchmarkTemplate = templatesPath.resolve("harness/http/HttpBenchmark.java")
   override protected def benchmarkGenerationResources: Seq[Path] = Seq()
@@ -256,23 +266,23 @@ class HttpBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
       generationResources,
       benchFlowBenchmark,
       experimentId,
-      httpDriver).generate()
+      httpDriver)(env).generate()
   }
 }
 object HttpBenchmarkSourcesGenerator {
   def apply(benchFlowBenchmark: BenchFlowBenchmark,
             experimentId: String,
             generatedBenchmarkOutputDir: Path,
-            generationResources: Path) =
-    new HttpBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, generationResources)
+            env: DriversMakerEnv) =
+    new HttpBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
 }
 
 
 class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
                                     experimentId: String,
                                     generatedBenchmarkOutputDir: Path,
-                                    generationResources: Path)
-  extends BenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, generationResources) {
+                                    env: DriversMakerEnv)
+  extends BenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env) {
 
   val benchmarkTemplate: Path = templatesPath.resolve("harness/wfms/WfMSBenchmark.java")
 
@@ -284,7 +294,7 @@ class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
   }
 
   override protected def benchmarkGenerationProcessors: Seq[BenchmarkSourcesProcessor] =
-    Seq(new PluginLoaderProcessor(benchFlowBenchmark, experimentId))
+    Seq(new WfMSPluginLoaderProcessor(benchFlowBenchmark, experimentId)(env))
 
   //for each driver type, create a driver generator and run it
   override protected def generateDriversSources() = {
@@ -294,7 +304,7 @@ class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
       generationResources,
       benchFlowBenchmark,
       experimentId,
-      startDriver).generate()
+      startDriver)(env).generate()
   }
 
 }
@@ -302,14 +312,6 @@ object WfMSBenchmarkSourcesGenerator {
   def apply(benchFlowBenchmark: BenchFlowBenchmark,
             experimentId: String,
             generatedBenchmarkOutputDir: Path,
-            generationResources: Path) =
-    new WfMSBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, generationResources)
+            env: DriversMakerEnv) =
+    new WfMSBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
 }
-
-
-
-
-
-
-
-

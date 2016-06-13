@@ -27,7 +27,7 @@ public class ManagedDirectory implements AutoCloseable {
     @Override
     public void close() throws IOException {
         if(path.toFile().exists()) {
-            FileUtils.deleteDirectory(path.toFile());
+            //FileUtils.deleteDirectory(path.toFile());
         }
     }
 }

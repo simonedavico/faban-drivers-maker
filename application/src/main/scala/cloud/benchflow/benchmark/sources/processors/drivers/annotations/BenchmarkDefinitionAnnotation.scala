@@ -2,6 +2,7 @@ package cloud.benchflow.benchmark.sources.processors.drivers.annotations
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.benchmark.sources.processors.BenchmarkSourcesProcessor
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.driver.BenchmarkDefinition
 import spoon.reflect.declaration.CtClass
 
@@ -11,8 +12,8 @@ import spoon.reflect.declaration.CtClass
   * Created on 05/05/16.
   */
 class BenchmarkDefinitionAnnotation(benchFlowBenchmark: BenchFlowBenchmark,
-                                    experimentId: String)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId) {
+                                    experimentId: String)(implicit env: DriversMakerEnv)
+  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
 
   override def doProcess(e: CtClass[_]): Unit = {
 

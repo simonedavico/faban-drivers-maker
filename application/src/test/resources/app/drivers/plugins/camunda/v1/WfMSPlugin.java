@@ -24,12 +24,20 @@ import java.io.IOException;
 
 private class WfMSPlugin extends WfMSApi {
 
+    //THIS DOESN'T GO HERE
+//    private Map<String,String> modelsStartID;
+    private Map<String, String> JSONHeaders;
     protected String processDefinitionAPI;
-    private static String MY_SQL_MONITOR_QUERY = "...";
+    private JsonParser parser;
+
 
     public WfMSPlugin(String sutEndpoint) {
         super(sutEndpoint, "/deployment/create");
         this.processDefinitionAPI = sutEndpoint + "/process-definition";
+        this.parser = new JsonParser();
+        //this.modelsStartID = new HashMap<String, String>();
+        this.JSONHeaders = new TreeMap<String, String>();
+        JSONHeaders.put("Content-Type","application/json");
     }
 
     @Override
@@ -58,5 +66,11 @@ private class WfMSPlugin extends WfMSApi {
         result.put(model.getName(), processDefinitionId);
         return result;
 
+    }
+
+    public String startProcessDefinition(String processDefinitionId, String data) throws IOException {
+        String startURL = SUTEndpoint + "/process-definition/" + modelsStartID.get(modelName) + "/start";
+        StringBuilder responseStart = http.fetchURL(startURL, "{}", JSONHeaders);
+        return responseStart.toString();
     }
 }

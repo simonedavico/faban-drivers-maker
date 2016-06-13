@@ -3,9 +3,9 @@ benchflowEnv:
   benchflowServices: /app/benchflow-services
   generationResources: /app/drivers
 
-fabanDefaults:
-  javaHome: /usr/lib/jvm/java7
-  javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
+#fabanDefaults:
+#  javaHome: /usr/lib/jvm/java7
+#  javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
 
 minio:
   address: ${env.MINIO_ADDRESS}

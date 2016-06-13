@@ -29,9 +29,9 @@ object YamlTest extends App {
   import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmarkYamlProtocol._
   import cloud.benchflow.benchmark.config.collectors.CollectorYamlProtocol._
 
-  println("""suts_name: [a, b, c]""".stripMargin.parseYaml.convertTo[SutsName])
-  println("""sut_name: a""".stripMargin.parseYaml.convertTo[SutsName])
-  println("""suts_type: WfMS""".stripMargin.parseYaml.convertTo[SutsType])
+//  println("""suts_name: [a, b, c]""".stripMargin.parseYaml.convertTo[SutsName])
+//  println("""sut_name: a""".stripMargin.parseYaml.convertTo[SutsName])
+//  println("""suts_type: WfMS""".stripMargin.parseYaml.convertTo[SutsType])
 
   println(
     """properties:

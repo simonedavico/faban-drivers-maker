@@ -1,6 +1,7 @@
 package cloud.benchflow.benchmark.sources
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.{WfMSDriver, Operation, Driver, BenchFlowBenchmark}
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import spoon.processing.AbstractProcessor
 import spoon.reflect.declaration.{CtPackage, CtClass}
 
@@ -13,11 +14,21 @@ package object processors {
 
   /** base class for every processor */
   abstract class BenchmarkSourcesProcessor(val benchflowBenchmark: BenchFlowBenchmark,
-                                           val experimentId: String)
+                                           val experimentId: String)(implicit env: DriversMakerEnv)
     extends AbstractProcessor[CtClass[_]] {
 
+    /***
+      * Default implementation prevents processing of:
+      * - anonymous classes
+      * - inner classes
+      * - libraries and plugins
+      */
     protected def isProcessable(element: CtClass[_]): Boolean = {
-      element.getParent() match {
+      (element match {
+        case elemClass: CtClass[_] => !element.isAnonymous
+        case _ => true
+      }) &&
+      (element.getParent() match {
         //if it's part of benchflow libraries or plugins, don't process it
         case elemPackage: CtPackage =>
              !(elemPackage.getQualifiedName.contains("libraries") ||
@@ -25,7 +36,7 @@ package object processors {
         //if it's an inner class, don't process it
         case elemClass: CtClass[_] => false
         case _ => true
-      }
+      })
     }
 
     protected def doProcess(element: CtClass[_]): Unit
@@ -40,19 +51,19 @@ package object processors {
   /** a processor specific for a driver */
   abstract class DriverProcessor(benchFlowBenchmark: BenchFlowBenchmark,
                                  driver: Driver[_ <: Operation],
-                                 experimentId: String)
-    extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)
+                                 experimentId: String)(implicit env: DriversMakerEnv)
+    extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env)
 
   /** base class for a processor that generates operations for a driver */
   abstract class DriverOperationsProcessor(benchflowBenchmark: BenchFlowBenchmark,
                                            driver: Driver[_ <: Operation],
-                                           experimentId: String)
-    extends DriverProcessor(benchflowBenchmark, driver, experimentId)
+                                           experimentId: String)(implicit env: DriversMakerEnv)
+    extends DriverProcessor(benchflowBenchmark, driver, experimentId)(env)
 
   /** base class for a processor that generates operations for a wfms driver */
   abstract class WfMSDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
                                                driver: WfMSDriver,
-                                               experimentId: String)
-    extends DriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)
+                                               experimentId: String)(implicit env: DriversMakerEnv)
+    extends DriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)(env)
 
 }

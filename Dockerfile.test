@@ -16,6 +16,7 @@ COPY configuration.yml /app/
 COPY ./target/benchflow-drivers-maker.jar /app/
 
 # Get benchflow-drivers-maker dependencies
+#TODO: remove parts of this section since testing resources are already present
 RUN apk --update add wget tar && \
 	wget -q --no-check-certificate -O /tmp/faban.tar.gz https://github.com/benchflow/faban/releases/download/${RELEASE_VERSION}/faban-kit-${FABAN_VERSION}.tar.gz && \
 	mkdir -p ${FABAN_ROOT}/ && \

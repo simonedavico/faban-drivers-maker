@@ -1,7 +1,9 @@
 package cloud.benchflow.benchmark.sources.processors.drivers.annotations
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark._
-import cloud.benchflow.benchmark.sources.processors.{DriverProcessor, BenchmarkSourcesProcessor}
+import cloud.benchflow.benchmark.heuristics.GenerationDefaults
+import cloud.benchflow.benchmark.sources.processors.DriverProcessor
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.driver.{OperationSequence, Row}
 import spoon.reflect.code.CtNewArray
 import spoon.reflect.declaration.{CtAnnotation, CtClass}
@@ -13,8 +15,8 @@ import spoon.reflect.declaration.{CtAnnotation, CtClass}
   */
 class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
                              driver: Driver[_ <: Operation],
-                             experimentId: String)
-  extends DriverProcessor(benchFlowBenchmark, driver, experimentId){
+                             experimentId: String)(implicit env: DriversMakerEnv)
+  extends DriverProcessor(benchFlowBenchmark, driver, experimentId)(env){
 
 
   private def createMatrixMix(e: CtClass[_], mix: MatrixMix): Unit = {
@@ -41,7 +43,7 @@ class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     matrixMixAnnotation.addValue(
       "deviation",
       java.lang.Double.valueOf(
-        mix.deviation.getOrElse(MixAnnotationProcessor.DEFAULT_DEVIATION)
+        mix.deviation.getOrElse(GenerationDefaults.deviation)
       )
     )
   }
@@ -57,7 +59,7 @@ class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     fixedSequenceMixAnnotation.addValue(
       "deviation",
       java.lang.Double.valueOf(
-        mix.deviation.getOrElse(MixAnnotationProcessor.DEFAULT_DEVIATION)
+        mix.deviation.getOrElse(GenerationDefaults.deviation)
       )
     )
 
@@ -76,7 +78,7 @@ class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     flatMixAnnotation.addValue(
       "deviation",
       java.lang.Double.valueOf(
-        mix.deviation.getOrElse(MixAnnotationProcessor.DEFAULT_DEVIATION)
+        mix.deviation.getOrElse(GenerationDefaults.deviation)
       )
     )
 
@@ -96,7 +98,7 @@ class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     flatSequenceMixAnnotation.addValue(
       "deviation",
       java.lang.Double.valueOf(
-        mix.deviation.getOrElse(MixAnnotationProcessor.DEFAULT_DEVIATION)
+        mix.deviation.getOrElse(GenerationDefaults.deviation)
       )
     )
 
@@ -120,8 +122,8 @@ class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     //if there is configuration, I use it
     //otherwise I don't add the annotation since FlatMix should already be the default for Faban
     //see http://faban.org/1.3/docs/api/com/sun/faban/driver/FlatMix.html
-    driver.configuration.map((maybeConfiguration: DriverConfiguration) => {
-      maybeConfiguration.mix.map((mix: Mix) => mix match {
+    driver.configuration.foreach((maybeConfiguration: DriverConfiguration) => {
+      maybeConfiguration.mix.foreach((mix: Mix) => mix match {
         case matrix: MatrixMix => createMatrixMix(e, matrix)
         case fixedSequence: FixedSequenceMix => createFixedSequenceMix(e, fixedSequence)
         case flat: FlatMix => createFlatMix(e, flat)
@@ -131,7 +133,4 @@ class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowBenchmark,
 
   }
 
-}
-object MixAnnotationProcessor {
-  val DEFAULT_DEVIATION = 5
 }

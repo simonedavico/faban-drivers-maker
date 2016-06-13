@@ -1,15 +1,18 @@
 package cloud.benchflow.benchmark.sources.processors
 
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import spoon.reflect.declaration.{CtClass, CtType, ModifierKind}
+import spoon.support.reflect.declaration.CtClassImpl
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
   * Created on 11/05/16.
   */
-class PluginLoaderProcessor(benchFlowBenchmark: BenchFlowBenchmark,
-                            experimentId: String) extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId) {
+class WfMSPluginLoaderProcessor(benchFlowBenchmark: BenchFlowBenchmark,
+                                experimentId: String)(implicit env: DriversMakerEnv)
+  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
 
 
   override protected def doProcess(element: CtClass[_]): Unit = {

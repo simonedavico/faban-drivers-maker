@@ -1,17 +1,18 @@
 package cloud.benchflow.benchmark.config
 
-import cloud.benchflow.benchmark.config._
+//import cloud.benchflow.benchmark.config._
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.requests.Trial
-import cloud.benchflow.driversmaker.utils.env.DriversMakerBenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
   * Created on 16/02/16.
   */
-class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversMakerBenchFlowEnv) {
+class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
+                                  val benv: DriversMakerEnv) {
 
   type DCTransformer = DockerCompose => DockerCompose
   type ServiceTransformer = Service => Service
@@ -23,8 +24,8 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
   }
 
   case class BenchFlowEnvVariable(override val name: String) extends BenchFlowVariable(name) {
-    type Source = DriversMakerBenchFlowEnv
-    override def resolve(implicit source: Source): String = source.getVariable[String](s"BENCHFLOW_$name")
+    type Source = DriversMakerEnv
+    override def resolve(implicit source: Source): String = source.getConfigYml.getVariable[String](s"BENCHFLOW_$name")
   }
   object BenchFlowEnvVariable {
     val prefix = "(BENCHFLOW_ENV_)(.*)".r
@@ -67,17 +68,23 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
   /***
     * Returns the local ip for a given alias
     */
-  private def getLocalIp(alias: String) = benv.getVariable[String](s"BENCHFLOW_SERVER_${alias.toUpperCase}_PRIVATEIP")
+  private def getLocalIp(alias: String) =
+    benv.getConfigYml.getVariable[String](s"BENCHFLOW_SERVER_${alias.toUpperCase}_PRIVATEIP")
 
-  private def getPublicIp(alias: String) = benv.getVariable[String](s"BENCHFLOW_SERVER_${alias.toUpperCase}_PUBLICIP")
+  private def getPublicIp(alias: String) =
+    benv.getConfigYml.getVariable[String](s"BENCHFLOW_SERVER_${alias.toUpperCase}_PUBLICIP")
 
   /***
     * Adds fields needed by BenchFlow to a service
     */
   private def generateBenchFlowFieldsForService: ServiceTransformer = service => {
     bb.getAliasForService(service.name) match {
-      case Some(alias) => service.copy(environment = Some(service.environment.get :+ s"constraint:node==$alias"),
-        ports = Some(Ports(Seq(getLocalIp(alias) + ":" + service.ports.get.ports.head))))
+      case Some(alias) =>
+        service.copy(
+//          environment = Some(service.environment.get :+ s"constraint:node==$alias"),
+          environment = service.environment.map(_ :+ s"constraint:node==$alias"),
+          ports = Some(Ports(Seq(getLocalIp(alias) + ":" + service.ports.get.ports.head)))
+        )
       case None =>  throw new Exception(s"Server alias not found for service ${service.name}")
     }
   }
@@ -112,9 +119,13 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
   private def generateFieldsForBenchFlowService: BenchFlowServiceTransformer =
       boundservice => bfservice => {
         val alias = bb.getAliasForService(boundservice.name).get
+        val name = s"${bfservice.name}_collector_${boundservice.name}"
         bfservice.copy(
-           name = s"${bfservice.name}_collector_${boundservice.name}",
-           environment = Some(bfservice.environment.get :+ s"constraint:node==$alias"),
+           name = name,
+           environment = Some(bfservice.environment.get :+
+                              s"constraint:node==$alias" :+
+                              s"BENCHFLOW_COLLECTOR_NAME=$name" :+
+                              s"ENVCONSUL_CONSUL=${benv.getEnvConsulAddress}"),
            ports = Some(Ports(Seq(getLocalIp(alias) + ":" + bfservice.ports.get.ports.head))))
       }
 
@@ -193,9 +204,26 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark, val benv: DriversM
     val total = s"BENCHFLOW_TRIAL_TOTAL=${trial.getTotalTrials}"
     val cName = service.name + "_" + trial.getTrialId
 
-    service.copy(containerName = Some(ContainerName(cName)),
-                 environment = Some(service.environment.get :+ expId :+ trialId :+ total :+
-                                                            s"CONTAINER_NAME=$cName"))
+    service.copy(
+      containerName = Some(ContainerName(cName)),
+      environment = service.environment.map(env =>
+        env :+
+        expId :+
+        trialId :+
+        total :+
+        s"CONTAINER_NAME=$cName" :+
+        s"SUT_NAME=${bb.sut.name}" :+
+        s"SUT_VERSION=${bb.sut.version}"
+      )
+    )
+//                 environment = Some(service.environment.get :+
+//                                                        expId :+
+//                                                        trialId :+
+//                                                        total :+
+//                                                        s"CONTAINER_NAME=$cName" :+
+//                                                        s"SUT_NAME=${bb.sut.name}" :+
+//                                                        s"SUT_VERSION=${bb.sut.version}"
+//                 ))
   }
 
   /***
