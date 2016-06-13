@@ -13,16 +13,17 @@ import scala.reflect.ClassTag
 package object scale {
 
   trait ScaleBalancer {
-    def bb: BenchFlowBenchmark
-    def configuration: Map[String, Any]
+    protected val configuration: Map[String, Any]
+
+    def users: Int
     def scale: Int
     def scale(driver: Driver[_]): Int
     def threadPerScale(driver: Driver[_]): Float
   }
 
-  class BaseScaleBalancer(val configuration: Map[String, Any])(val bb: BenchFlowBenchmark) extends ScaleBalancer {
+  class BaseScaleBalancer(val configuration: Map[String, Any])(private val bb: BenchFlowBenchmark) extends ScaleBalancer {
 
-    protected val users = bb.virtualUsers.virtualUsers
+    val users = bb.virtualUsers.virtualUsers
 
     private def popularity(driver: Driver[_]): Float =
       driver.configuration.flatMap(_.popularity).getOrElse(1.toFloat/bb.drivers.size)
@@ -46,15 +47,15 @@ package object scale {
 
     private def scalingFactor = super.scale/threshold
 
-    abstract override def scale: Int = super.scale/scalingFactor
+    abstract override def scale = super.scale/scalingFactor
 
-    abstract override def threadPerScale(driver: Driver[_]): Float = super.threadPerScale(driver) * scalingFactor
+    abstract override def threadPerScale(driver: Driver[_]) = super.threadPerScale(driver) * scalingFactor
 
   }
 
   trait FixedScaleBalancer extends ScaleBalancer {
 
-    abstract override def scale = bb.virtualUsers.virtualUsers
+    abstract override def scale = users
 
     abstract override def threadPerScale(driver: Driver[_]) = {
       configuration.get("threadPerScale").get.asInstanceOf[Float]
@@ -71,21 +72,6 @@ package object scale {
         case _ => throw new Exception("Unknown strategy for ScaleBalancer. Implement the strategy into " +
                                       "the ScaleBalancer factory.")
       }
-    }
-
-  }
-
-  abstract class ScaleHeuristic[A <: HeuristicConfiguration : ClassTag](mapConfig: Map[String, Any])(env: BenchFlowEnv)
-      extends Heuristic[A](mapConfig)(env) {
-
-    def scale(bb: BenchFlowBenchmark): Double
-    def threadsPerScale(bb: BenchFlowBenchmark): Float
-
-  }
-  object ScaleHeuristic {
-
-    def apply(strategy: String, configuration: Map[String, Any])(implicit env: BenchFlowEnv) = strategy match {
-      case "simple" => new SimpleScaleHeuristic(configuration)
     }
 
   }

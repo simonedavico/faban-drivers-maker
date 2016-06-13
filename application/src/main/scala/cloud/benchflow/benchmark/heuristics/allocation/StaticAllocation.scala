@@ -32,7 +32,6 @@ class StaticAllocationHeuristic(mapConfig: Map[String, Any])(implicit env: Bench
 
     def allocate(driver: Driver[_]): Set[(HostAddress, Int)] = {
 
-      //def scale(driver: Driver[_]) = config.scaleBalancer(bb).scale * config.scaleBalancer(bb).threadPerScale(driver)
       def scale(driver: Driver[_]) = config.scaleBalancer(bb).scale(driver)
 
       def distribute(numOfAgents: Int, hosts: List[Host]) = {
@@ -56,13 +55,13 @@ class StaticAllocationHeuristic(mapConfig: Map[String, Any])(implicit env: Bench
         hostsWithAgents.toSet
       }
 
-      val numOfAgents = (scale(driver)/config.agentAllocationThreshold).toInt
+      val numOfAgents = scale(driver) / config.agentAllocationThreshold
 
       val hosts = numOfAgents < agentHosts.size + 1 match {
         //allocate one agent to each host
         case true => agentHosts.take(numOfAgents).map { case (addr, w) => (addr, 1) }.toSet
         //distribute agents according to host weight
-        case false => distribute(numOfAgents, (masterHost :: agentHosts).reverse)
+        case false => distribute(numOfAgents, masterHost :: agentHosts)
       }
 
       hosts

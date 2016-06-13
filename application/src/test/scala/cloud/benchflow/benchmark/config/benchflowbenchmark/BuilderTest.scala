@@ -219,6 +219,6 @@ object BuilderTest extends App {
   val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv)
 //  println(builder.bb)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
-  println(builder.buildDeploymentDescriptor(trial))
-//  println(builder.buildFabanBenchmarkConfiguration(trial))
+//  println(builder.buildDeploymentDescriptor(trial))
+  println(builder.buildFabanBenchmarkConfiguration(trial))
 }
