@@ -21,7 +21,8 @@ package object scale {
     def threadPerScale(driver: Driver[_]): Float
   }
 
-  class BaseScaleBalancer(val configuration: Map[String, Any])(private val bb: BenchFlowBenchmark) extends ScaleBalancer {
+  class BaseScaleBalancer(protected val configuration: Map[String, Any])
+                         (private val bb: BenchFlowBenchmark) extends ScaleBalancer {
 
     val users = bb.virtualUsers.virtualUsers
 

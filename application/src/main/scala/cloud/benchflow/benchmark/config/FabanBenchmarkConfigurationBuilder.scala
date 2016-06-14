@@ -52,7 +52,8 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
     elem match {
       case elem: Elem =>
         val ns = propertyToNamespace.getOrElse(elem.label, "")
-        <xml>{elem.child.map(addFabanNamespace)}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label, attributes = elem.attributes)
+        <xml>{elem.child.map(addFabanNamespace)}</xml>.copy(label = ns + (if (ns != "") ":" else "") + elem.label,
+                                                            attributes = elem.attributes)
       case _ => elem
     }
   }
