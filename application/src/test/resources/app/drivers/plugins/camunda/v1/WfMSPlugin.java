@@ -2,6 +2,7 @@ package cloud.benchflow.plugins.camunda.v1;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -33,10 +34,10 @@ private class WfMSPlugin extends WfMSApi {
 
     public WfMSPlugin(String sutEndpoint) {
         super(sutEndpoint, "/deployment/create");
-        this.processDefinitionAPI = sutEndpoint + "/process-definition";
-        this.parser = new JsonParser();
+        processDefinitionAPI = sutEndpoint + "/process-definition";
+        parser = new JsonParser();
         //this.modelsStartID = new HashMap<String, String>();
-        this.JSONHeaders = new TreeMap<String, String>();
+        JSONHeaders = new TreeMap<String, String>();
         JSONHeaders.put("Content-Type","application/json");
     }
 
@@ -68,8 +69,8 @@ private class WfMSPlugin extends WfMSApi {
 
     }
 
-    public String startProcessDefinition(String processDefinitionId, String data) throws IOException {
-        String startURL = SUTEndpoint + "/process-definition/" + modelsStartID.get(modelName) + "/start";
+    public String startProcessInstance(String processDefinitionId, String data) throws IOException {
+        String startURL = sutEndpoint + "/process-definition/" + modelsStartID.get(processDefinitionId) + "/start";
         StringBuilder responseStart = http.fetchURL(startURL, "{}", JSONHeaders);
         return responseStart.toString();
     }

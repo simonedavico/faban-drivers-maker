@@ -23,8 +23,6 @@ mysql:
 #    - BENCHFLOW_COLLECTOR_NAME=mysql_collector_${BENCHFLOW_BENCHMARK_CONFIG_COLLECTOR_NAME}
     - BENCHFLOW_DATA_NAME=mysql
 
-    # CHECK IF INJECT ENVCONSUL_CONSUL variable
-# 192.168.41.105::8080
   expose:
     - 8080
 #  extra_hosts:

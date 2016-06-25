@@ -35,6 +35,7 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     private ApacheHC3Transport http;
     private DriverConfig driverConfig;
+    private Map<String, String> modelsStartID;
     //protected ParamRepository params;
 
 

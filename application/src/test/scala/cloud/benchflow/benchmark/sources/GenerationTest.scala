@@ -49,9 +49,13 @@ object GenerationTest extends App {
   val parsedConfiguration = BenchFlowBenchmark.fromYaml(bb)
 
   val configYml = new BenchFlowEnv("./application/src/test/resources/app/config.yml")
+//  val benchFlowEnv = new DriversMakerEnv(configYml,
+//    "./application/src/test/resources/app/benchflow-services",
+//    "./application/src/test/resources/app/drivers/templates/skeleton/benchmark")
+
   val benchFlowEnv = new DriversMakerEnv(configYml,
     "./application/src/test/resources/app/benchflow-services",
-    "./application/src/test/resources/app/drivers/templates/skeleton/benchmark")
+    "./application/src/test/resources/app/drivers")
 
   BenchmarkSourcesGenerator(
     experimentId = "MyExperiment.1.1",

@@ -10,13 +10,13 @@ public abstract class WfMSApi {
     protected String sutEndpoint;
     protected String deployAPI;
 
-    public WfMSApi(String sutEndpoint, String deployAPI) {
-        this.sutEndpoint = sutEndpoint;
-        this.deployAPI = sutEndpoint + deployAPI;
+    public WfMSApi(String se, String d) {
+        sutEndpoint = se;
+        deployAPI = sutEndpoint + d;
     }
 
     public abstract Map<String, String> deploy(File model) throws IOException;
 
-    public abstract String startProcessDefinition(String processDefinitionId, String data) throws IOException;
+    public abstract String startProcessInstance(String processDefinitionId, String data) throws IOException;
 
 }

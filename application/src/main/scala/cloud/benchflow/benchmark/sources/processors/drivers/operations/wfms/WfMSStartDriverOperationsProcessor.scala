@@ -5,7 +5,7 @@ import cloud.benchflow.benchmark.sources.processors._
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.driver.{Timing, BenchmarkOperation}
 import spoon.reflect.code.{CtIf, CtFieldAccess, CtCodeSnippetExpression}
-import spoon.reflect.declaration.{ModifierKind, CtMethod, CtClass}
+import spoon.reflect.declaration._
 import spoon.reflect.reference.{CtFieldReference, CtTypeReference}
 
 /**
@@ -21,6 +21,8 @@ class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
 
   override def doProcess(e: CtClass[_]): Unit = {
 
+    //TODO: remove this and put it in a DriverNameProcessor
+    //which will fix the driver name and all related inner paths
     e.setSimpleName(driver.getClass.getSimpleName)
 
     def generateOperation(op: Operation): Unit = {
@@ -34,10 +36,12 @@ class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
             methodName,
             null, null, methodBody)
 
+      method.addThrownType(getFactory.Type().createReference(classOf[java.lang.Exception]))
+
       val isStartedCheck: CtCodeSnippetExpression[java.lang.Boolean] = getFactory.Code().createCodeSnippetExpression("isStarted()")
 
-      val pluginCall = getFactory.Code().createCodeSnippetStatement(s"""wfms.startProcessInstance("${op.name}")""")
-      val mockCall = getFactory.Code().createCodeSnippetStatement("""wfms.startProcessInstance("mock.bpmn")""")
+      val pluginCall = getFactory.Code().createCodeSnippetStatement(s"""plugin.startProcessInstance("${op.name}", "")""")
+      val mockCall = getFactory.Code().createCodeSnippetStatement("""plugin.startProcessInstance("mock.bpmn", "")""")
 
       val ifStatement: CtIf = getFactory.Core().createIf()
       methodBody.addStatement(ifStatement

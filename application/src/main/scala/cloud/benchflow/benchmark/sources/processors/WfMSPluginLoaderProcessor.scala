@@ -3,7 +3,6 @@ package cloud.benchflow.benchmark.sources.processors
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import spoon.reflect.declaration.{CtClass, CtType, ModifierKind}
-import spoon.support.reflect.declaration.CtClassImpl
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -27,6 +26,12 @@ class WfMSPluginLoaderProcessor(benchFlowBenchmark: BenchFlowBenchmark,
     //I have to do this to fix the complete name of WfMSPlugin's superclass
     val nestedPluginType: CtType[_] = element.getNestedType("WfMSPlugin")
     val nestedApiType: CtType[_] = element.getNestedType("WfMSApi")
+
+//    val nestedBenchFlowAsyncCallableType: CtType[_] = element.getNestedType("BenchFlowServicesAsynchInteraction")
+//    element.getMethodsByName("foo").get(0).getBody.forEach(new Consumer[CtStatement] {
+//      override def accept(t: CtStatement): Unit = if(t.toString.contains())
+//    }
+
 
     val pluginField = getFactory.Code().createCtField("plugin", nestedApiType.getReference, "null", ModifierKind.PRIVATE)
     element.addFieldAtTop(pluginField)

@@ -2,6 +2,7 @@ package cloud.benchflow.benchmark.drivers;
 
 //import com.sun.faban.common.*;
 import com.sun.faban.driver.*;
+import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -21,32 +22,19 @@ import java.util.concurrent.CountDownLatch;
 public class Driver {
 
     private DriverContext ctx;
-    private HttpTransport http;
+//    private HttpTransport http;
+    private ApacheHC3Transport http;
     private String sutEndpoint;
     private Logger logger;
-    private DriverConfig driverConfig;
     private Map<String,String> modelsStartID;
 
-    //TODO: add with spoon..what?
-
-
+    //add plugin with spoon
 
     public Driver() throws Exception {
         initialize();
         setSutEndpoint();
         //added with spoon
         //loadModelsInfo();
-    }
-
-    private class DriverConfig {
-
-        private String getContextProperty(String property){
-            return ctx.getProperty(property);
-        }
-
-        private String getXPathValue(String xPathExpression) throws Exception {
-            return ctx.getXPathValue(xPathExpression);
-        }
     }
 
     private class BenchFlowServicesAsynchInteraction implements Callable<String> {
@@ -100,7 +88,7 @@ public class Driver {
                 try {
                     //simone: change this
                     // mysqlMonitorEndpoint = getXPathValue("services/monitors/mysql");
-                    mysqlMonitorEndpoint = driverConfig.getXPathValue("benchFlowServices/monitors/mysql");
+                    mysqlMonitorEndpoint = getXPathValue("benchFlowServices/monitors/mysql");
 
                     logger.info("mysqlMonitorEndpoint: " + mysqlMonitorEndpoint);
 
@@ -118,7 +106,14 @@ public class Driver {
                     //TODO: we for sure want to have a better way to get the same.
                     //the point now is that it is not possible to throw an exception on the run method
                     try {
-                        res = new BenchFlowServicesAsynchInteraction(mysqlMonitorEndpoint + queryCall).call();
+                        //res = new BenchFlowServicesAsynchInteraction(mysqlMonitorEndpoint + queryCall).call();
+                        res = new Callable<String>() {
+                            public String call() throws Exception {
+                                return "foo";
+                                //TODO: figure out this
+//                                return http.fetchUrl(mysqlMonitorEndpoint + queryCall).toString();
+                            }
+                        }.call();
                     } catch (Exception ex) {
                         Thread t = Thread.currentThread();
                         t.getUncaughtExceptionHandler().uncaughtException(t, ex);
@@ -151,7 +146,7 @@ public class Driver {
 
 
     private void setSutEndpoint() throws Exception {
-        this.sutEndpoint = driverConfig.getXPathValue("sutConfiguration/sutEndpoint");
+        sutEndpoint = getXPathValue("sutConfiguration/sutEndpoint");
     }
 
     private boolean isStarted() {
@@ -188,21 +183,28 @@ public class Driver {
 
     //TODO: add with spoon?
     private void loadModelsInfo() {
-        int numModel = Integer.parseInt(driverConfig.getContextProperty("model_num"));
+        int numModel = Integer.parseInt(getContextProperty("model_num"));
         for (int i = 1; i <= numModel; i++) {
-            String name = driverConfig.getContextProperty("model_" + i + "_name");
-            String startID = driverConfig.getContextProperty("model_" + i + "_startID");
-            this.modelsStartID.put(name, startID);
+            String name = getContextProperty("model_" + i + "_name");
+            String startID = getContextProperty("model_" + i + "_startID");
+            modelsStartID.put(name, startID);
         }
     }
 
     private void initialize() {
-        this.ctx = DriverContext.getContext();
+        ctx = DriverContext.getContext();
         HttpTransport.setProvider("com.sun.faban.driver.transport.hc3.ApacheHC3Transport");
-        this.http = HttpTransport.newInstance();
-        this.logger = ctx.getLogger();
-        this.driverConfig = new DriverConfig();
-        this.modelsStartID = new HashMap<String,String>();
+        http = (ApacheHC3Transport) HttpTransport.newInstance();
+        logger = ctx.getLogger();
+        modelsStartID = new HashMap<String,String>();
+    }
+
+    private String getContextProperty(String property){
+        return ctx.getProperty(property);
+    }
+
+    private String getXPathValue(String xPathExpression) throws Exception {
+        return ctx.getXPathValue(xPathExpression);
     }
 
 }

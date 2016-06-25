@@ -11,7 +11,7 @@ class GenerationDefaults(private implicit val benv: BenchFlowEnv) {
   lazy val jvm = JvmParamsHeuristic(
     strategy = "simple",
     configuration = Map(
-      "xms" -> 125,
+      "xms" -> 124,
       "xmx" -> 2048
     )
   )

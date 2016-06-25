@@ -74,6 +74,13 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
   private def getPublicIp(alias: String) =
     benv.getConfigYml.getVariable[String](s"BENCHFLOW_SERVER_${alias.toUpperCase}_PUBLICIP")
 
+  private def getIp(alias: String) = {
+    getPublicIp(alias)
+//    val localIp = getLocalIp(alias)
+//    if (localIp == null) getPublicIp(alias)
+//    else localIp
+  }
+
   /***
     * Adds fields needed by BenchFlow to a service
     */
@@ -83,7 +90,7 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
         service.copy(
 //          environment = Some(service.environment.get :+ s"constraint:node==$alias"),
           environment = service.environment.map(_ :+ s"constraint:node==$alias"),
-          ports = Some(Ports(Seq(getLocalIp(alias) + ":" + service.ports.get.ports.head)))
+          ports = Some(Ports(Seq(getIp(alias) + ":" + service.ports.get.ports.head)))
         )
       case None =>  throw new Exception(s"Server alias not found for service ${service.name}")
     }
@@ -126,7 +133,7 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
                               s"constraint:node==$alias" :+
                               s"BENCHFLOW_COLLECTOR_NAME=$name" :+
                               s"ENVCONSUL_CONSUL=${benv.getEnvConsulAddress}"),
-           ports = Some(Ports(Seq(getLocalIp(alias) + ":" + bfservice.ports.get.ports.head))))
+           ports = Some(Ports(Seq(getIp(alias) + ":" + bfservice.ports.get.ports.head))))
       }
 
   private def generateFieldsForBenchFlowServices(bound: Service, bfservices: Seq[Service]): Seq[Service] =
