@@ -118,18 +118,7 @@ public class FabanBenchmarkGeneratorResource {
 
             Path descriptorsPath = driverPath.resolve("build/sut/");
 
-//            BenchFlowBenchmarkConfigurationBuilder builder =
-//                    new BenchFlowBenchmarkConfigurationBuilder(defaultBenchmarkConfiguration,
-//                            defaultDeploymentDescriptor, benv, fabanDefaults);
-
             Path generatedBenchmarkOutputDir = driverPath;//.resolve("src");
-
-//            BenchmarkSourcesGenerator.apply(
-//                    experiment.getExperimentId(),
-//                    builder.bb(),
-//                    generatedBenchmarkOutputDir,
-//                    generationResources)
-//            .generate();
 
             BenchmarkGenerator benchmarkGenerator =
                     new BenchmarkGenerator(
@@ -140,11 +129,7 @@ public class FabanBenchmarkGeneratorResource {
                             benv);
 
             benchmarkGenerator.generateSources();
-
             logger.debug("Generated drivers sources");
-
-            //TODO: figure out how to provide a default run.xml
-            //idea: add method generate minimum necessary run.xml in FabanBenchmarkConfigurationBuilder
 
             while(trials.hasNext()) {
 
@@ -174,9 +159,6 @@ public class FabanBenchmarkGeneratorResource {
             }
 
             logger.debug("About to build generated driver");
-
-            //temporary: change benchmark name in driver class
-            //changeBenchmarkName(driverPath, experiment.getExperimentId());
             buildDriver(driverPath, experiment.getExperimentId());
 
             //save generated driver to minio

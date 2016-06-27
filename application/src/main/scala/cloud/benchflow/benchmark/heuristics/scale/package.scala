@@ -21,49 +21,6 @@ package object scale {
     def threadPerScale(driver: Driver[_]): Float
   }
 
-  class BaseScaleBalancer(protected val configuration: Map[String, Any])
-                         (private val bb: BenchFlowBenchmark) extends ScaleBalancer {
-
-    val users = bb.virtualUsers.virtualUsers
-
-    private def popularity(driver: Driver[_]): Float =
-      driver.configuration.flatMap(_.popularity).getOrElse(1.toFloat/bb.drivers.size)
-
-    def scale(driver: Driver[_]): Int = (users * popularity(driver)).toInt
-
-    private lazy val s = {
-      //scale = max(users/pop_d1, users/pop_d2, users/pop_d3...)
-      bb.drivers.map(d => users/popularity(d)).max.toInt
-    }
-
-    def scale: Int = s
-
-    def threadPerScale(driver: Driver[_]): Float = scale(driver)/scale
-
-  }
-
-  trait ExtendedScaleBalancer extends ScaleBalancer {
-
-    private def threshold = configuration.get("threshold").get.asInstanceOf[Int]
-
-    private def scalingFactor = super.scale/threshold
-
-    abstract override def scale = super.scale/scalingFactor
-
-    abstract override def threadPerScale(driver: Driver[_]) = super.threadPerScale(driver) * scalingFactor
-
-  }
-
-  trait FixedScaleBalancer extends ScaleBalancer {
-
-    abstract override def scale = users
-
-    abstract override def threadPerScale(driver: Driver[_]) = {
-      configuration.get("threadPerScale").get.asInstanceOf[Float]
-    }
-
-  }
-
   object ScaleBalancer {
 
     def apply(strategy: String, configuration: Map[String, Any]) = (bb: BenchFlowBenchmark) => {
@@ -76,4 +33,5 @@ package object scale {
     }
 
   }
+
 }

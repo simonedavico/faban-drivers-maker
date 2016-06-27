@@ -23,17 +23,19 @@ class ComputeDelayHeuristic(mapConfig: Map[String, Any])(implicit env: BenchFlow
 
   override def delay(bb: BenchFlowBenchmark, numOfUsedHosts: Int): Int = {
 
-    //TODO: round half to even?
     val rampUp = bb.execution.rampUp
     val scale = config.scaleBalancer(bb).scale
 
-    (rampUp, config.parallel) match {
+    val toRound = (rampUp, config.parallel) match {
       case (0, _) => 0
       // rampUp/scale * 1000
-      case (_, false) => rampUp/scale * 1000
+      case (_, false) => rampUp.toFloat/scale * 1000
       // (rampUp/scale) * #(agents+master utilised) * 1000
-      case _ => rampUp/scale * numOfUsedHosts * 1000
+      case _ => rampUp.toFloat/scale * numOfUsedHosts * 1000
     }
+
+    //round result half to even
+    (toRound*2).toInt/2
 
   }
 
