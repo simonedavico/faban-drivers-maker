@@ -24,8 +24,7 @@ drivers:
             stats:
                 interval: 30
         operations:
-            - myModel:
-                 data: ciaociao
+            - myModel.bpmn
         configuration:
             mix:
                 fixedSequence: [ myModel ]

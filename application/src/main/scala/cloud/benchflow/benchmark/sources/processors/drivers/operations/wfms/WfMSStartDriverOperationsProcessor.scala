@@ -4,6 +4,7 @@ import cloud.benchflow.benchmark.config.benchflowbenchmark.{Operation, WfMSStart
 import cloud.benchflow.benchmark.sources.processors._
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import com.sun.faban.driver.{Timing, BenchmarkOperation}
+import org.apache.commons.io.FilenameUtils
 import spoon.reflect.code.{CtIf, CtFieldAccess, CtCodeSnippetExpression}
 import spoon.reflect.declaration._
 import spoon.reflect.reference.{CtFieldReference, CtTypeReference}
@@ -27,7 +28,7 @@ class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowBenchmark,
 
     def generateOperation(op: Operation): Unit = {
 
-        val methodName = s"do${op.name}Request"
+        val methodName = s"do${FilenameUtils.removeExtension(op.name)}Request"
         val methodBody = getFactory.Core().createBlock()
         val method: CtMethod[Void] = getFactory.Method()
           .create(e,

@@ -156,11 +156,17 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
     override def write(obj: WfMSOperation): YamlValue = ???
 
     override def read(yaml: YamlValue): WfMSOperation = {
-      val fields = yaml.asYamlObject.fields
-      val operationName = fields.seq.head._1.convertTo[String]
-      val operationBody = fields.seq.head._2.asYamlObject
-      val data = operationBody.getFields(YamlString("data")).headOption.map(_.convertTo[String])
-      WfMSOperation(name = operationName, data = data)
+
+      yaml match {
+        case YamlString(model) => WfMSOperation(name = model, data = None)
+        case _ => {
+          val fields = yaml.asYamlObject.fields
+          val operationName = fields.seq.head._1.convertTo[String]
+          val operationBody = fields.seq.headOption.map(_._2.asYamlObject)
+          val data = operationBody.flatMap(_.getFields(YamlString("data")).headOption.map(_.convertTo[String]))
+          WfMSOperation(name = operationName, data = data)
+        }
+      }
     }
   }
 
