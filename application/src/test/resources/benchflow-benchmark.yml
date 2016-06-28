@@ -14,9 +14,6 @@ execution:
    rampDown: 0
 
 properties:
-    hostConfig:
-        host: 10.7.0.10
-        tools: NONE
     stats:
         maxRunTime: 6
         interval: 30
@@ -56,5 +53,4 @@ sut-configuration:
                     DB_PASSWORD: camunda
                     TABLE_NAMES: ACT_HI_PROCINST,ACT_HI_ACTINST
                     DB_PORT: 3306
-                    COLLECTOR_NAME: db
             - stats

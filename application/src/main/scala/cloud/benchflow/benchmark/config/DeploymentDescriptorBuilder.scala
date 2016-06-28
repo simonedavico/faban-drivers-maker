@@ -81,6 +81,9 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
 //    else localIp
   }
 
+  private def isBenchFlowService(service: Service) =
+    service.name.contains("collector") || service.name.contains("monitor")
+
   /***
     * Adds fields needed by BenchFlow to a service
     */
@@ -211,26 +214,22 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
     val total = s"BENCHFLOW_TRIAL_TOTAL=${trial.getTotalTrials}"
     val cName = service.name + "_" + trial.getTrialId
 
-    service.copy(
-      containerName = Some(ContainerName(cName)),
-      environment = service.environment.map(env =>
+    val newEnv = if(isBenchFlowService(service)) {
+      service.environment.map(env =>
         env :+
         expId :+
         trialId :+
         total :+
-        s"CONTAINER_NAME=$cName" :+
+        s"BENCHFLOW_CONTAINER_NAME=$cName" :+
         s"SUT_NAME=${bb.sut.name}" :+
         s"SUT_VERSION=${bb.sut.version}"
       )
+    } else service.environment
+
+    service.copy(
+      containerName = Some(ContainerName(cName)),
+      environment = newEnv
     )
-//                 environment = Some(service.environment.get :+
-//                                                        expId :+
-//                                                        trialId :+
-//                                                        total :+
-//                                                        s"CONTAINER_NAME=$cName" :+
-//                                                        s"SUT_NAME=${bb.sut.name}" :+
-//                                                        s"SUT_VERSION=${bb.sut.version}"
-//                 ))
   }
 
   /***

@@ -1,6 +1,5 @@
 package cloud.benchflow.benchmark.config.docker.compose
 
-
 import net.jcazevedo.moultingyaml._
 import cloud.benchflow.benchmark.config._
 
@@ -38,8 +37,8 @@ case class DockerCompose(services: List[Service]) {
     DockerCompose(services ++ newServices)
 
   override def toString: String = {
-    this.toYaml.print(scalarStyle = DoubleQuoted)
-//    this.toYaml.prettyPrint
+//    this.toYaml.print(scalarStyle = DoubleQuoted)
+    this.toYaml.prettyPrint
   }
 }
 object DockerCompose {

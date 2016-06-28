@@ -86,9 +86,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
 
   private def convertDriver2(driver: Driver[_], agents: Set[(String, Int)]): Elem =
     <driverConfig name={driver.getClass.getSimpleName}>
-      <fd:agents>
-        { agents.map { case (host, numOfAgents) => s"$host:$numOfAgents" }.mkString(" ") }
-      </fd:agents>
+      <fd:agents>{agents.map { case (host, numOfAgents) => s"$host:$numOfAgents" }.mkString(" ")}</fd:agents>
       {
         driver.properties match {
           case None => scala.xml.Null
@@ -151,7 +149,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
 
     val scaleBalancer = benv.getHeuristics.scaleBalancer(bb)
     val agents = benv.getHeuristics.allocationHeuristic.agents(bb)
-    val numOfUsedHosts = agents.values.reduce(_.union(_)).size
+    val usedHosts = agents.values.reduce(_.union(_))
 
     removeNewlines(
       <xml>
@@ -168,6 +166,10 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
           <fh:description>{ bb.description }</fh:description>
           <fa:scale>{ scaleBalancer.scale }</fa:scale>
           <fh:timeSync>{ GenerationDefaults.timeSync }</fh:timeSync>
+          <fa:hostConfig>
+            <fa:host>{ usedHosts.map { case (host, numOfAgents) => s"$host" }.mkString(" ") }</fa:host>
+            <fh:tools>NONE</fh:tools>
+          </fa:hostConfig>
 
           {
             convert(bb.properties).map(addFabanNamespace)
@@ -183,7 +185,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
           </fa:runControl>
 
           <threadStart>
-            <delay>{ benv.getHeuristics.threadStart.delay(bb, numOfUsedHosts) }</delay>
+            <delay>{ benv.getHeuristics.threadStart.delay(bb, usedHosts.size) }</delay>
             <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(bb) }</simultaneous>
             <parallel>{ benv.getHeuristics.threadStart.parallel(bb) }</parallel>
           </threadStart>
