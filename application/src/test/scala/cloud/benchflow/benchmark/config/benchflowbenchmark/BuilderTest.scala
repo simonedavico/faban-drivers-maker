@@ -68,13 +68,18 @@ object BuilderTest extends App {
 
   val httpOperation =
     """myOperation:
+      |    endpoint: boh
       |    method: get
       |    headers:
       |        Accept: bla
       |    data: payload
     """.stripMargin
 
+
 //  println(httpOperation.parseYaml.convertTo[HttpOperation])
+//  println(httpOperation.parseYaml.convertTo[HttpOperation].toYaml.prettyPrint)
+//  println(httpOperation.parseYaml.convertTo[HttpOperation].toYaml.prettyPrint.parseYaml.convertTo[HttpOperation])
+
 
   val wfmsOperation =
     """
@@ -216,9 +221,16 @@ object BuilderTest extends App {
 
   val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
   val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
-  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv)
+//  val parsedBB = bb.parseYaml.convertTo[BenchFlowBenchmark]
+//  println("ciao")
+  println(bb.parseYaml.convertTo[BenchFlowBenchmark].toYaml.prettyPrint)
+
+//  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv)
 //  println(builder.bb)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
 //  println(builder.buildDeploymentDescriptor(trial))
-  println(builder.buildFabanBenchmarkConfiguration(trial))
+//  println(builder.buildFabanBenchmarkConfiguration(trial))
+
+//  println(None.toYaml.toString)
+
 }

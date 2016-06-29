@@ -27,7 +27,16 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object SutYamlFormat extends YamlFormat[Sut] {
-    override def write(obj: Sut): YamlValue = ???
+    override def write(sut: Sut): YamlValue = {
+      YamlObject(
+        YamlString("name") -> YamlString(sut.name),
+        YamlString("version") -> YamlString(sut.version.toString),
+        YamlString("type") -> YamlString(sut.sutsType match {
+          case WfMS => "WfMS"
+          case Http => "http"
+        })
+      )
+    }
 
     override def read(yaml: YamlValue): Sut = {
       val sutName = yaml.asYamlObject.fields.get(YamlString("name")) match {
@@ -50,35 +59,37 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object PropertiesYamlFormat extends YamlFormat[Properties] {
-    override def write(obj: Properties): YamlValue = ???
+    override def write(props: Properties): YamlValue = {
+
+      def convertSecond(s: Any): YamlValue = {
+        s match {
+          case str: String => YamlString(str)
+          //TODO: extend with more numeric types, or try to generify
+          case int: Int => YamlNumber(int)
+          case lst: List[String] => lst.toYaml
+          case map: Map[String, Any] => convert(map)
+        }
+      }
+
+      def convertOne(t: (String, Any)): (YamlValue, YamlValue) = {
+        YamlString(t._1) -> convertSecond(t._2)
+      }
+
+      def convert(p: Map[String, Any]) = {
+        YamlObject(p.map(convertOne))
+      }
+
+      convert(props.properties)
+    }
 
     private def toScalaPair(pair: (YamlValue, YamlValue)): (String, Any) = {
       val first = pair._1.convertTo[String]
-//      pair._2 match {
-//        case YamlString(value) => (first, value)
-//        case YamlBoolean(bool) => (first, bool.toString)
-//        case YamlDate(date) => (first, date.toString)
-//        case YamlNumber(num) => (first, num.toString)
-//        case YamlObject(map) => (first, map.seq.map(toScalaPair))
-//        case YamlArray(values) => (first, values.toList.map(value => value.convertTo[String]))
-//        case _ => throw DeserializationException("Unexpected format for field properties")
-//      }
-
-//      (first, pair._2 match {
-//        case YamlString(value) => value
-//        case YamlBoolean(bool) => bool.toString
-//        case YamlDate(date) => date.toString
-//        case YamlNumber(num) => num.toString
-//        case YamlObject(map) => map.seq.map(toScalaPair)
-//        case YamlArray(values) => values.toList.map(value => value.convertTo[String])
-//        case _ => throw DeserializationException("Unexpected format for field properties")
-//      })
 
       def convertValue(value: YamlValue): Any = value match {
         case YamlString(s) => s
-        case YamlBoolean(bool) => bool.toString
-        case YamlDate(date) => date.toString
-        case YamlNumber(num) => num.toString
+        case YamlBoolean(bool) => bool
+        case YamlDate(date) => date
+        case YamlNumber(num) => num
         case YamlObject(map) => map.seq.map(toScalaPair)
         case YamlArray(values) => values.map(convertValue)//values.toList.map(value => value.convertTo[String])
         case _ => throw DeserializationException("Unexpected format for field properties")
@@ -100,7 +111,16 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
 
 
   implicit object BindingYamlFormat extends YamlFormat[Binding] {
-    override def write(obj: Binding): YamlValue = ???
+    override def write(binding: Binding): YamlValue = {
+
+      binding.config match {
+        case Some(config) => YamlObject(
+          YamlString(binding.boundService) -> config.toYaml
+        )
+        case None => YamlString(binding.boundService)
+      }
+
+    }
 
     override def read(yaml: YamlValue): Binding = {
 
@@ -125,7 +145,21 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object HttpOperationYamlFormat extends YamlFormat[HttpOperation] {
-    override def write(obj: HttpOperation): YamlValue = ???
+
+    override def write(httpOp: HttpOperation): YamlValue = {
+      YamlObject(
+        YamlString(httpOp.name) -> {
+          YamlObject(
+            YamlString("endpoint") -> YamlString(httpOp.endpoint),
+            YamlString("method") -> YamlString(httpOp.method.toString),
+            YamlString("headers") -> httpOp.headers.toYaml,
+            //TODO: check that serializing data as null when absent is ok
+            YamlString("data") -> httpOp.data.toYaml
+          )
+        }
+      )
+    }
+
 
     override def read(yaml: YamlValue): HttpOperation = {
 
@@ -153,25 +187,31 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object WfMSOperationYamlFormat extends YamlFormat[WfMSOperation] {
-    override def write(obj: WfMSOperation): YamlValue = ???
+    override def write(wfmsOp: WfMSOperation): YamlValue = {
+      wfmsOp.data match {
+        case Some(data) => YamlObject(
+          YamlString(wfmsOp.name) -> YamlObject(YamlString("data") -> YamlString(data))
+        )
+        case None => YamlString(wfmsOp.name)
+      }
+    }
 
     override def read(yaml: YamlValue): WfMSOperation = {
 
       yaml match {
         case YamlString(model) => WfMSOperation(name = model, data = None)
-        case _ => {
+        case _ =>
           val fields = yaml.asYamlObject.fields
           val operationName = fields.seq.head._1.convertTo[String]
           val operationBody = fields.seq.headOption.map(_._2.asYamlObject)
           val data = operationBody.flatMap(_.getFields(YamlString("data")).headOption.map(_.convertTo[String]))
           WfMSOperation(name = operationName, data = data)
-        }
       }
     }
   }
 
   implicit object MatrixMixRowYamlFormat extends YamlFormat[MatrixMixRow] {
-    override def write(obj: MatrixMixRow): YamlValue = ???
+    override def write(matrixMixRow: MatrixMixRow): YamlValue = matrixMixRow.row.toYaml
 
     override def read(yaml: YamlValue): MatrixMixRow = {
       yaml.asInstanceOf[YamlArray] match {
@@ -182,7 +222,7 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object FlatSequenceMixRowYamlFormat extends YamlFormat[FlatSequenceMixRow] {
-    override def write(obj: FlatSequenceMixRow): YamlValue = ???
+    override def write(flatSeqMixRow: FlatSequenceMixRow): YamlValue = flatSeqMixRow.row.toYaml
 
     override def read(yaml: YamlValue): FlatSequenceMixRow = {
       yaml.asInstanceOf[YamlArray] match {
@@ -193,7 +233,16 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object FlatSequenceMixYamlFormat extends YamlFormat[FlatSequenceMix] {
-    override def write(obj: FlatSequenceMix): YamlValue = ???
+    override def write(flatSeqMix: FlatSequenceMix): YamlValue = {
+      YamlObject(
+        YamlString("flatSequence") ->
+          YamlObject(
+            YamlString("sequences") -> flatSeqMix.rows.toYaml,
+            YamlString("flat") -> flatSeqMix.opsMix.toYaml
+          ),
+        YamlString("deviation") -> flatSeqMix.deviation.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): FlatSequenceMix = {
 
@@ -224,7 +273,13 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object MatrixMixYamlFormat extends YamlFormat[MatrixMix] {
-    override def write(obj: MatrixMix): YamlValue = ???
+
+    override def write(matrixMix: MatrixMix): YamlValue = {
+      YamlObject(
+        YamlString("matrix") -> matrixMix.rows.toYaml,
+        YamlString("deviation") -> matrixMix.deviation.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): MatrixMix = {
       val matrixRows = yaml.asYamlObject.fields.get(YamlString("matrix")).get match {
@@ -244,7 +299,13 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object FlatMixYamlFormat extends YamlFormat[FlatMix] {
-    override def write(obj: FlatMix): YamlValue = ???
+
+    override def write(flatMix: FlatMix): YamlValue = {
+      YamlObject(
+        YamlString("flat") -> flatMix.opsMix.toYaml,
+        YamlString("deviation") -> flatMix.deviation.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): FlatMix = {
 
@@ -266,7 +327,12 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object SequenceMixYamlFormat extends YamlFormat[FixedSequenceMix] {
-    override def write(obj: FixedSequenceMix): YamlValue = ???
+    override def write(fixedSeq: FixedSequenceMix): YamlValue = {
+      YamlObject(
+        YamlString("fixedSequence") -> fixedSeq.sequence.toYaml,
+        YamlString("deviation") -> fixedSeq.deviation.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): FixedSequenceMix = {
 
@@ -287,8 +353,27 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
     }
   }
 
+  implicit object MixYamlFormat extends YamlFormat[Mix] {
+    override def read(yaml: YamlValue): Mix = ???
+
+    override def write(mix: Mix): YamlValue = {
+      mix match {
+        case matrix: MatrixMix => MatrixMixYamlFormat.write(matrix)
+        case flat: FlatMix => FlatMixYamlFormat.write(flat)
+        case flatSeq: FlatSequenceMix => FlatSequenceMixYamlFormat.write(flatSeq)
+        case fixed: FixedSequenceMix =>  SequenceMixYamlFormat.write(fixed)
+      }
+    }
+  }
+
   implicit object DriverConfigurationYamlFormat extends YamlFormat[DriverConfiguration] {
-    override def write(obj: DriverConfiguration): YamlValue = ???
+    override def write(driverConfig: DriverConfiguration): YamlValue = {
+      YamlObject(
+        YamlString("mix") -> driverConfig.mix.toYaml,
+        YamlString("max90th") -> driverConfig.max90th.toYaml,
+        YamlString("popularity") -> driverConfig.popularity.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): DriverConfiguration = {
 
@@ -305,7 +390,6 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
 
       }
 
-      //val threadPerScale = yaml.asYamlObject.fields.get(YamlString("threadPerScale")).map(_.convertTo[Int])
       val max90th = yaml.asYamlObject.fields.get(YamlString("max90th")).map(_.convertTo[Double])
       val popularity = yaml.asYamlObject.fields.get(YamlString("popularity")).map(_.convertTo[String].init.toFloat/100)
       val mix = yaml.asYamlObject.fields.get(YamlString("mix")).map(generateMix)
@@ -315,18 +399,22 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
         max90th = max90th,
         popularity = popularity
       )
-//      yaml.asYamlObject.fields.get(YamlString("mix")) match {
-//        case None => DriverConfiguration(mix = None, max90th = max90th, popularity = popularity)
-//        case Some(mix) => DriverConfiguration(mix = Some(generateMix(mix)),
-//          max90th = max90th, popularity = popularity)
-//      }
     }
   }
 
 
   //TODO: figure out how to make drivers yaml format generic (may not be possible)
   implicit object HttpDriverYamlFormat extends YamlFormat[HttpDriver] {
-    override def write(obj: HttpDriver): YamlValue = ???
+    override def write(httpDriver: HttpDriver): YamlValue = {
+      YamlObject(
+        YamlString("http") ->
+          YamlObject(
+            YamlString("operations") -> httpDriver.operations.toYaml,
+            YamlString("configuration") -> httpDriver.configuration.toYaml,
+            YamlString("properties") -> httpDriver.properties.toYaml
+          )
+      )
+    }
 
     override def read(yaml: YamlValue): HttpDriver = {
 
@@ -356,7 +444,22 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object WfMSDriverYamlFormat extends YamlFormat[WfMSDriver] {
-    override def write(obj: WfMSDriver): YamlValue = ???
+
+    override def write(wfmsDriver: WfMSDriver): YamlValue = {
+
+      val driverName = wfmsDriver match {
+        case WfMSStartDriver(_,_,_) => "start"
+      }
+
+      YamlObject(
+        YamlString(driverName) ->
+          YamlObject(
+            YamlString("operations") -> wfmsDriver.operations.toYaml,
+            YamlString("configuration") -> wfmsDriver.configuration.toYaml,
+            YamlString("properties") -> wfmsDriver.properties.toYaml
+          )
+      )
+    }
 
     override def read(yaml: YamlValue): WfMSDriver = {
 
@@ -389,7 +492,10 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
 
 
   implicit object BenchFlowConfigFormat extends YamlFormat[BenchFlowConfig] {
-    override def write(obj: BenchFlowConfig): YamlValue = ???
+
+    override def write(bFlowConfig: BenchFlowConfig): YamlValue = {
+      bFlowConfig.benchflow_config.toYaml
+    }
 
     override def read(yaml: YamlValue): BenchFlowConfig = {
       val bfConfig = yaml.asYamlObject.fields.head
@@ -407,7 +513,14 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object SutConfigurationFormat extends YamlFormat[SutConfiguration] {
-    override def write(obj: SutConfiguration): YamlValue = ???
+
+    override def write(sutConfig: SutConfiguration): YamlValue = {
+      YamlObject(
+        YamlString("target-service") -> sutConfig.targetService.toYaml,
+        YamlString("deploy") -> sutConfig.deploy.toYaml,
+        YamlString("benchflow-config") -> sutConfig.bfConfig.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): SutConfiguration = {
       val sutConfig = yaml.asYamlObject.fields.head
@@ -422,7 +535,25 @@ object BenchFlowBenchmarkYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object BenchFlowBenchmarkConfigurationFormat extends YamlFormat[BenchFlowBenchmark] {
-    override def write(obj: BenchFlowBenchmark): YamlValue = ???
+
+    override def write(bb: BenchFlowBenchmark): YamlValue = {
+      YamlObject(
+        YamlString("sut") -> bb.sut.toYaml,
+        YamlString("benchmark_name") -> bb.name.toYaml,
+        YamlString("description") -> bb.description.toYaml,
+        YamlString("trials") -> bb.trials.trials.toYaml,
+        YamlString("virtualUsers") -> bb.virtualUsers.virtualUsers.toYaml,
+        YamlString("execution") -> bb.execution.toYaml,
+        YamlString("properties") -> bb.properties.toYaml,
+        YamlString("drivers") -> {
+          bb.sut.sutsType match {
+            case WfMS => bb.drivers.map(_.asInstanceOf[WfMSDriver]).toYaml
+            case Http => bb.drivers.map(_.asInstanceOf[HttpDriver]).toYaml
+          }
+        },
+        YamlString("sut-configuration") -> bb.sutConfiguration.toYaml
+      )
+    }
 
     override def read(yaml: YamlValue): BenchFlowBenchmark = {
 
