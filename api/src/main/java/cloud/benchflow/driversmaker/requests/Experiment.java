@@ -47,7 +47,7 @@ public class Experiment {
         this.totalTrials = totalTrials;
     }
 
-    public String getExperimentId() { return benchmarkName + "." + experimentNumber; }
+    public String getExperimentId() { return getBenchmarkId() + "." + experimentNumber; }
 
     public String getBenchmarkId() { return userId + "." + benchmarkName; }
 
