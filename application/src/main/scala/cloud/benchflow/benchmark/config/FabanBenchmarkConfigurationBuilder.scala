@@ -1,6 +1,5 @@
 package cloud.benchflow.benchmark.config
 
-//import cloud.benchflow.benchmark.config._
 import cloud.benchflow.benchmark.config.benchflowbenchmark._
 import cloud.benchflow.benchmark.config.collectors._
 import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
@@ -31,6 +30,33 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
     }
   }
   private object removeNewlines extends RuleTransformer(removeNewlinesRule)
+
+  private val updateStatsRewriteRule = new RewriteRule {
+
+    def addIntervalIfNotSpecified(statsChildren: Seq[Node]) = {
+      statsChildren.find {
+        case c: Elem if c.label == "interval" => true
+        case _ => false
+      } match {
+        case Some(interval) => statsChildren
+        case None => <interval>GenerationDefaults.interval</interval> :: statsChildren.toList
+      }
+    }
+
+    val minimizeEmpty = false
+    override def transform(n: Node): Seq[Node] = {
+      n match {
+        case stats: Elem if stats.label == "stats" =>
+          val children = addIntervalIfNotSpecified(stats.child)
+          println(children)
+          Elem(stats.prefix, "stats", stats.attributes, stats.scope, minimizeEmpty, addIntervalIfNotSpecified(stats.child): _*)
+        case other => other
+
+      }
+    }
+  }
+
+  private object insertIntervalIfNotExists extends RuleTransformer(updateStatsRewriteRule)
 
   private def propertyToNamespace =
     Map(
@@ -90,7 +116,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
       {
         driver.properties match {
           case None => scala.xml.Null
-          case Some(properties) => convert(properties)
+          case Some(properties) => convert(properties).map(insertIntervalIfNotExists)
         }
       }
     </driverConfig>
@@ -172,7 +198,8 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
           </fa:hostConfig>
 
           {
-            convert(bb.properties).map(addFabanNamespace)
+            val xmlProps = convert(bb.properties).map(addFabanNamespace)
+            xmlProps.map(insertIntervalIfNotExists)
             //++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
           }
 

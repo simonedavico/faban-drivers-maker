@@ -223,13 +223,13 @@ object BuilderTest extends App {
   val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
 //  val parsedBB = bb.parseYaml.convertTo[BenchFlowBenchmark]
 //  println("ciao")
-  println(bb.parseYaml.convertTo[BenchFlowBenchmark].toYaml.prettyPrint)
+//  println(bb.parseYaml.convertTo[BenchFlowBenchmark].toYaml.prettyPrint)
 
-//  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv)
+  val builder = new BenchFlowBenchmarkConfigurationBuilder(bb, dc, benchFlowEnv)
 //  println(builder.bb)
 ////  val builder = new BenchFlowBenchmarkConfigurationBuilder(benchFlowBenchmark, deploymentDescriptor, benchFlowEnv, defaults)
 //  println(builder.buildDeploymentDescriptor(trial))
-//  println(builder.buildFabanBenchmarkConfiguration(trial))
+  println(builder.buildFabanBenchmarkConfiguration(trial))
 
 //  println(None.toYaml.toString)
 

@@ -16,7 +16,6 @@ execution:
 properties:
     stats:
         maxRunTime: 6
-        interval: 30
 
 drivers:
     - start:
@@ -39,7 +38,7 @@ sut-configuration:
     deploy:
         camunda: bull
         db: lisa1
-        mysql_monitor_db: lisa1
+        benchflow.monitor.mysql.db: lisa1
 
     benchflow-config:
         camunda:

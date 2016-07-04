@@ -26,7 +26,7 @@ db:
   ports:
     - '3306:3306'
 
-mysql_monitor_db:
+benchflow.monitor.mysql.db:
   image: 'benchflow/monitors:querymysql_dev'
 #  container_name: mysql__monitor_db_camunda_HQ
   environment:

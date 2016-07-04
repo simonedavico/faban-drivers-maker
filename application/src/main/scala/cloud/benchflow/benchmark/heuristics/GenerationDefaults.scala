@@ -51,4 +51,6 @@ object GenerationDefaults {
 
   val timeSync = false
 
+  val interval = 1
+
 }

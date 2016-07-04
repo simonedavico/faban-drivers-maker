@@ -1,6 +1,5 @@
 package cloud.benchflow.benchmark.config
 
-//import cloud.benchflow.benchmark.config._
 import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmark
 import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.requests.Trial
@@ -54,7 +53,8 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
     override def resolve(implicit source: Source): String = {
       val bfservice = source._2
       val boundTo = source._1
-      bb.getBindingConfiguration(boundTo.name, bfservice.name.split("_")(0)) match {
+//      bb.getBindingConfiguration(boundTo.name, bfservice.name.split("_")(0)) match {
+      bb.getBindingConfiguration(boundTo.name, bfservice.name.split("\\.")(2)) match {
         case Some(config) =>
           config.properties.get(name).get.toString
         case None => name
@@ -82,7 +82,7 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
   }
 
   private def isBenchFlowService(service: Service) =
-    service.name.contains("collector") || service.name.contains("monitor")
+    service.name.contains("benchflow.collector") || service.name.contains("benchflow.monitor")
 
   /***
     * Adds fields needed by BenchFlow to a service
@@ -91,7 +91,6 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
     bb.getAliasForService(service.name) match {
       case Some(alias) =>
         service.copy(
-//          environment = Some(service.environment.get :+ s"constraint:node==$alias"),
           environment = service.environment.map(_ :+ s"constraint:node==$alias"),
           ports = Some(Ports(Seq(getIp(alias) + ":" + service.ports.get.ports.head)))
         )
@@ -129,7 +128,8 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
   private def generateFieldsForBenchFlowService: BenchFlowServiceTransformer =
       boundservice => bfservice => {
         val alias = bb.getAliasForService(boundservice.name).get
-        val name = s"${bfservice.name}_collector_${boundservice.name}"
+        //val name = s"${bfservice.name}_collector_${boundservice.name}"
+        val name = s"benchflow.collector.${bfservice.name}.${boundservice.name}"
         bfservice.copy(
            name = name,
            environment = Some(bfservice.environment.get :+
@@ -160,7 +160,8 @@ class DeploymentDescriptorBuilder(val bb: BenchFlowBenchmark,
       * Given the name of a bound collector, returns the service it is bound to
       */
     def getBoundService(bfservice: Service): Service = {
-      val boundTo = bfservice.name.split("_")(2)
+//      val boundTo = bfservice.name.split("_")(2)
+      val boundTo = bfservice.name.split("\\.")(3)
       dc.services.filter(s => s.name == boundTo).head
     }
 

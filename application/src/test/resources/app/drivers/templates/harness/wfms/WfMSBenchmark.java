@@ -222,7 +222,8 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
             String[] bindings = driverConfig.getXPathValue("benchFlowServices/collectors/" + collectorName + "/bindings").split(",");
             for(String service : bindings) {
 
-                String completeCollectorName = collectorName + "_collector_" + service;
+                //String completeCollectorName = collectorName + "_collector_" + service;
+                String completeCollectorName = "benchflow.collector." + collectorName + "." + service;
                 String collectorApi = driverConfig.getXPathValue("benchFlowServices/collectors/" + completeCollectorName + "/" + api);
                 String privatePort = driverConfig.getXPathValue("benchFlowServices/collectors/" + completeCollectorName + "/privatePort");
                 String portApi = benchFlowComposeAddress + "/projects/" + trialId + "/port/" + completeCollectorName + "/" + privatePort;
