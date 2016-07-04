@@ -39,7 +39,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
         case _ => false
       } match {
         case Some(interval) => statsChildren
-        case None => <interval>GenerationDefaults.interval</interval> :: statsChildren.toList
+        case None => <interval>{GenerationDefaults.interval}</interval> :: statsChildren.toList
       }
     }
 
@@ -47,8 +47,6 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowBenchmark,
     override def transform(n: Node): Seq[Node] = {
       n match {
         case stats: Elem if stats.label == "stats" =>
-          val children = addIntervalIfNotSpecified(stats.child)
-          println(children)
           Elem(stats.prefix, "stats", stats.attributes, stats.scope, minimizeEmpty, addIntervalIfNotSpecified(stats.child): _*)
         case other => other
 
