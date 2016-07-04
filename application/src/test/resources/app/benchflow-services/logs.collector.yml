@@ -1,0 +1,21 @@
+logs:
+  image: 'benchflow/collectors:logs_dev'
+  environment:
+      - KAFKA_HOST=
+      - MINIO_HOST=
+      - MINIO_ACCESSKEYID=
+      - MINIO_SECRETACCESSKEY=
+      - MINIO_ALIAS=
+      - BENCHFLOW_DATA_NAME=
+#      - BENCHFLOW_COLLECTOR_NAME=
+      - CONTAINERS=
+  volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  expose:
+      - 8080
+  ports:
+      - '8080'
+
+endpoints:
+  privatePort: 8080
+  stop: /store

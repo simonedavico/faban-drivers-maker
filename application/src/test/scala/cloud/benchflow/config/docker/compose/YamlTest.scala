@@ -1,8 +1,11 @@
 package cloud.benchflow.config.docker.compose
-import cloud.benchflow.config._
-import cloud.benchflow.config.collectors.CollectorAPI
+
 import net.jcazevedo.moultingyaml._
-import cloud.benchflow.config.benchflowbenchmark._
+
+import cloud.benchflow.benchmark.config._
+import cloud.benchflow.benchmark.config.collectors._
+import cloud.benchflow.benchmark.config.docker.compose._
+import cloud.benchflow.benchmark.config.benchflowbenchmark._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -23,12 +26,12 @@ object YamlTest extends App {
     ""
   )
 
-  import cloud.benchflow.config.benchflowbenchmark.BenchFlowBenchmarkYamlProtocol._
-  import cloud.benchflow.config.collectors.CollectorYamlProtocol._
+  import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmarkYamlProtocol._
+  import cloud.benchflow.benchmark.config.collectors.CollectorYamlProtocol._
 
-  println("""suts_name: [a, b, c]""".stripMargin.parseYaml.convertTo[SutsNames])
-  println("""sut_name: a""".stripMargin.parseYaml.convertTo[SutsNames])
-  println("""suts_type: WfMS""".stripMargin.parseYaml.convertTo[SutsType])
+//  println("""suts_name: [a, b, c]""".stripMargin.parseYaml.convertTo[SutsName])
+//  println("""sut_name: a""".stripMargin.parseYaml.convertTo[SutsName])
+//  println("""suts_type: WfMS""".stripMargin.parseYaml.convertTo[SutsType])
 
   println(
     """properties:
@@ -112,17 +115,17 @@ object YamlTest extends App {
       |                      one: two
     """
 
-  println(BenchFlowBenchmark.fromYaml(completeConfiguration))
+//  println(BenchFlowBenchmark.fromYaml(completeConfiguration))
 
-  val driver =
-    """fooDriver:
-      |    prop1:
-      |        nested1:
-      |            - list
-      |    prop2: val2
-    """.stripMargin.parseYaml.convertTo[Driver]
+//  val driver =
+//    """fooDriver:
+//      |    prop1:
+//      |        nested1:
+//      |            - list
+//      |    prop2: val2
+//    """.stripMargin.parseYaml.convertTo[Driver]
 
-  println(driver)
+//  println(driver)
 
   val collectorAPI =
     """endpoints:

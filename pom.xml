@@ -10,7 +10,6 @@
 		<project.name>benchflow-drivers-maker</project.name>
         <project.mainclass>cloud.benchflow.driversmaker.DriversMakerApplication</project.mainclass>
         <project.configurationfile>configuration.yml</project.configurationfile>
-
         <dropwizard.version>0.9.1</dropwizard.version>
         <javax.mail.version>1.5.4</javax.mail.version>
         <apache.commons.io.version>2.4</apache.commons.io.version>

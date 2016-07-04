@@ -1,0 +1,23 @@
+faban:
+  image: benchflow/collectors:faban_dev
+  environment:
+#    - SUT_NAME=
+#    - SUT_VERSION=
+#    - BENCHFLOW_COLLECTOR_NAME=
+    - MINIO_HOST=
+    - MINIO_ACCESSKEYID=
+    - MINIO_SECRETACCESSKEY=
+    - MINIO_ALIAS
+    - KAFKA_HOST
+    - KAFKA_PORT
+    - KAFKA_TOPIC=faban
+    - CONTAINERS
+    - FABAN_CONTAINER_ID
+  expose:
+      - 8080
+  ports:
+      - '8080'
+
+endpoint:
+   privatePort: 8080
+   stop: /store

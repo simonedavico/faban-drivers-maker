@@ -1,12 +1,14 @@
 benchflowEnv:
   config.yml: /app/config.yml
   benchflowServices: /app/benchflow-services
-  driverSkeleton: /app/skeleton
-  benchflowCompose: ${env.BENCHFLOW_COMPOSE_ADDRESS}
+  generationResources: /app/drivers
 
-fabanDefaults:
-  javaHome: /usr/lib/jvm/java7
-  javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
+#fabanDefaults:
+#  javaHome: /usr/lib/jvm/java7
+#  javaOpts: -Xmx1g -Xms256m -XX:+DisableExplicitGC
+
+minio:
+  address: ${env.MINIO_ADDRESS}
 
 server:
   type: default
@@ -29,3 +31,8 @@ logging:
       threshold: ALL
       timeZone: UTC
       target: stdout
+
+
+
+
+

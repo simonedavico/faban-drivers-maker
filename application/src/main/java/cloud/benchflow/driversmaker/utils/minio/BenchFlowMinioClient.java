@@ -1,6 +1,8 @@
 package cloud.benchflow.driversmaker.utils.minio;
 
+import io.minio.ErrorCode;
 import io.minio.MinioClient;
+import io.minio.ObjectStat;
 import io.minio.Result;
 import io.minio.errors.*;
 import io.minio.messages.Item;
@@ -312,6 +314,12 @@ public class BenchFlowMinioClient {
     public List<String> listModels(final String benchmarkId) {
         List<String> modelNames = new LinkedList<>();
         try {
+            try {
+                ObjectStat stat = mc.statObject(BENCHMARKS_BUCKET, benchmarkId + "/models");
+            } catch(ErrorResponseException e) {
+                if(e.errorCode() == ErrorCode.NO_SUCH_KEY) return modelNames;
+                else throw new BenchFlowMinioClientException(e.getMessage(), e);
+            }
             for(Result<Item> item : mc.listObjects(BENCHMARKS_BUCKET, benchmarkId + "/models")) {
                 modelNames.add(item.get().objectName());
             }

@@ -10,22 +10,22 @@ while IFS=',' read -ra ADDR; do
       for i in "${ADDR[@]}"; do
       	  #Server name
       	  name="BENCHFLOW_SERVER_"${i^^}"_NAME"
-          echo $name":\""${!name}"\"#=#"
+          echo $name": \""${!name}"\"#=#"
 
           #Server public IP
           public_ip="BENCHFLOW_SERVER_"${i^^}"_PUBLICIP"
-          echo $public_ip":\""${!public_ip}"\"#=#"
+          echo $public_ip": \""${!public_ip}"\"#=#"
 
           #Server private IP
           private_ip="BENCHFLOW_SERVER_"${i^^}"_PRIVATEIP"
-          echo $private_ip":\""${!private_ip}"\"#=#"
+          echo $private_ip": \""${!private_ip}"\"#=#"
 
           #Server hostname
           hostname="BENCHFLOW_SERVER_"${i^^}"_HOSTNAME"
-          echo $hostname":\""${!hostname}"\"#=#"
+          echo $hostname": \""${!hostname}"\"#=#"
 
           #Server tags
           tags="BENCHFLOW_SERVER_"${i^^}"_TAGS"
-          echo $tags":["${!tags}"]#=#"
+          echo $tags": ["${!tags}"]#=#"
       done
 done <<< "$BENCHFLOW_SERVERS_LIST_ALIASES"
