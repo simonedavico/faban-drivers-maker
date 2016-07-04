@@ -1,0 +1,20 @@
+engines:
+  checkstyle:
+    enabled: true
+  scalastyle:
+    enabled: true
+  markdownlint:
+    enabled: true
+  shellcheck:
+    enabled: true
+
+ratings:
+  paths:
+    - "**.java"
+    - "**.scala"
+    - "Dockerfile"
+    - "Dockerfile.test"
+    - "Dockerfile.ci"
+
+exclude_paths:
+- "**/src/test/**"

@@ -16,7 +16,6 @@ execution:
 properties:
     stats:
         maxRunTime: 6
-        interval: 2
 
 drivers:
     - start:

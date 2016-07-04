@@ -119,10 +119,9 @@ public class FabanBenchmarkGeneratorResource {
 //            String deploymentDescriptor = minio.getOriginalDeploymentDescriptor(minioBenchmarkId);
             String deploymentDescriptor = minio.getDeploymentDescriptorForExperiment(minioBenchmarkId, experimentNumber);
 //            String benchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
-            String benchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
+            String benchmarkConfiguration = minio.getBenchFlowBenchmarkForExperiment(minioBenchmarkId, experimentNumber);
 
             Path descriptorsPath = driverPath.resolve("build/sut/");
-
             Path generatedBenchmarkOutputDir = driverPath;//.resolve("src");
 
             BenchmarkGenerator benchmarkGenerator =
