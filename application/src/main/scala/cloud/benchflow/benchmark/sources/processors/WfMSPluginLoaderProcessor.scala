@@ -16,9 +16,9 @@ class WfMSPluginLoaderProcessor(benchFlowBenchmark: BenchFlowBenchmark,
 
   override protected def doProcess(element: CtClass[_]): Unit = {
 
-    val apiType: CtType[_] = getFactory.Type().get("cloud.benchflow.libraries.WfMSApi")
+    val apiType: CtType[_] = getFactory.Type().get("cloud.benchflow.libraries.wfms.WfMSApi")
     val pluginType = getFactory.Type()
-      .get(s"cloud.benchflow.plugins.${benchFlowBenchmark.sut.name}.${benchFlowBenchmark.sut.version}.WfMSPlugin")
+      .get(s"cloud.benchflow.plugins.wfms.${benchFlowBenchmark.sut.name}.${benchFlowBenchmark.sut.version}.WfMSPlugin")
 
     element.addNestedType(apiType)
     element.addNestedType(pluginType)
