@@ -1,4 +1,4 @@
-package cloud.benchflow.libraries;
+package cloud.benchflow.libraries.wfms;
 
 import java.util.Map;
 

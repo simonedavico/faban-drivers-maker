@@ -148,9 +148,9 @@ abstract class WfMSDriverGenerator[A <: WfMSDriverOperationsProcessor: ClassTag]
                              experimentId)(env) {
 
   override def templateResources: Seq[Path] = {
-    val pluginsPath = generationResources.resolve(s"plugins/${benchFlowBenchmark.sut.name}")
+    val pluginsPath = generationResources.resolve(s"plugins/wfms/${benchFlowBenchmark.sut.name}")
     val pluginPath = ResolvePlugin(pluginsPath, benchFlowBenchmark.sut.version)
-    val wfmsLibraryPath = generationResources.resolve("libraries/WfMSApi.java")
+    val wfmsLibraryPath = generationResources.resolve("libraries/wfms/WfMSApi.java")
     Seq(wfmsLibraryPath, pluginPath)
   }
 
@@ -287,9 +287,9 @@ class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowBenchmark,
   val benchmarkTemplate: Path = templatesPath.resolve("harness/wfms/WfMSBenchmark.java")
 
   override protected def benchmarkGenerationResources: Seq[Path] = {
-    val pluginsPath = generationResources.resolve(s"plugins/${benchFlowBenchmark.sut.name}")
+    val pluginsPath = generationResources.resolve(s"plugins/wfms/${benchFlowBenchmark.sut.name}")
     val pluginPath = ResolvePlugin(pluginsPath, benchFlowBenchmark.sut.version)
-    val wfmsLibraryPath = generationResources.resolve("libraries/WfMSApi.java")
+    val wfmsLibraryPath = generationResources.resolve("libraries/wfms/WfMSApi.java")
     Seq(wfmsLibraryPath, pluginPath)
   }
 
