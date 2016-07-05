@@ -1,13 +1,10 @@
 properties:
   image: benchflow/collectors:properties_dev
   environment:
-    - KAFKA_HOST=
-    - MINIO_HOST=
-    - MINIO_ACCESSKEYID=
-    - MINIO_SECRETACCESSKEY=
-    - BENCHFLOW_DATA_NAME=
-#    - BENCHFLOW_COLLECTOR_NAME=
-    - CONTAINERS=
+  - BENCHFLOW_DATA_NAME=properties
+  - KAFKA_TOPIC=properties
+  - CONTAINERS=${BENCHFLOW_BENCHMARK_BOUNDSERVICE_CONTAINER_NAME}
+
   volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   expose:
@@ -16,5 +13,4 @@ properties:
       - '8080'
 
 endpoints:
-    privatePort: 8080
-    stop: /store
+  stop: /store
