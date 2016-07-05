@@ -90,6 +90,9 @@ public class FabanBenchmarkGeneratorResource {
         experiment.setUserId("BenchFlow");
         String benchmarkId = experiment.getBenchmarkId();
         String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
+
+        String experimentId = experiment.getExperimentId();
+        String minioExperimentId = experimentId.replace(".", "/");
         long experimentNumber = experiment.getExperimentNumber();
 
         //temporary: get zip of sources and copy in temporary folder
@@ -113,8 +116,10 @@ public class FabanBenchmarkGeneratorResource {
             logger.debug("About to generate benchmark for experiment " + experiment.getExperimentId());
 
             Iterator<Trial> trials = experiment.getAllTrials();
-            String defaultDeploymentDescriptor = minio.getOriginalDeploymentDescriptor(minioBenchmarkId);
-            String defaultBenchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
+//            String deploymentDescriptor = minio.getOriginalDeploymentDescriptor(minioBenchmarkId);
+            String deploymentDescriptor = minio.getDeploymentDescriptorForExperiment(minioBenchmarkId, experimentNumber);
+//            String benchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
+            String benchmarkConfiguration = minio.getBenchFlowBenchmarkForExperiment(minioBenchmarkId, experimentNumber);
 
             Path descriptorsPath = driverPath.resolve("build/sut/");
 
@@ -123,8 +128,8 @@ public class FabanBenchmarkGeneratorResource {
             BenchmarkGenerator benchmarkGenerator =
                     new BenchmarkGenerator(
                             experiment.getExperimentId(),
-                            defaultBenchmarkConfiguration,
-                            defaultDeploymentDescriptor,
+                            benchmarkConfiguration,
+                            deploymentDescriptor,
                             generatedBenchmarkOutputDir,
                             benv);
 

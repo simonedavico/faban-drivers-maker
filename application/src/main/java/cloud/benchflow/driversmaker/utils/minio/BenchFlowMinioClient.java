@@ -30,6 +30,8 @@ public class BenchFlowMinioClient {
 
     private MinioClient mc;
     private static final String BENCHMARKS_BUCKET = "benchmarks";
+    private static final String DEPLOYMENT_DESCRIPTOR_NAME = "docker-compose.yml";
+    private static final String TEST_CONFIGURATION_NAME = "benchflow-benchmark.yml";
 
     public BenchFlowMinioClient(final String address, final String accessKey, final String privateKey)
             throws InvalidPortException, InvalidEndpointException {
@@ -37,18 +39,6 @@ public class BenchFlowMinioClient {
 //        System.out.println("Secret key: " + privateKey);
 //        System.out.println("Address: " + address);
         this.mc = new MinioClient(address, accessKey, privateKey);
-    }
-
-    //TODO: implement this?
-    public void saveOriginalBenchmark(final String benchmarkId, final byte[] benchmark) {
-        Exception e = new NotImplementedException("Can't save original benchmark yet");
-        throw new BenchFlowMinioClientException(e.getMessage(), e);
-    }
-
-    //TODO: implement this?
-    public void getOriginalBenchmark(final String benchmarkId) {
-        Exception e = new NotImplementedException("Can't retrieve original benchmark yet");
-        throw new BenchFlowMinioClientException(e.getMessage(), e);
     }
 
     /***
@@ -122,7 +112,7 @@ public class BenchFlowMinioClient {
      * saved at benchmarks/{benchmarkId}/original/docker-compose.yml
      */
     public String getOriginalDeploymentDescriptor(final String benchmarkId)  {
-        return getTextFile(benchmarkId + "/original/docker-compose.yml");
+        return getTextFile(benchmarkId + "/original/" + DEPLOYMENT_DESCRIPTOR_NAME);
     }
 
     /***
@@ -130,7 +120,7 @@ public class BenchFlowMinioClient {
      * saved at benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
      */
     public String getOriginalBenchFlowBenchmark(final String benchmarkId) {
-        return getTextFile(benchmarkId + "/original/benchflow-benchmark.yml");
+        return getTextFile(benchmarkId + "/original/" + TEST_CONFIGURATION_NAME);
     }
 
     /***
@@ -138,7 +128,27 @@ public class BenchFlowMinioClient {
      * at benchmarks/{benchmarkId}/original/docker-compose.yml
      */
     public void saveOriginalDeploymentDescriptor(final String benchmarkId, final String deploymentDescriptor) {
-        saveTextFile(deploymentDescriptor, benchmarkId + "/original/docker-compose.yml");
+        saveTextFile(deploymentDescriptor, benchmarkId + "/original/" + DEPLOYMENT_DESCRIPTOR_NAME);
+    }
+
+    /***
+     * Saves the deployment descriptor for a given experiment
+     * at benchmarks/{benchmarkId}/{experimentNumber}/docker-compose.yml
+     */
+    public void saveDeploymentDescriptorForExperiment(final String benchmarkId,
+                                                      final long experimentNumber,
+                                                      final String deploymentDescriptor) {
+        saveTextFile(deploymentDescriptor, benchmarkId + "/" + experimentNumber + "/" +  DEPLOYMENT_DESCRIPTOR_NAME);
+    }
+
+    /***
+     * Saves the configuration for an experiment
+     * at benchmarks/{benchmarkId}/{experimentNumber}/benchflow-benchmark.yml
+     */
+    public void saveBenchFlowBenchmarkForExperiment(final String benchmarkId,
+                                                    final long experimentNumber,
+                                                    final String benchFlowBenchmark) {
+        saveTextFile(benchFlowBenchmark, benchmarkId + "/" + experimentNumber + "/" + TEST_CONFIGURATION_NAME);
     }
 
     /***
@@ -146,7 +156,15 @@ public class BenchFlowMinioClient {
      * at benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
      */
     public void saveOriginalBenchFlowBenchmark(final String benchmarkId, final String benchFlowBenchmark) {
-        saveTextFile(benchFlowBenchmark, benchmarkId + "/original/benchflow-benchmark.yml");
+        saveTextFile(benchFlowBenchmark, benchmarkId + "/original/" + TEST_CONFIGURATION_NAME);
+    }
+
+    /***
+     * Returns the deployment descriptor for an experiment
+     * from benchmarks/{benchmarkId}/{experimentNumber}/docker-compose.yml
+     */
+    public String getDeploymentDescriptorForExperiment(final String benchmarkId, final long experimentNumber) {
+        return getTextFile(benchmarkId + "/" + experimentNumber + "/" + DEPLOYMENT_DESCRIPTOR_NAME);
     }
 
     /***
@@ -154,7 +172,15 @@ public class BenchFlowMinioClient {
      * from benchmarks/{benchmarkId}/{experimentNumber}/{trialNumber}/docker-compose.yml
      */
     public String getDeploymentDescriptor(final String benchmarkId, final long experimentNumber, final int trialNumber) {
-        return getTextFile(benchmarkId + "/" + experimentNumber + "/" + trialNumber + "/docker-compose.yml");
+        return getTextFile(benchmarkId + "/" + experimentNumber + "/" + trialNumber + "/" + DEPLOYMENT_DESCRIPTOR_NAME);
+    }
+
+    /***
+     * Returns the benchmark configuration for an experiment,
+     * at benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
+     */
+    public String getBenchFlowBenchmarkForExperiment(final String benchmarkId, final long experimentNumber) {
+        return getTextFile(benchmarkId + "/" + experimentNumber + "/" + TEST_CONFIGURATION_NAME);
     }
 
     /***
@@ -163,7 +189,7 @@ public class BenchFlowMinioClient {
      */
     public void saveDeploymentDescriptor(final String benchmarkId, final long experimentNumber,
                                          final int trialNumber, final String descriptor) {
-        String id = benchmarkId + "/" + experimentNumber + "/" + trialNumber + "/docker-compose.yml";
+        String id = benchmarkId + "/" + experimentNumber + "/" + trialNumber + "/" + DEPLOYMENT_DESCRIPTOR_NAME;
         saveTextFile(descriptor, id);
     }
 
@@ -173,7 +199,7 @@ public class BenchFlowMinioClient {
      */
     public void removeDeploymentDescriptor(final String benchmarkId, final long experimentNumber,
                                            final int trialNumber) {
-        removeIfExists(benchmarkId + "/" + experimentNumber + "/" + trialNumber + "/docker-compose.yml");
+        removeIfExists(benchmarkId + "/" + experimentNumber + "/" + trialNumber + "/" + DEPLOYMENT_DESCRIPTOR_NAME);
     }
 
     /***
@@ -190,7 +216,7 @@ public class BenchFlowMinioClient {
      * from benchmarks/{benchmarkId}/{experimentNumber}/benchflow-benchmark.yml
      */
     public String getBenchFlowBenchmark(final String benchmarkId, final long experimentNumber) {
-        return getTextFile(benchmarkId + "/" + experimentNumber + "/benchflow-benchmark.yml");
+        return getTextFile(benchmarkId + "/" + experimentNumber + "/" + TEST_CONFIGURATION_NAME);
     }
 
     /***
@@ -198,7 +224,7 @@ public class BenchFlowMinioClient {
      * from benchmarks/{benchmarkId}/{experimentNumber}/benchflow-benchmark.yml
      */
     public void removeBenchFlowBenchmark(final String benchmarkId, final long experimentNumber) {
-        removeIfExists(benchmarkId + "/" + experimentNumber + "/benchflow-benchmark.yml");
+        removeIfExists(benchmarkId + "/" + experimentNumber + "/" + TEST_CONFIGURATION_NAME);
     }
 
 
@@ -277,14 +303,14 @@ public class BenchFlowMinioClient {
      * Removes benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
      */
     public void removeOriginalBenchFlowBenchmark(final String benchmarkId) {
-        removeIfExists(benchmarkId + "/original/benchflow-benchmark.yml");
+        removeIfExists(benchmarkId + "/original/" + TEST_CONFIGURATION_NAME);
     }
 
     /***
      * Removes benchmarks/{benchmarkId}/original/docker-compose.yml
      */
     public void removeOriginalDeploymentDescriptor(final String benchmarkId) {
-        removeIfExists(benchmarkId + "/original/docker-compose.yml");
+        removeIfExists(benchmarkId + "/original/" + DEPLOYMENT_DESCRIPTOR_NAME);
     }
 
     /***
