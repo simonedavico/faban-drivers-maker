@@ -12,6 +12,11 @@ ENV CLIENT_VERSION v-dev
 ENV SUT_LIBRARIES_VERSION v-dev
 ENV SUT_PLUGINS_VERSION v-dev
 
+ENV GENERATION_RESOURCES_ROOT /app/drivers
+ENV LIBRARIES_ROOT ${GENERATION_RESOURCES_ROOT}/libraries
+ENV PLUGINS_ROOT ${GENERATION_RESOURCES_ROOT}/plugins
+ENV TEMPLATES_ROOT ${GENERATION_RESOURCES_ROOT}/templates
+
 # Get benchflow-drivers-maker
 RUN wget -q --no-check-certificate -O /app/benchflow-drivers-maker.jar https://github.com/benchflow/drivers-maker/releases/download/$FABAN_DRIVERS_MAKER_VERSION/benchflow-drivers-maker.jar
 
@@ -33,20 +38,19 @@ RUN apk --update add wget tar && \
 	rm -rf ${FABAN_HOME}/benchmarks ${FABAN_HOME}/bin ${FABAN_HOME}/config ${FABAN_HOME}/legal \
 	       ${FABAN_HOME}/logs ${FABAN_HOME}/output ${FABAN_HOME}/resources ${FABAN_HOME}/samples ${FABAN_HOME}/services && \
 	find ${FABAN_HOME}/master/ -not -path "/app/faban/master/" -not -path "${FABAN_HOME}/master/webapps" -not -path "${FABAN_HOME}/master/webapps/faban" -not -path "${FABAN_HOME}/master/webapps/faban/WEB-INF"  -not -path "${FABAN_HOME}/master/webapps/faban/WEB-INF/classes*" | xargs rm -rf && \
-	# Get test driver (TODO: remove after testing)
-    mkdir -p /app/skeleton && \
-    wget -q --no-check-certificate -O - https://github.com/benchflow/client/archive/$CLIENT_VERSION.tar.gz \
-    | tar xz --strip-components=4 -C /app/skeleton client-$CLIENT_VERSION/test/camunda/wfmsbenchmark && \
     # Get sut-libraries
-    mkdir -p /app/libraries && \
+    mkdir -p ${LIBRARIES_ROOT} && \
     wget -q --no-check-certificate -O - https://github.com/benchflow/sut-libraries/archive/$SUT_LIBRARIES_VERSION.tar.gz \
-    | tar xz --strip-components=1 -C /app/libraries sut-libraries-$SUT_LIBRARIES_VERSION && \
+    | tar xz --strip-components=1 -C ${LIBRARIES_ROOT} sut-libraries-$SUT_LIBRARIES_VERSION && \
     # Get sut-plugins
-    mkdir -p /app/plugins && \
+    mkdir -p ${PLUGINS_ROOT} && \
     wget -q --no-check-certificate -O - https://github.com/benchflow/sut-plugins/archive/$SUT_PLUGINS_VERSION.tar.gz \
-    | tar xz --strip-components=1 -C /app/plugins sut-plugins-$SUT_PLUGINS_VERSION && \
+    | tar xz --strip-components=1 -C ${PLUGINS_ROOT} sut-plugins-$SUT_PLUGINS_VERSION && \
 	apk del --purge tar && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/* *.gz
+
+#copy driver skeleton
+COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
 
 # Install Ant (Source: https://hub.docker.com/r/webratio/ant/~/dockerfile/)
 ENV ANT_VERSION 1.9.4
@@ -58,7 +62,6 @@ RUN mkdir -p /opt/ant && \
     apk del --purge wget
 ENV ANT_HOME /opt/ant
 ENV PATH ${PATH}:/opt/ant/bin
-
 
 COPY ./services/envcp/config.tpl /app/config.tpl
 COPY ./services/envcp/add_servers_info.sh /app/add_servers_info.sh
