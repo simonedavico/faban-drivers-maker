@@ -44,6 +44,9 @@ sut-configuration:
     benchflow-config:
         camunda:
             - stats
+            - mysql:
+                config:
+                  QUERY_BLABLA: ...
         db:
             - mysql:
                 config:
@@ -52,4 +55,5 @@ sut-configuration:
                     DB_PASSWORD: camunda
                     TABLE_NAMES: ACT_HI_PROCINST,ACT_HI_ACTINST
                     DB_PORT: 3306
+                    QUERY_BLABLA: ...
             - stats
