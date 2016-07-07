@@ -1,24 +1,38 @@
 sudo: required
-dist: precise
+dist: trusty
 group: edge
 
 language: java
-jdk:
-  - oraclejdk8
+# reference: https://github.com/travis-ci/travis-ci/issues/5897#issuecomment-218354129
+# jdk:
+#   - oraclejdk8
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
 # whitelist
 branches:
-  only:
+  only: 
     - dev
   except:
     - v-dev
 
 before_install:
-  - mvn validate
+  # Attempt to fix: https://github.com/travis-ci/travis-ci/issues/5545
+  # reference: http://stevenschwenke.de/cannotFindSymbolInTravisAndShippable
+  - export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
+  - export PATH="$PATH:/usr/lib/jvm/java-8-oracle/bin"
+  - export java_path="/usr/lib/jvm/java-8-oracle/jre/bin/java"
+  - update-alternatives --set java $java_path
+  - java -version
 
 install:
-  - make all
+  - make install
 
+script:
+  - make test
+  - make build_container
 
 cache:
   directories:

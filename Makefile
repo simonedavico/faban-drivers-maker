@@ -1,13 +1,16 @@
 REPONAME = drivers-maker
 DOCKERIMAGENAME = benchflow/$(REPONAME)
 VERSION = dev
-JAVA_VERSION_FOR_COMPILATION = java-8-oracle
+JAVA_VERSION_FOR_COMPILATION = (^|/)java-8-oracle($|\s)
 UNAME = $(shell uname)
-JAVA_HOME := `update-java-alternatives -l | cut -d' ' -f3 | grep $(JAVA_VERSION_FOR_COMPILATION)`"/jre"
 
 find_java:
 ifeq ($(UNAME), Darwin)
 	$(eval JAVA_HOME := $(shell /usr/libexec/java_home))
+else ifeq ($(UNAME),Linux)
+ifndef TRAVIS
+	$(eval JAVA_HOME := $(shell update-java-alternatives -l | cut -d' ' -f3 | egrep '$(JAVA_VERSION_FOR_COMPILATION)'))
+endif 
 endif
 
 .PHONY: all build_release
@@ -18,19 +21,22 @@ clean:
 	mvn clean
 
 build: find_java
-	JAVA_HOME=$(JAVA_HOME) mvn package
+	mvn package
 
 build_release: find_java
-	JAVA_HOME=$(JAVA_HOME) mvn package
+	mvn package
 
 install: find_java
-	JAVA_HOME=$(JAVA_HOME) mvn package
+	mvn package
 
 test: find_java
-	JAVA_HOME=$(JAVA_HOME) mvn test
+	mvn test -B
+
+build_container:
+	docker build -t $(DOCKERIMAGENAME):$(VERSION) -f Dockerfile .
 
 build_container_local: find_java
-	JAVA_HOME=$(JAVA_HOME) mvn package
+	mvn package
 	docker build -t $(DOCKERIMAGENAME):$(VERSION) -f Dockerfile.ci .
 	rm target/benchflow-$(REPONAME).jar
 
