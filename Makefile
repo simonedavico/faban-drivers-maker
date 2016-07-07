@@ -27,6 +27,7 @@ build_release: find_java
 	mvn package
 
 install: find_java
+	mvn validate
 	mvn package
 
 test: find_java
