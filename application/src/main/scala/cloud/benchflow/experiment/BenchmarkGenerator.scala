@@ -3,11 +3,11 @@ package cloud.benchflow.experiment
 import java.nio.file.Path
 
 import cloud.benchflow.experiment.config.FabanBenchmarkConfigurationBuilder
-import cloud.benchflow.experiment.config.docker.compose.deploymentdescriptor.DeploymentDescriptorBuilder
-import cloud.benchflow.experiment.config.docker.compose.deploymentdescriptor.DockerCompose
-//import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
-//import cloud.benchflow.benchmark.config.{FabanBenchmarkConfigurationBuilder, DeploymentDescriptorBuilder}
-import cloud.benchflow.experiment.config.experimentdescriptor.BenchFlowExperiment
+import cloud.benchflow.experiment.config.deploymentdescriptor.DeploymentDescriptorBuilder
+
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
+import cloud.benchflow.test.deployment.docker.compose.DockerCompose
+
 import cloud.benchflow.experiment.sources.generators.BenchmarkSourcesGenerator
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv

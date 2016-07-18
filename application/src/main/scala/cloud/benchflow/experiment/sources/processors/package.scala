@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.sources
 
-import cloud.benchflow.experiment.config.experimentdescriptor._
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment.{WfMSDriver, Driver, Operation, BenchFlowExperiment}
 import spoon.processing.AbstractProcessor
 import spoon.reflect.declaration.{CtPackage, CtClass}
 

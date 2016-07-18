@@ -1,11 +1,10 @@
 package cloud.benchflow.experiment.sources.processors.drivers.annotations
 
 import java.util.concurrent.TimeUnit
-
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, Operation, Driver}
-import cloud.benchflow.experiment.heuristics.GenerationDefaults
+import cloud.benchflow.experiment.GenerationDefaults
 import cloud.benchflow.experiment.sources.processors.DriverProcessor
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment.{Operation, Driver, BenchFlowExperiment}
 import com.sun.faban.driver.BenchmarkDriver
 import spoon.reflect.code.CtFieldAccess
 import spoon.reflect.declaration.CtClass

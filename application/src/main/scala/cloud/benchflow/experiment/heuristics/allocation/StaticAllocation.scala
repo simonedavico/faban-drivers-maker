@@ -1,8 +1,8 @@
 package cloud.benchflow.experiment.heuristics.allocation
 
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, Driver}
 import cloud.benchflow.experiment.heuristics.HeuristicConfiguration
 import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.test.config.experiment.{Driver, BenchFlowExperiment}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)

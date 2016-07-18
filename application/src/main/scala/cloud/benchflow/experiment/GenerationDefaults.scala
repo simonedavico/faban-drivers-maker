@@ -1,10 +1,10 @@
-package cloud.benchflow.experiment.heuristics
+package cloud.benchflow.experiment
 
 import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.experiment.heuristics.allocation._
 import cloud.benchflow.experiment.heuristics.jvm._
 import cloud.benchflow.experiment.heuristics.scale._
 import cloud.benchflow.experiment.heuristics.threadstart._
-import cloud.benchflow.experiment.heuristics.allocation._
 
 class GenerationDefaults(private implicit val benv: BenchFlowEnv) {
 
