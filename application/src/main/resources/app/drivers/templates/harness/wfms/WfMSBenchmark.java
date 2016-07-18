@@ -1,4 +1,4 @@
-package cloud.benchflow.benchmark.harness;
+package cloud.benchflow.experiment.harness;
 
 import com.sun.faban.harness.*;
 import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
@@ -17,7 +17,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +25,7 @@ import org.w3c.dom.NodeList;
 
 public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
-    private static Logger logger = Logger.getLogger(cloud.benchflow.benchmark.harness.WfMSBenchmark.class.getName());
+    private static Logger logger = Logger.getLogger(cloud.benchflow.experiment.harness.WfMSBenchmark.class.getName());
 
     private String benchFlowComposeAddress;
     private String sutEndpoint;

@@ -1,6 +1,6 @@
 package cloud.benchflow.driversmaker.resources;
 
-import cloud.benchflow.benchmark.BenchmarkGenerator;
+import cloud.benchflow.experiment.BenchmarkGenerator;
 import cloud.benchflow.driversmaker.exceptions.BenchmarkGenerationException;
 import cloud.benchflow.driversmaker.requests.Experiment;
 import cloud.benchflow.driversmaker.requests.Trial;

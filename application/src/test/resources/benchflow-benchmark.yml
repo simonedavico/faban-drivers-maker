@@ -1,13 +1,13 @@
 sut:
     name: camunda
-    version: v1
+    version: 3.5.0
     type: WfMS
 
-benchmark_name: WfMSBenchmark
-description: A WfMS benchmark
+testName: WfMSTest
+description: A WfMS test
 trials: 2
-virtualUsers: 1000
 
+virtualUsers: 1000
 execution:
    rampUp: 0
    steadyState: 60
@@ -19,16 +19,52 @@ properties:
         interval: 2
 
 drivers:
-    - start:
-        properties:
-            stats:
-                interval: 30
-        operations:
-            - myModel.bpmn
-        configuration:
-            mix:
-                fixedSequence: [ myModel ]
-                deviation: 5
+- start:
+    properties:
+        stats:
+            interval: 30
+    operations:
+        - myModel.bpmn
+    configuration:
+        mix:
+            fixedSequence: [ myModel ]
+            deviation: 5
+
+#goal:
+#  type: custom
+#  settings:
+#    load function:
+#      rampUp:
+#      steadyState:
+#      rampDown:
+#
+#    parameters:
+#    - users: 1000
+#    - memory: ... on service
+#    - cpus ... on service
+#    - $MYCUSTOMPARAM on service
+
+#goal:
+#  type: config
+#  settings:
+#    load function (execution): ...
+#
+#    parameters:
+#    - users:
+#         constant: 1000
+#    - users:
+#         range: 1...100
+#         step: +5 || *5 || -5 || /5
+#    - $BOOLPARAM:
+#         range: [ true, false ]
+#
+#    explore:
+#    - users
+#    - $BOOLPARAM on camunda
+#
+#    observe:
+#    - mem-usage on camunda
+#    -
 
 sut-configuration:
 
@@ -39,21 +75,18 @@ sut-configuration:
     deploy:
         camunda: bull
         db: lisa1
-        benchflow.monitor.mysql.db: lisa1
 
     benchflow-config:
+
         camunda:
-            - stats
-            - mysql:
-                config:
-                  QUERY_BLABLA: ...
+        - stats
+
         db:
-            - mysql:
-                config:
-                    DB_NAME: process-engine
-                    DB_USER: camunda
-                    DB_PASSWORD: camunda
-                    TABLE_NAMES: ACT_HI_PROCINST,ACT_HI_ACTINST
-                    DB_PORT: 3306
-                    QUERY_BLABLA: ...
-            - stats
+        - mysql:
+            config:
+                MYSQL_DB_NAME: process-engine
+                MYSQL_USER: camunda
+                MYSQL_USER_PASSWORD: camunda
+                TABLE_NAMES: ACT_HI_PROCINST,ACT_HI_ACTINST
+                MYSQL_PORT: 3306
+                MY_MONITOR_QUERY: complete

@@ -1,22 +1,13 @@
-package cloud.benchflow.benchmark.drivers;
+package cloud.benchflow.experiment.drivers;
 
 //import com.sun.faban.common.*;
 import com.sun.faban.driver.*;
 import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
-
-import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.CountDownLatch;
 
 public class Driver {
@@ -78,70 +69,70 @@ public class Driver {
 //            }
 //        })
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //TODO: use setParams
-                String mysqlMonitorEndpoint = "";
-                //TODO: we for sure want to have a better way to get the same.
-                //the point now is that it is not possible to throw an exception on the run method
-                try {
-                    //simone: change this
-                    // mysqlMonitorEndpoint = getXPathValue("services/monitors/mysql");
-                    mysqlMonitorEndpoint = getXPathValue("benchFlowServices/monitors/mysql");
-
-                    logger.info("mysqlMonitorEndpoint: " + mysqlMonitorEndpoint);
-
-                } catch (Exception ex) {
-                    Thread t = Thread.currentThread();
-                    t.getUncaughtExceptionHandler().uncaughtException(t, ex);
-                    return;
-                }
-
-                String queryCall = "?query=SELECT+COUNT(*)+FROM+ACT_HI_PROCINST+WHERE+END_TIME_+IS+NULL&value=0&method=equal";
-                //TODO: improve, the empty answer with equal seems no, the not empty seems yes in the current implementation
-                String res = "";
-
-                while (true) {
-                    //TODO: we for sure want to have a better way to get the same.
-                    //the point now is that it is not possible to throw an exception on the run method
-                    try {
-                        //res = new BenchFlowServicesAsynchInteraction(mysqlMonitorEndpoint + queryCall).call();
-                        res = new Callable<String>() {
-                            public String call() throws Exception {
-                                return "foo";
-                                //TODO: figure out this
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                //TODO: use setParams
+//                String mysqlMonitorEndpoint = "";
+//                //TODO: we for sure want to have a better way to get the same.
+//                //the point now is that it is not possible to throw an exception on the run method
+//                try {
+//                    //simone: change this
+//                    // mysqlMonitorEndpoint = getXPathValue("services/monitors/mysql");
+//                    mysqlMonitorEndpoint = getXPathValue("benchFlowServices/monitors/mysql");
+//
+//                    logger.info("mysqlMonitorEndpoint: " + mysqlMonitorEndpoint);
+//
+//                } catch (Exception ex) {
+//                    Thread t = Thread.currentThread();
+//                    t.getUncaughtExceptionHandler().uncaughtException(t, ex);
+//                    return;
+//                }
+//
+//                String queryCall = "?query=SELECT+COUNT(*)+FROM+ACT_HI_PROCINST+WHERE+END_TIME_+IS+NULL&value=0&method=equal";
+//                //TODO: improve, the empty answer with equal seems no, the not empty seems yes in the current implementation
+//                String res = "";
+//
+//                while (true) {
+//                    //TODO: we for sure want to have a better way to get the same.
+//                    //the point now is that it is not possible to throw an exception on the run method
+//                    try {
+//                        //res = new BenchFlowServicesAsynchInteraction(mysqlMonitorEndpoint + queryCall).call();
+//                        res = new Callable<String>() {
+//                            public String call() throws Exception {
+////                                return "foo";
+//                                //TODO: figure out this
 //                                return http.fetchUrl(mysqlMonitorEndpoint + queryCall).toString();
-                            }
-                        }.call();
-                    } catch (Exception ex) {
-                        Thread t = Thread.currentThread();
-                        t.getUncaughtExceptionHandler().uncaughtException(t, ex);
-                        return;
-                    }
-
-                    logger.info("Waiting for workload to complete, res: " + res);
-
-                    //TODO: this is really custom given the current way the monitor works
-                    if (res.toLowerCase().contains("matches 0")) {
-                        break;
-                    } else {
-                        //Pause for 10 seconds
-                        logger.info("Waiting for workload to complete, waiting to restart");
-                        //TODO: we for sure want to have a better way to get the same.
-                        //the point now is that it is not possible to throw an exception on the run method
-                        try {
-                            Thread.sleep(10000);
-                        } catch (InterruptedException ex) {
-                            Thread t = Thread.currentThread();
-                            t.getUncaughtExceptionHandler().uncaughtException(t, ex);
-                            return;
-                        }
-                    }
-                }
-                done.countDown();
-            }
-        }).start();
+//                            }
+//                        }.call();
+//                    } catch (Exception ex) {
+//                        Thread t = Thread.currentThread();
+//                        t.getUncaughtExceptionHandler().uncaughtException(t, ex);
+//                        return;
+//                    }
+//
+//                    logger.info("Waiting for workload to complete, res: " + res);
+//
+//                    //TODO: this is really custom given the current way the monitor works
+//                    if (res.toLowerCase().contains("matches 0")) {
+//                        break;
+//                    } else {
+//                        //Pause for 10 seconds
+//                        logger.info("Waiting for workload to complete, waiting to restart");
+//                        //TODO: we for sure want to have a better way to get the same.
+//                        //the point now is that it is not possible to throw an exception on the run method
+//                        try {
+//                            Thread.sleep(10000);
+//                        } catch (InterruptedException ex) {
+//                            Thread t = Thread.currentThread();
+//                            t.getUncaughtExceptionHandler().uncaughtException(t, ex);
+//                            return;
+//                        }
+//                    }
+//                }
+//                done.countDown();
+//            }
+//        }).start();
     }
 
 

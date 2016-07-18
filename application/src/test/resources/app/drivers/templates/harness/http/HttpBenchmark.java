@@ -1,4 +1,4 @@
-package cloud.benchflow.benchmark.harness;
+package cloud.benchflow.experiment.harness;
 
 public class HttpBenchmark {
 

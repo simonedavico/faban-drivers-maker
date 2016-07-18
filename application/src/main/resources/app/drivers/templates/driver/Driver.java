@@ -1,22 +1,13 @@
-package cloud.benchflow.benchmark.drivers;
+package cloud.benchflow.experiment.drivers;
 
 //import com.sun.faban.common.*;
 import com.sun.faban.driver.*;
 import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
-
-import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.CountDownLatch;
 
 public class Driver {

@@ -1,11 +1,10 @@
-package cloud.benchflow.benchmark.harness;
+package cloud.benchflow.experiment.harness;
 
 import com.sun.faban.harness.*;
 import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.concurrent.*;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -17,7 +16,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +24,7 @@ import org.w3c.dom.NodeList;
 
 public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
-    private static Logger logger = Logger.getLogger(cloud.benchflow.benchmark.harness.WfMSBenchmark.class.getName());
+    private static Logger logger = Logger.getLogger(cloud.benchflow.experiment.harness.WfMSBenchmark.class.getName());
 
     private String benchFlowComposeAddress;
     private String sutEndpoint;
@@ -36,9 +34,13 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
     private ApacheHC3Transport http;
     private DriverConfig driverConfig;
     private Map<String, String> modelsStartID;
-    //protected ParamRepository params;
+    private Map<String, ServiceInfo> serviceInfoMap;
+    //this is already in defaultfabanbenchmark2
+//    protected ParamRepository params;
 
-
+    /**
+     * Encapsulates methods to retrieve values from run.xml
+     */
     private class DriverConfig {
 
         private Node getNode(String xPathExpression) {
@@ -101,20 +103,147 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     }
 
-    private class BenchFlowServicesAsynchInteraction implements Callable<String> {
-        private String url;
+    private static class ServiceInfo {
 
-        public BenchFlowServicesAsynchInteraction(String url){
-            this.url = url;
+        private String serviceName;
+        private List<CollectorInfo> collectors;
+
+        public ServiceInfo(String name) {
+            serviceName = name;
         }
 
-        @Override
-        public String call() throws Exception {
-            return http.fetchURL(url).toString();
+        public void addCollector(CollectorInfo collector) {
+            collectors.add(collector);
         }
+
+        public String getName() {
+            return serviceName;
+        }
+
+        public List<CollectorInfo> getCollectors() {
+            return collectors;
+        }
+
+    }
+
+    private static class CollectorInfo {
+
+        private String collectorName;
+        private String collectorId;
+        private List<MonitorInfo> monitors;
+        private String startAPI;
+        private String stopAPI;
+
+        public CollectorInfo(String name, String id) {
+            collectorName = name;
+            collectorId = id;
+        }
+
+        public String getName() {
+            return collectorName;
+        }
+
+        public String getId() {
+            return collectorId;
+        }
+
+        public List<MonitorInfo> getMonitors() {
+            return monitors;
+        }
+
+        public String getStartAPI() {
+            return startAPI;
+        }
+
+        public String getStopAPI() {
+            return stopAPI;
+        }
+
+        public void setStartAPI(String start) {
+            startAPI = start;
+        }
+
+        public void setStopAPI(String stop) {
+            stopAPI = stop;
+        }
+
+        public void addMonitor(MonitorInfo monitor) {
+            monitors.add(monitor);
+        }
+
+    }
+
+    private static class MonitorInfo {
+
+        private String monitorName;
+        private String monitorId;
+
+        private String startAPI;
+        private String monitorAPI;
+        private String stopAPI;
+
+        private String runPhase;
+        private Map<String, String> params;
+
+        public MonitorInfo(String name, String id) {
+            monitorName = name;
+            monitorId = id;
+        }
+
+        public String getName() {
+            return monitorName;
+        }
+
+        public String getId() {
+            return monitorId;
+        }
+
+        public String getStartAPI() {
+            return startAPI;
+        }
+
+        public String getStopAPI() {
+            return stopAPI;
+        }
+
+        public String getMonitorAPI() {
+            return monitorAPI;
+        }
+
+        public void setStartAPI(String start) {
+            startAPI = start;
+        }
+
+        public void setStopAPI(String stop) {
+            stopAPI = stop;
+        }
+
+        public void setMonitorAPI(String monitor) {
+            monitorAPI = monitor;
+        }
+
+        public String getRunPhase() {
+            return runPhase;
+        }
+
+        public void setRunPhase(String phase) {
+            runPhase = phase;
+        }
+
+        public Map<String, String> getParams() {
+            return params;
+        }
+
+        public void setParams(Map<String, String> p) {
+            params = p;
+        }
+
     }
 
 
+    /***
+     * This method deploys the sut.
+     */
     @Configure
     public void configure() throws Exception {
 
@@ -137,7 +266,9 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         logger.info("System Started. Status: " + statusUp);
     }
 
-
+    /**
+     * This method sets sut endpoint, deployment manager address, trial id
+     */
     @Override
     @Validate
     public void validate() throws Exception {
@@ -151,10 +282,10 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         logger.info("benchmarkDir is: " + benchmarkDir.toString());
 
         setSutEndpoint();
-        benchFlowComposeAddress = driverConfig.getXPathValue("benchFlowServices/benchFlowCompose");
+        benchFlowComposeAddress = driverConfig.getXPathValue("benchFlowServices/deploymentManager");
         trialId = driverConfig.getXPathValue("benchFlowRunConfiguration/trialId");
 
-        logger.info("Compose address is: " + benchFlowComposeAddress);
+        logger.info("Deployment manager address is: " + benchFlowComposeAddress);
         logger.info("Trial id is: " + trialId);
         logger.info("DONE: setSutEndpoint");
 
@@ -165,6 +296,9 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     }
 
+    /**
+     *  Deploys BPMN models
+     */
     @PreRun
     public void preRun() throws Exception {
 
@@ -205,40 +339,9 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         logger.info("END: Deploying processes...");
     }
 
-    private void callCollectorsApi(String api) throws Exception {
-
-        //TODO: this is suboptimal because we create one thread for each collector
-        //but we should really create one thread only for the collectors with a start API
-        //this will allow us also to count the number of expected responses and use a countdownlatch
-        NodeList collectors = driverConfig.getNode("benchFlowServices/collectors").getChildNodes();
-        ExecutorService es = Executors.newFixedThreadPool(collectors.getLength());
-        CompletionService<String> cs = new ExecutorCompletionService<>(es);
-
-        List<Future<String>> collectorsStartResponses = new LinkedList<Future<String>>();
-        for(int i = 0; i < collectors.getLength(); i++) {
-            Node collector = collectors.item(i);
-            String collectorName = collector.getNodeName();
-
-            String[] bindings = driverConfig.getXPathValue("benchFlowServices/collectors/" + collectorName + "/bindings").split(",");
-            for(String service : bindings) {
-
-                //String completeCollectorName = collectorName + "_collector_" + service;
-                String completeCollectorName = "benchflow.collector." + collectorName + "." + service;
-                String collectorApi = driverConfig.getXPathValue("benchFlowServices/collectors/" + completeCollectorName + "/" + api);
-                String privatePort = driverConfig.getXPathValue("benchFlowServices/collectors/" + completeCollectorName + "/privatePort");
-                String portApi = benchFlowComposeAddress + "/projects/" + trialId + "/port/" + completeCollectorName + "/" + privatePort;
-
-                HttpMethod getCollectorAddress = new GetMethod(portApi);
-                http.getHttpClient().executeMethod(getCollectorAddress);
-                String collectorAddress = new String(getCollectorAddress.getResponseBody(), "UTF-8");
-                getCollectorAddress.releaseConnection();
-                String collectorApiAddress = collectorAddress + collectorApi;
-                collectorsStartResponses.add(cs.submit(new BenchFlowServicesAsynchInteraction(collectorApiAddress)));
-            }
-        }
-
-    }
-
+    /**
+     * Undeploys the sut
+     */
     private int undeploy() throws Exception {
         //remove the sut
         //curl -v -X PUT http://<HOST_IP>:<HOST_PORT>/projects/camunda/rm/
@@ -249,18 +352,94 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
     }
 
 
+    /**
+     * Retrieves the address for a benchflow service from the deployment manager
+     */
+    private String benchFlowServiceAddress(String benchFlowServiceId, String privatePort) throws Exception {
+        String deploymentManagerPortsApi = benchFlowComposeAddress + "/projects/" +
+                trialId + "/port/" + benchFlowServiceId + "/" + privatePort;
+
+        HttpMethod getServiceAddress = new GetMethod(deploymentManagerPortsApi);
+        http.getHttpClient().executeMethod(getServiceAddress);
+        String serviceAddress = new String(getServiceAddress.getResponseBody(), "UTF-8");
+        getServiceAddress.releaseConnection();
+        return serviceAddress;
+    }
+
+
+    /**
+     * Starts collectors and related monitors
+     */
     @Override
     @StartRun
     public void start() throws Exception {
         super.start();
-        callCollectorsApi("start");
+        //callCollectorsApi("start");
+        String privatePort = driverConfig.getXPathValue("benchFlowServices/privatePort");
+        for(ServiceInfo serviceInfo: serviceInfoMap.values()) {
+
+            List<CollectorInfo> collectorInfoList = serviceInfo.getCollectors();
+            for(CollectorInfo collectorInfo: collectorInfoList) {
+
+                List<MonitorInfo> monitorInfoList = collectorInfo.getMonitors();
+                for(MonitorInfo monitorInfo: monitorInfoList) {
+
+                    //monitor at start of load
+                    if(monitorInfo.getRunPhase().equals("start")) {
+
+                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
+                        //TODO: get monitor interface from factory and run .run() method
+                    }
+
+                    else if(monitorInfo.getRunPhase().equals("all")) {
+                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
+                        //TODO: get monitor interface from factory and run .start() method
+                    }
+
+                }
+
+                String collectorEndpoint = benchFlowServiceAddress(collectorInfo.getId(), privatePort);
+                //TODO: call start api for collector
+            }
+
+        }
     }
 
+    /**
+     * Stops collectors and related monitors
+     */
     @PostRun
     public void postRun() throws Exception {
-        callCollectorsApi("stop");
+
+        String privatePort = driverConfig.getXPathValue("benchFlowServices/privatePort");
+        for(ServiceInfo serviceInfo: serviceInfoMap.values()) {
+
+            List<CollectorInfo> collectorInfoList = serviceInfo.getCollectors();
+            for(CollectorInfo collectorInfo: collectorInfoList) {
+
+                List<MonitorInfo> monitorInfoList = collectorInfo.getMonitors();
+                for(MonitorInfo monitorInfo: monitorInfoList) {
+
+                    //monitor at end of load
+                    if(monitorInfo.getRunPhase().equals("end")) {
+                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
+                        //TODO: get monitor interface from factory and run .run() method
+                    } else if(monitorInfo.getRunPhase().equals("all")) {
+                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
+                        //TODO: get monitor interface from factory and run .monitor() and .stop() methods
+                    }
+
+                }
+
+                String collectorEndpoint = benchFlowServiceAddress(collectorInfo.getId(), privatePort);
+                //TODO: call stop api for collector
+            }
+
+        }
+
         undeploy();
     }
+
 
     @Override
     @EndRun
@@ -281,19 +460,17 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     protected final String getTrialId() { return this.trialId; }
 
+    /**
+     * Retrieves sut endpoint address from deployment manager and sets resolved address as field of this class
+     */
     private void setSutEndpoint() throws Exception {
 
         StringBuilder urlBuilder = new StringBuilder();
         String targetServiceName = driverConfig.getXPathValue("sutConfiguration/serviceName");
         String targetServiceEndpoint = driverConfig.getXPathValue("sutConfiguration/endpoint");
-        String targetServicePrivatePort = driverConfig.getXPathValue("sutConfiguration/privatePort");
+        String privatePort = driverConfig.getXPathValue("benchFlowServices/privatePort");
 
-        String portApi = benchFlowComposeAddress + "/projects/" + trialId + "/port/" + targetServiceName + "/" + targetServicePrivatePort;
-        HttpMethod getTargetServiceAddress = new GetMethod(portApi);
-        http.getHttpClient().executeMethod(getTargetServiceAddress);
-        String targetServiceAddress = new String(getTargetServiceAddress.getResponseBody(), "UTF-8");
-
-        getTargetServiceAddress.releaseConnection();
+        String targetServiceAddress = benchFlowServiceAddress(targetServiceName, privatePort);
 
         sutEndpoint = urlBuilder.append("http://")
                 .append(targetServiceAddress)
@@ -302,11 +479,112 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         driverConfig.addConfigurationNode("sutConfiguration", "sutEndpoint", sutEndpoint);
     }
 
+    /**
+     * Setup benchmarkDir, http transport, and services info map
+     */
     private void initialize() {
-//        params = RunContext.getParamRepository();
+        //params = RunContext.getParamRepository();
         this.benchmarkDir = Paths.get(RunContext.getBenchmarkDir());
         this.http = new ApacheHC3Transport();
         this.driverConfig = new DriverConfig();
+        this.serviceInfoMap = new HashMap<String, ServiceInfo>();
+        parseBenchmarkConfiguration();
+    }
+
+    /**
+     * Parse run.xml to build a service info map
+     */
+    private void parseBenchmarkConfiguration() {
+
+        NodeList services = driverConfig.getNode("benchFlowServices/servicesConfiguration").getChildNodes();
+
+        //iterate over every service in the configuration
+        for(int serviceIndex = 0; serviceIndex < services.getLength(); serviceIndex++) {
+
+            Element service = (Element) services.item(serviceIndex);
+            String serviceName = service.getAttribute("name");
+            ServiceInfo serviceInfo = new ServiceInfo(serviceName);
+
+            NodeList collectors = service.getElementsByTagName("collector");
+
+            //iterate over all collectors for the given service
+            for(int collectorIndex = 0; collectorIndex < collectors.getLength(); collectorIndex++) {
+
+                Element collector = (Element) collectors.item(collectorIndex);
+                String collectorName = collector.getAttribute("name");
+                String collectorId = collector.getElementsByTagName("id").item(0).getTextContent();
+
+                CollectorInfo collectorInfo = new CollectorInfo(collectorName, collectorId);
+
+                Element apiNode = (Element) collector.getElementsByTagName("api").item(0);
+
+                //find out start and stop API values
+                NodeList collectorAPIs = apiNode.getChildNodes();
+                for(int apiIndex = 0; apiIndex < collectorAPIs.getLength(); apiIndex++) {
+
+                    Element currentAPI = (Element)collectorAPIs.item(apiIndex);
+                    if(currentAPI.getTagName().equals("start")) {
+                        collectorInfo.setStartAPI(currentAPI.getTextContent());
+                    } else if(currentAPI.getTagName().equals("stop")) {
+                        collectorInfo.setStopAPI(currentAPI.getTextContent());
+                    }
+                }
+
+                NodeList monitors = collector.getElementsByTagName("monitors").item(0).getChildNodes();
+
+                for(int monitorIndex = 0; monitorIndex < monitors.getLength(); monitorIndex++) {
+
+                    Element monitor = (Element) monitors.item(monitorIndex);
+                    String monitorName = monitor.getAttribute("name");
+                    String monitorId = monitor.getElementsByTagName("id").item(0).getTextContent();
+
+                    MonitorInfo monitorInfo = new MonitorInfo(monitorName, monitorId);
+
+                    //build monitor parameters map
+                    Element monitorConfiguration = (Element) monitor.getElementsByTagName("configuration").item(0);
+                    NodeList monitorConfigurationParams = monitorConfiguration.getElementsByTagName("param");
+                    Map<String, String> params = new HashMap<String, String>();
+                    for(int paramIndex = 0; paramIndex < monitorConfigurationParams.getLength(); paramIndex++) {
+
+                        Element param = (Element) monitorConfigurationParams.item(paramIndex);
+                        String paramName = param.getAttribute("name");
+                        String paramValue = param.getTextContent();
+                        params.put(paramName, paramValue);
+
+                    }
+
+                    monitorInfo.setParams(params);
+
+                    Element monitorApiNode = (Element) monitor.getElementsByTagName("api").item(0);
+
+                    //find out monitor APIs
+                    NodeList monitorAPIs = monitorApiNode.getChildNodes();
+                    for(int monitorApiIndex = 0; monitorApiIndex < monitorAPIs.getLength(); monitorApiIndex++) {
+
+                        Element currentMonitorAPI = (Element) monitorAPIs.item(monitorApiIndex);
+                        if(currentMonitorAPI.getTagName().equals("start")) {
+                            monitorInfo.setStartAPI(currentMonitorAPI.getTextContent());
+                        } else if(currentMonitorAPI.getTagName().equals("monitor")) {
+                            monitorInfo.setMonitorAPI(currentMonitorAPI.getTextContent());
+                        } else if(currentMonitorAPI.getTagName().equals("stop")) {
+                            monitorInfo.setStopAPI(currentMonitorAPI.getTextContent());
+                        }
+
+                    }
+
+                    //check phase
+                    String runPhase = monitor.getElementsByTagName("runPhase").item(0).getTextContent();
+                    monitorInfo.setRunPhase(runPhase);
+
+                    collectorInfo.addMonitor(monitorInfo);
+                }
+
+                serviceInfo.addCollector(collectorInfo);
+            }
+
+            serviceInfoMap.put(serviceName, serviceInfo);
+        }
+
     }
 
 }

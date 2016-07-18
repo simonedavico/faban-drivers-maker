@@ -2,10 +2,10 @@ package cloud.benchflow.config.docker.compose
 
 import net.jcazevedo.moultingyaml._
 
-import cloud.benchflow.benchmark.config._
-import cloud.benchflow.benchmark.config.collectors._
-import cloud.benchflow.benchmark.config.docker.compose._
-import cloud.benchflow.benchmark.config.benchflowbenchmark._
+import cloud.benchflow.experiment.config._
+import cloud.benchflow.experiment.config.benchflowservices.collectors._
+import cloud.benchflow.experiment.config.docker.compose._
+import cloud.benchflow.experiment.config.experimentdescriptor._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -13,8 +13,8 @@ import cloud.benchflow.benchmark.config.benchflowbenchmark._
   * Created on 05/02/16.
   */
 object YamlTest extends App {
-  val dc = DockerCompose(Service("camunda", image = Some(Image("ciao")), net = Some(Network("host")), extra_hosts = Some(ExtraHosts(Seq("bla")))))
-  println(dc)
+//  val dc = DockerCompose(Service("camunda", image = Some(Image("ciao")), net = Some(Network("host")), extra_hosts = Some(ExtraHosts(Seq("bla")))))
+//  println(dc)
 
   val tests = List(
     "http://${BENCHFLOW_HELLO}/ciao/${BENCHFLOW_GOODBYE}",
@@ -26,8 +26,8 @@ object YamlTest extends App {
     ""
   )
 
-  import cloud.benchflow.benchmark.config.benchflowbenchmark.BenchFlowBenchmarkYamlProtocol._
-  import cloud.benchflow.benchmark.config.collectors.CollectorYamlProtocol._
+  import cloud.benchflow.experiment.config.experimentdescriptor.BenchFlowExperimentYamlProtocol._
+  import cloud.benchflow.experiment.config.benchflowservices.collectors.CollectorYamlProtocol._
 
 //  println("""suts_name: [a, b, c]""".stripMargin.parseYaml.convertTo[SutsName])
 //  println("""sut_name: a""".stripMargin.parseYaml.convertTo[SutsName])

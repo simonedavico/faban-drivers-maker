@@ -18,7 +18,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
