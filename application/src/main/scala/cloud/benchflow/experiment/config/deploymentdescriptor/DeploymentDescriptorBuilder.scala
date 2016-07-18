@@ -1,12 +1,13 @@
-package cloud.benchflow.experiment.config.docker.compose.deploymentdescriptor
+package cloud.benchflow.experiment.config.deploymentdescriptor
 
 import java.nio.file.Paths
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, Binding}
-import cloud.benchflow.experiment.config.docker.compose.{ContainerName, Ports, EnvironmentV2, Service}
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.experiment.config._
 import benchflowservices.{BenchFlowServiceType, Collector => CollectorType, Monitor => MonitorType, benchFlowServiceDescriptor}
+import cloud.benchflow.test.config.experiment.{Binding, BenchFlowExperiment}
+import cloud.benchflow.test.deployment.docker.compose.DockerCompose
+import cloud.benchflow.test.deployment.docker.service.{Environment, Ports, ContainerName, Service}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -100,7 +101,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
 
     private def resolveMonitorVariables(monitor: Monitor): Monitor = {
       monitor.copy(
-        environment = EnvironmentV2(
+        environment = Environment(
           monitor.environment.vars.map {
             case (variableName, variableValue) =>
               variableName -> resolve(service, collector, monitor)(variableValue)
@@ -187,7 +188,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
 
     private def resolveCollectorVariables(collector: Collector): Collector = {
       collector.copy(
-        environment = EnvironmentV2(
+        environment = Environment(
           collector.environment.vars.map {
             case (variableName, variableValue) =>
               variableName -> resolve(self, collector)(variableValue)

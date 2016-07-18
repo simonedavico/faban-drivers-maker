@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.heuristics
 
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, Driver}
 import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.test.config.experiment.{Driver, BenchFlowExperiment}
 
 import scala.reflect.ClassTag
 

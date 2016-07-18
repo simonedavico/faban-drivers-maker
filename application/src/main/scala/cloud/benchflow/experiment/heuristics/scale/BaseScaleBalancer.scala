@@ -1,6 +1,6 @@
 package cloud.benchflow.experiment.heuristics.scale
 
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, Driver}
+import cloud.benchflow.test.config.experiment.{Driver, BenchFlowExperiment}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)

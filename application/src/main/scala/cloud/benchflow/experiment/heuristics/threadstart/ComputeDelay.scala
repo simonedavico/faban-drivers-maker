@@ -1,9 +1,9 @@
 package cloud.benchflow.experiment.heuristics.threadstart
 
-import cloud.benchflow.experiment.config.experimentdescriptor.BenchFlowExperiment
 import cloud.benchflow.experiment.heuristics.HeuristicConfiguration
 import cloud.benchflow.experiment.heuristics.scale.ScaleBalancer
 import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)

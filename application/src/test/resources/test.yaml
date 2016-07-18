@@ -1,5 +1,0 @@
-goBenchmark:
-    drivers:
-      - driverOne:
-          description: This is a test description
-          otherProperty : This is an arbitrary property

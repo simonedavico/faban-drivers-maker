@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.sources.processors
 
-import cloud.benchflow.experiment.config.experimentdescriptor.BenchFlowExperiment
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import com.sun.faban.harness.DefaultFabanBenchmark2
 import spoon.reflect.declaration.{CtType, ModifierKind, CtClass}
 import spoon.reflect.reference.CtTypeReference

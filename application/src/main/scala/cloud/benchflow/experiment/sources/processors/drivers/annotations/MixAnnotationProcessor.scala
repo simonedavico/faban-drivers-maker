@@ -1,9 +1,9 @@
 package cloud.benchflow.experiment.sources.processors.drivers.annotations
 
-import cloud.benchflow.experiment.config.experimentdescriptor._
-import cloud.benchflow.experiment.heuristics.GenerationDefaults
+import cloud.benchflow.experiment.GenerationDefaults
 import cloud.benchflow.experiment.sources.processors.DriverProcessor
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment._
 import com.sun.faban.driver.{OperationSequence, Row}
 import spoon.reflect.code.CtNewArray
 import spoon.reflect.declaration.{CtAnnotation, CtClass}

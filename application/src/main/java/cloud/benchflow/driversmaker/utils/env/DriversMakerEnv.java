@@ -1,6 +1,6 @@
 package cloud.benchflow.driversmaker.utils.env;
 
-import cloud.benchflow.experiment.heuristics.GenerationDefaults;
+import cloud.benchflow.experiment.GenerationDefaults;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)

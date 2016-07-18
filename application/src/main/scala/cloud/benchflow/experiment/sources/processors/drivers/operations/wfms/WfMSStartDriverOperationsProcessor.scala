@@ -1,8 +1,8 @@
 package cloud.benchflow.experiment.sources.processors.drivers.operations.wfms
 
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, Operation, WfMSStartDriver}
 import cloud.benchflow.experiment.sources.processors._
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment.{Operation, WfMSStartDriver, BenchFlowExperiment}
 import com.sun.faban.driver.{Timing, BenchmarkOperation}
 import org.apache.commons.io.FilenameUtils
 import spoon.reflect.code.{CtIf, CtFieldAccess, CtCodeSnippetExpression}

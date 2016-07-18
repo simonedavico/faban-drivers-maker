@@ -2,17 +2,15 @@ package cloud.benchflow.experiment.config
 
 import java.nio.file.Paths
 
-import cloud.benchflow.experiment.config.experimentdescriptor._
+import cloud.benchflow.experiment.GenerationDefaults
 import cloud.benchflow.experiment.config.benchflowservices.collectors._
 import cloud.benchflow.experiment.config.benchflowservices.monitors.{MonitorRunPhase, MonitorAPI}
-import cloud.benchflow.experiment.config.docker.compose.Service
-
-//import cloud.benchflow.benchmark.config.docker.compose.DockerCompose
-import cloud.benchflow.experiment.config.docker.compose.deploymentdescriptor.DockerCompose
-import cloud.benchflow.experiment.heuristics.GenerationDefaults
+import cloud.benchflow.test.config.experiment.{Driver, Binding, Properties, BenchFlowExperiment}
+import cloud.benchflow.test.deployment.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.experiment.config.benchflowservices._
+import cloud.benchflow.test.deployment.docker.service.Service
 
 import scala.xml.{Text, Node, Elem}
 import scala.xml.transform.{RuleTransformer, RewriteRule}

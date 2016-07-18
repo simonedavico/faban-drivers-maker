@@ -1,9 +1,10 @@
-package cloud.benchflow.experiment.config.docker.compose.deploymentdescriptor
+package cloud.benchflow.experiment.config.deploymentdescriptor
 
-import cloud.benchflow.experiment.config.experimentdescriptor.BenchFlowExperiment
-import cloud.benchflow.experiment.config.docker.compose.Service
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
+import cloud.benchflow.test.deployment.docker.compose.DockerCompose
+import cloud.benchflow.test.deployment.docker.service.Service
 import org.jgrapht.alg.CycleDetector
 import org.jgrapht.graph.{DefaultEdge, DefaultDirectedGraph}
 import cloud.benchflow.experiment.config.BenchFlowEnvString

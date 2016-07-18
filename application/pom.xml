@@ -136,6 +136,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.simonedavico</groupId>
+            <artifactId>test-definition-model</artifactId>
+            <version>v-dev</version>
+        </dependency>
+
+        <dependency>
             <groupId>cloud.benchflow</groupId>
             <artifactId>faban-driver</artifactId>
             <version>0.1</version>

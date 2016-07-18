@@ -1,8 +1,8 @@
 package cloud.benchflow.experiment.sources.processors.drivers.operations.http
 
-import cloud.benchflow.experiment.config.experimentdescriptor.{BenchFlowExperiment, HttpDriver}
 import cloud.benchflow.experiment.sources.processors._
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment.{HttpDriver, BenchFlowExperiment}
 import spoon.reflect.declaration.CtClass
 
 /**

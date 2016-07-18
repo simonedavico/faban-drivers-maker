@@ -2,13 +2,13 @@ package cloud.benchflow.experiment.sources.generators
 
 import java.nio.file.{Paths, Path}
 
-import cloud.benchflow.experiment.config.experimentdescriptor._
 import cloud.benchflow.experiment.sources.processors._
 import cloud.benchflow.experiment.sources.processors.drivers.ModelsLoaderProcessor
-import cloud.benchflow.experiment.sources.processors.drivers.annotations.{BenchmarkDefinitionAnnotation, BenchmarkDriverAnnotationProcessor, MixAnnotationProcessor, TimeAnnotationProcessor}
+import cloud.benchflow.experiment.sources.processors.drivers.annotations._
 import cloud.benchflow.experiment.sources.processors.drivers.operations.http.HttpDriverOperationsProcessor
 import cloud.benchflow.experiment.sources.processors.drivers.operations.wfms.WfMSStartDriverOperationsProcessor
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config.experiment._
 
 import spoon.Launcher
 import spoon.compiler.SpoonResourceHelper
