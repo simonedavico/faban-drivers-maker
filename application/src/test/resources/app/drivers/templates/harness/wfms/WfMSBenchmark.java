@@ -302,7 +302,7 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
     @PreRun
     public void preRun() throws Exception {
 
-        logger.info("START: Deployng processes...");
+        logger.info("START: Deploying processes...");
 
         int numDeplProcesses = 0;
         Path modelDir = benchmarkDir.resolve("models");

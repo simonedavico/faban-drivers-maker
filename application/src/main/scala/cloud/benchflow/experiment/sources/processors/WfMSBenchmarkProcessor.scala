@@ -3,8 +3,10 @@ package cloud.benchflow.experiment.sources.processors
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import com.sun.faban.harness.DefaultFabanBenchmark2
+import spoon.reflect.code._
 import spoon.reflect.declaration.{CtType, ModifierKind, CtClass}
 import spoon.reflect.reference.CtTypeReference
+import spoon.reflect.visitor.Filter
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -24,9 +26,24 @@ class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowExperiment,
     })
   }
 
+  //add plugin.deploy statement to preRun method in Benchmark class
+  //CAREFUL!!! any changes to WfMSBenchmark.preRun method
+  //could impact on this processor!
   override def doProcess(element: CtClass[_]): Unit = {
-    //TODO: add statement to deploy models
-    println(element.getMethod("preRun").getBody.getStatements.size())
+
+    val ifBody = element.getMethod("preRun").getBody.getStatement[CtFor](10)
+                               .getBody.asInstanceOf[CtBlock[_]].getStatement(0)
+                               .asInstanceOf[CtIf]
+                               .getThenStatement[CtBlock[_]]
+
+    ifBody.insertBefore(
+      new Filter[CtUnaryOperator[_]] {
+        override def matches(t: CtUnaryOperator[_]): Boolean = {
+          true
+        }
+      },
+      getFactory.Code().createCodeSnippetStatement("processDefinitionId = plugin.deploy(modelFile).get(modelName)")
+    )
   }
 
 }
