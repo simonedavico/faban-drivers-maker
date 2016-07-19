@@ -3,6 +3,7 @@ package cloud.benchflow.experiment.sources.processors.drivers.annotations
 import cloud.benchflow.experiment.GenerationDefaults
 import cloud.benchflow.experiment.sources.processors.DriverProcessor
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+import cloud.benchflow.test.config._
 import cloud.benchflow.test.config.experiment._
 import com.sun.faban.driver.{OperationSequence, Row}
 import spoon.reflect.code.CtNewArray

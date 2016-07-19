@@ -1,6 +1,6 @@
 package cloud.benchflow.experiment.heuristics.scale
 
-import cloud.benchflow.test.config.experiment.Driver
+import cloud.benchflow.test.config.Driver
 
 
 /**

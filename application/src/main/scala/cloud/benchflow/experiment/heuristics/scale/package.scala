@@ -1,6 +1,7 @@
 package cloud.benchflow.experiment.heuristics
 
-import cloud.benchflow.test.config.experiment.{Driver, BenchFlowExperiment}
+import cloud.benchflow.test.config.Driver
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)

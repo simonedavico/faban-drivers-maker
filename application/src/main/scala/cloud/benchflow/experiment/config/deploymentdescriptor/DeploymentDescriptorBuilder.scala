@@ -5,7 +5,8 @@ import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.experiment.config._
 import benchflowservices.{BenchFlowServiceType, Collector => CollectorType, Monitor => MonitorType, benchFlowServiceDescriptor}
-import cloud.benchflow.test.config.experiment.{Binding, BenchFlowExperiment}
+import cloud.benchflow.test.config.Binding
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.deployment.docker.compose.DockerCompose
 import cloud.benchflow.test.deployment.docker.service.{Environment, Ports, ContainerName, Service}
 

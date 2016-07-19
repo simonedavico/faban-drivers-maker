@@ -4,7 +4,8 @@ import java.util.concurrent.TimeUnit
 import cloud.benchflow.experiment.GenerationDefaults
 import cloud.benchflow.experiment.sources.processors.DriverProcessor
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
-import cloud.benchflow.test.config.experiment.{Operation, Driver, BenchFlowExperiment}
+import cloud.benchflow.test.config.{Operation, Driver}
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import com.sun.faban.driver.BenchmarkDriver
 import spoon.reflect.code.CtFieldAccess
 import spoon.reflect.declaration.CtClass

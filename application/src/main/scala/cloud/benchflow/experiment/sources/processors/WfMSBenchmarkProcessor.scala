@@ -4,7 +4,7 @@ import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import com.sun.faban.harness.DefaultFabanBenchmark2
 import spoon.reflect.code._
-import spoon.reflect.declaration.{CtType, ModifierKind, CtClass}
+import spoon.reflect.declaration.CtClass
 import spoon.reflect.reference.CtTypeReference
 import spoon.reflect.visitor.Filter
 
@@ -42,7 +42,9 @@ class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowExperiment,
           true
         }
       },
-      getFactory.Code().createCodeSnippetStatement("processDefinitionId = plugin.deploy(modelFile).get(modelName)")
+      getFactory.Code().createCodeSnippetStatement(
+        "processDefinitionId = plugin.deploy(modelFile).get(modelName)"
+      )
     )
   }
 

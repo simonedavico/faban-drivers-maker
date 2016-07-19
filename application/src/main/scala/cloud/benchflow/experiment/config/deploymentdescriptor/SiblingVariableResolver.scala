@@ -2,13 +2,16 @@ package cloud.benchflow.experiment.config.deploymentdescriptor
 
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
+
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.deployment.docker.compose.DockerCompose
 import cloud.benchflow.test.deployment.docker.service.Service
+import cloud.benchflow.experiment.config.BenchFlowEnvString
+
 import org.jgrapht.alg.CycleDetector
 import org.jgrapht.graph.{DefaultEdge, DefaultDirectedGraph}
-import cloud.benchflow.experiment.config.BenchFlowEnvString
 import org.jgrapht.traverse.TopologicalOrderIterator
+
 import scala.collection.JavaConverters._
 
 /**

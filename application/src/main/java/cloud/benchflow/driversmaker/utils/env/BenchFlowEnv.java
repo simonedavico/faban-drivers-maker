@@ -11,6 +11,7 @@ import java.util.Map;
  *
  * Created on 13/02/16.
  */
+@SuppressWarnings("unchecked")
 public class BenchFlowEnv {
 
     private Map<String, Object> env;

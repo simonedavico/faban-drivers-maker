@@ -5,7 +5,8 @@ import java.nio.file.Paths
 import cloud.benchflow.experiment.GenerationDefaults
 import cloud.benchflow.experiment.config.benchflowservices.collectors._
 import cloud.benchflow.experiment.config.benchflowservices.monitors.{MonitorRunPhase, MonitorAPI}
-import cloud.benchflow.test.config.experiment.{Driver, Binding, Properties, BenchFlowExperiment}
+import cloud.benchflow.test.config.{Driver, Binding, Properties}
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.deployment.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
