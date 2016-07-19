@@ -130,12 +130,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.zafarkhaja</groupId>
-            <artifactId>java-semver</artifactId>
-            <version>${java.semver.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.simonedavico</groupId>
             <artifactId>test-definition-model</artifactId>
             <version>v-dev</version>
