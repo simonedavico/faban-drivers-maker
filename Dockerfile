@@ -16,6 +16,9 @@ ENV GENERATION_RESOURCES_ROOT /app/drivers
 ENV LIBRARIES_ROOT ${GENERATION_RESOURCES_ROOT}/libraries
 ENV PLUGINS_ROOT ${GENERATION_RESOURCES_ROOT}/plugins
 ENV TEMPLATES_ROOT ${GENERATION_RESOURCES_ROOT}/templates
+ENV BENCHFLOW_SERVICES_ROOT ${GENERATION_RESOURCES_ROOT}/benchflow-services
+ENV BENCHFLOW_COLLECTORS_ROOT ${BENCHFLOW_SERVICES_ROOT}/collectors
+ENV BENCHFLOW_MONITORS_ROOT ${BENCHFLOW_SERVICES_ROOT}/monitors
 
 # Get benchflow-drivers-maker
 RUN wget -q --no-check-certificate -O /app/benchflow-drivers-maker.jar https://github.com/benchflow/drivers-maker/releases/download/$FABAN_DRIVERS_MAKER_VERSION/benchflow-drivers-maker.jar
@@ -31,7 +34,7 @@ RUN apk --update add wget tar && \
 	mkdir -p ${FABAN_HOME}/master/webapps/faban && \
 	cd ${FABAN_HOME}/master/webapps/faban && \
 	JAVA=`readlink -f $(which java) | sed 's|/bin/java$||'` && \
-	#Unjar faban.war
+	# Unjar faban.war
 	$JAVA/bin/jar xvf ../faban.war && \
 	# Remove unused Faban assets
 	rm -f ${FABAN_HOME}/*.* && \
@@ -49,8 +52,29 @@ RUN apk --update add wget tar && \
 	apk del --purge tar && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/* *.gz
 
-#copy driver skeleton
+# copy driver skeleton
 COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
+
+# Download monitors library into driver skeleton
+RUN wget -q --no-check-certificate -O /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
+    http://github.com/benchflow/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar
+
+# Copy it also in /lib folder
+COPY /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
+
+# Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
+RUN mkdir /tmp/monitors-deployment-descriptors && \
+    wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/ https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
+    tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz --include='*monitor.yml*' -C /tmp/monitors-deployment-descriptors/ && \
+    find /tmp/monitors-deployment-descriptors/ -name '*.monitor.yml' -type f -exec mv -i {} ${BENCHFLOW_MONITORS_ROOT} \; && \
+    rm -rf /tmp/monitors-deployment-descriptors/
+
+# Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
+RUN mkdir /tmp/collectors-deployment-descriptors && \
+    wget -q --no-check-certificate -O /tmp/collectors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/collectors/archive/v-dev.tar.gz && \
+    tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz --include='*collector.yml*' -C /tmp/collectors-deployment-descriptors/ && \
+    find /tmp/collectors-deployment-descriptors/ -name '*.collector.yml' -type f -exec mv -i {} ${BENCHFLOW_COLLECTORS_ROOT} \; && \
+    rm -rf /tmp/collectors-deployment-descriptors/
 
 # Install Ant (Source: https://hub.docker.com/r/webratio/ant/~/dockerfile/)
 ENV ANT_VERSION 1.9.4

@@ -26,7 +26,7 @@ class LogisticsGrowthJvmParamsHeuristic(mapConfig: Map[String, Any])(env: BenchF
   //see https://en.wikipedia.org/wiki/Logistic_function
   override def xmx(bb: BenchFlowExperiment): Int = {
     val L = config.maxMemory
-    val x = bb.virtualUsers.virtualUsers
+    val x = bb.users.users
     val x0 = config.maxUsers/2
     (L/(1 + Math.exp(-config.k * (x - x0))) + config.xms).toInt
   }

@@ -18,6 +18,7 @@ properties:
         maxRunTime: 6
         interval: 2
 
+
 drivers:
 - start:
     properties:
@@ -30,41 +31,6 @@ drivers:
             fixedSequence: [ myModel ]
             deviation: 5
 
-#goal:
-#  type: custom
-#  settings:
-#    load function:
-#      rampUp:
-#      steadyState:
-#      rampDown:
-#
-#    parameters:
-#    - users: 1000
-#    - memory: ... on service
-#    - cpus ... on service
-#    - $MYCUSTOMPARAM on service
-
-#goal:
-#  type: config
-#  settings:
-#    load function (execution): ...
-#
-#    parameters:
-#    - users:
-#         constant: 1000
-#    - users:
-#         range: 1...100
-#         step: +5 || *5 || -5 || /5
-#    - $BOOLPARAM:
-#         range: [ true, false ]
-#
-#    explore:
-#    - users
-#    - $BOOLPARAM on camunda
-#
-#    observe:
-#    - mem-usage on camunda
-#    -
 
 sut-configuration:
 

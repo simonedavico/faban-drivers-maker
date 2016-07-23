@@ -11,7 +11,7 @@ import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 class BaseScaleBalancer(protected val configuration: Map[String, Any])
                        (private val bb: BenchFlowExperiment) extends ScaleBalancer {
 
-  val users = bb.virtualUsers.virtualUsers
+  val users = bb.users.users
 
   private def popularity(driver: Driver[_]): Float =
     driver.configuration.flatMap(_.popularity).getOrElse(1.toFloat/bb.drivers.size)

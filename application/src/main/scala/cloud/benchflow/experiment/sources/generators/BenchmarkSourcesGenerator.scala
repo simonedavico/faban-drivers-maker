@@ -10,6 +10,8 @@ import cloud.benchflow.experiment.sources.processors.drivers.operations.wfms.WfM
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.test.config._
 import cloud.benchflow.test.config.experiment._
+import cloud.benchflow.test.config.sut.http.{HttpDriver, Http}
+import cloud.benchflow.test.config.sut.wfms.{WfMSDriver, WfMSStartDriver, WfMS}
 
 import spoon.Launcher
 import spoon.compiler.SpoonResourceHelper

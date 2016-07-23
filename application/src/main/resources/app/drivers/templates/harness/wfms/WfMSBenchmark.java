@@ -5,7 +5,6 @@ import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.concurrent.*;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -35,9 +34,12 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
     private ApacheHC3Transport http;
     private DriverConfig driverConfig;
     private Map<String, String> modelsStartID;
-    //protected ParamRepository params;
+    //this is already in defaultfabanbenchmark2
+//    protected ParamRepository params;
 
-
+    /**
+     * Encapsulates methods to retrieve values from run.xml
+     */
     private class DriverConfig {
 
         private Node getNode(String xPathExpression) {
@@ -100,20 +102,10 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     }
 
-    private class BenchFlowServicesAsynchInteraction implements Callable<String> {
-        private String url;
 
-        public BenchFlowServicesAsynchInteraction(String url){
-            this.url = url;
-        }
-
-        @Override
-        public String call() throws Exception {
-            return http.fetchURL(url).toString();
-        }
-    }
-
-
+    /***
+     * This method deploys the sut.
+     */
     @Configure
     public void configure() throws Exception {
 
@@ -136,7 +128,9 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         logger.info("System Started. Status: " + statusUp);
     }
 
-
+    /**
+     * This method sets sut endpoint, deployment manager address, trial id
+     */
     @Override
     @Validate
     public void validate() throws Exception {
@@ -150,10 +144,10 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         logger.info("benchmarkDir is: " + benchmarkDir.toString());
 
         setSutEndpoint();
-        benchFlowComposeAddress = driverConfig.getXPathValue("benchFlowServices/benchFlowCompose");
+        benchFlowComposeAddress = driverConfig.getXPathValue("benchFlowServices/deploymentManager");
         trialId = driverConfig.getXPathValue("benchFlowRunConfiguration/trialId");
 
-        logger.info("Compose address is: " + benchFlowComposeAddress);
+        logger.info("Deployment manager address is: " + benchFlowComposeAddress);
         logger.info("Trial id is: " + trialId);
         logger.info("DONE: setSutEndpoint");
 
@@ -164,10 +158,13 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     }
 
+    /**
+     *  Deploys BPMN models
+     */
     @PreRun
     public void preRun() throws Exception {
 
-        logger.info("START: Deployng processes...");
+        logger.info("START: Deploying processes...");
 
         int numDeplProcesses = 0;
         Path modelDir = benchmarkDir.resolve("models");
@@ -190,8 +187,8 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
                 File modelFile = new File(modelPath);
                 String processDefinitionId = null;
 
-                //TODO: add with spoon
-//              processDefinitionId = plugin.deploy(modelFile).get(modelName);
+                //add with spoon
+                //processDefinitionId = plugin.deploy(modelFile).get(modelName);
 
                 logger.info("PROCESS DEFINITION ID: " + processDefinitionId);
 
@@ -204,40 +201,9 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         logger.info("END: Deploying processes...");
     }
 
-    private void callCollectorsApi(String api) throws Exception {
-
-        //TODO: this is suboptimal because we create one thread for each collector
-        //but we should really create one thread only for the collectors with a start API
-        //this will allow us also to count the number of expected responses and use a countdownlatch
-        NodeList collectors = driverConfig.getNode("benchFlowServices/collectors").getChildNodes();
-        ExecutorService es = Executors.newFixedThreadPool(collectors.getLength());
-        CompletionService<String> cs = new ExecutorCompletionService<>(es);
-
-        List<Future<String>> collectorsStartResponses = new LinkedList<Future<String>>();
-        for(int i = 0; i < collectors.getLength(); i++) {
-            Node collector = collectors.item(i);
-            String collectorName = collector.getNodeName();
-
-            String[] bindings = driverConfig.getXPathValue("benchFlowServices/collectors/" + collectorName + "/bindings").split(",");
-            for(String service : bindings) {
-
-                //String completeCollectorName = collectorName + "_collector_" + service;
-                String completeCollectorName = "benchflow.collector." + collectorName + "." + service;
-                String collectorApi = driverConfig.getXPathValue("benchFlowServices/collectors/" + completeCollectorName + "/" + api);
-                String privatePort = driverConfig.getXPathValue("benchFlowServices/collectors/" + completeCollectorName + "/privatePort");
-                String portApi = benchFlowComposeAddress + "/projects/" + trialId + "/port/" + completeCollectorName + "/" + privatePort;
-
-                HttpMethod getCollectorAddress = new GetMethod(portApi);
-                http.getHttpClient().executeMethod(getCollectorAddress);
-                String collectorAddress = new String(getCollectorAddress.getResponseBody(), "UTF-8");
-                getCollectorAddress.releaseConnection();
-                String collectorApiAddress = collectorAddress + collectorApi;
-                collectorsStartResponses.add(cs.submit(new BenchFlowServicesAsynchInteraction(collectorApiAddress)));
-            }
-        }
-
-    }
-
+    /**
+     * Undeploys the sut
+     */
     private int undeploy() throws Exception {
         //remove the sut
         //curl -v -X PUT http://<HOST_IP>:<HOST_PORT>/projects/camunda/rm/
@@ -248,18 +214,23 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
     }
 
 
+    /**
+     * Starts collectors and related monitors
+     */
     @Override
     @StartRun
     public void start() throws Exception {
         super.start();
-        callCollectorsApi("start");
     }
 
+    /**
+     * Stops collectors and related monitors
+     */
     @PostRun
     public void postRun() throws Exception {
-        callCollectorsApi("stop");
         undeploy();
     }
+
 
     @Override
     @EndRun
@@ -280,19 +251,17 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
 
     protected final String getTrialId() { return this.trialId; }
 
+    /**
+     * Retrieves sut endpoint address from deployment manager and sets resolved address as field of this class
+     */
     private void setSutEndpoint() throws Exception {
 
         StringBuilder urlBuilder = new StringBuilder();
         String targetServiceName = driverConfig.getXPathValue("sutConfiguration/serviceName");
         String targetServiceEndpoint = driverConfig.getXPathValue("sutConfiguration/endpoint");
-        String targetServicePrivatePort = driverConfig.getXPathValue("sutConfiguration/privatePort");
+        String privatePort = driverConfig.getXPathValue("benchFlowServices/privatePort");
 
-        String portApi = benchFlowComposeAddress + "/projects/" + trialId + "/port/" + targetServiceName + "/" + targetServicePrivatePort;
-        HttpMethod getTargetServiceAddress = new GetMethod(portApi);
-        http.getHttpClient().executeMethod(getTargetServiceAddress);
-        String targetServiceAddress = new String(getTargetServiceAddress.getResponseBody(), "UTF-8");
-
-        getTargetServiceAddress.releaseConnection();
+        String targetServiceAddress = benchFlowServiceAddress(targetServiceName, privatePort);
 
         sutEndpoint = urlBuilder.append("http://")
                 .append(targetServiceAddress)
@@ -301,8 +270,13 @@ public class WfMSBenchmark extends DefaultFabanBenchmark2 {
         driverConfig.addConfigurationNode("sutConfiguration", "sutEndpoint", sutEndpoint);
     }
 
+
+
+    /**
+     * Setup benchmarkDir, http transport, and services info map
+     */
     private void initialize() {
-//        params = RunContext.getParamRepository();
+        //params = RunContext.getParamRepository();
         this.benchmarkDir = Paths.get(RunContext.getBenchmarkDir());
         this.http = new ApacheHC3Transport();
         this.driverConfig = new DriverConfig();

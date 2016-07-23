@@ -2,8 +2,8 @@ package cloud.benchflow.experiment.sources.processors.drivers.operations.http
 
 import cloud.benchflow.experiment.sources.processors._
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
-import cloud.benchflow.test.config.HttpDriver
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
+import cloud.benchflow.test.config.sut.http.HttpDriver
 import spoon.reflect.declaration.CtClass
 
 /**
