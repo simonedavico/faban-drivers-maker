@@ -10,6 +10,8 @@ import cloud.benchflow.driversmaker.utils.env.{DriversMakerEnv, BenchFlowEnv}
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.deployment.docker.compose.DockerCompose
 
+import net.jcazevedo.moultingyaml._
+
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
@@ -17,6 +19,7 @@ import cloud.benchflow.test.deployment.docker.compose.DockerCompose
   */
 object GenerationTest extends App {
 
+  import cloud.benchflow.test.deployment.docker.compose.DockerComposeYamlProtocol._
 
   val trial = new Trial
   trial.setBenchmarkId("fooBenchmark")
@@ -43,7 +46,8 @@ object GenerationTest extends App {
   )
   val resolvedDC = dcBuilder.resolveDeploymentDescriptor(parsedDc, trial)
   //  println(resolvedDC)
-  //  println(resolvedDC.toYaml.prettyPrint)
+  println(resolvedDC.toYaml.prettyPrint)
+//  println(resolvedDC.toString)
 
   val runXmlBuilder = new FabanBenchmarkConfigurationBuilder(parsedBB,benchFlowEnv,parsedDc)
   //println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
@@ -57,6 +61,6 @@ object GenerationTest extends App {
     env = benchFlowEnv
   )
 
-  benchmarkSourcesGenerator.generate()
+  //benchmarkSourcesGenerator.generate()
 
 }

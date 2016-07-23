@@ -8,7 +8,7 @@ import benchflowservices.{BenchFlowServiceType, Collector => CollectorType, Moni
 import cloud.benchflow.test.config.Binding
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.deployment.docker.compose.DockerCompose
-import cloud.benchflow.test.deployment.docker.service.{Environment, Ports, ContainerName, Service}
+import cloud.benchflow.test.deployment.docker.service._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -174,7 +174,6 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
     //resolves constraint, collector name, ports
     private def resolveDeploymentInfo(collector: Collector): Collector = {
       val name = benchflowservices.collectorId(self.name, collector.name)
-      //val name = s"benchflow.collector.${collector.name}.${self.name}"
       val alias = testConfig.getAliasForService(self.name).get
       val aliasIp = env.getPublicIp(alias)
 
@@ -186,6 +185,24 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
         ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}")))
       )
     }
+
+    private def mountBoundServiceVolumes(collector: Collector): Collector = {
+
+      collector.volumes.map[Collector] { someVolumes =>
+
+        val mountVolumesIndex = someVolumes.volumes.indexOf("${BENCHFLOW_BOUNDSERVICE_VOLUMES}")
+        if(mountVolumesIndex != -1) {
+          collector.copy(
+            volumes = self.volumes.map(_.volumes ++ someVolumes.volumes.patch(mountVolumesIndex, Nil, 1)) match {
+              case Some(vols) => Some(Volumes(vols))
+              case None => None
+            }
+          )
+        }
+        else collector
+      }.get
+    }
+
 
     private def resolveCollectorVariables(collector: Collector): Collector = {
       collector.copy(
@@ -207,6 +224,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
               (deploymentDescriptorDefinition _
                 andThen resolveDeploymentInfo
                 andThen generateEnvVariables
+                andThen mountBoundServiceVolumes
                 andThen resolveCollectorVariables)(collectorName)
         }
       }
@@ -264,7 +282,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       //val benchFlowServiceOriginalName = benchFlowService.name.split("\\.")(2)
       val benchFlowServiceOriginalName = CollectorType.getName(benchFlowService.name)
       testConfig.getBindingConfiguration(boundService.name, benchFlowServiceOriginalName)
-                .map(_.properties.get(variable)).get.toString
+                .flatMap(_.properties.get(variable)).get.toString
     }
   }
   private object BenchFlowConfigVariable {
