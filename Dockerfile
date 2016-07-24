@@ -57,10 +57,11 @@ COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templat
 
 # Download monitors library into driver skeleton
 RUN wget -q --no-check-certificate -O /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
-    http://github.com/benchflow/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar
+    http://github.com/benchflow/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar && \
+    cp /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
 
 # Copy it also in /lib folder
-COPY /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
+# COPY /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
 
 # Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
 RUN mkdir /tmp/monitors-deployment-descriptors && \
