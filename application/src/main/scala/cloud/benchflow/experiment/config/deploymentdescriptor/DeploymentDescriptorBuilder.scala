@@ -204,7 +204,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
     }
 
     private def resolveVolumesFrom(collector: Collector): Collector = {
-      
+
       collector.volumesFrom.map[Collector] { someVolumesFrom =>
 
         val mountVolumesIndex = someVolumesFrom.volumes.map(_._1).indexOf("${BENCHFLOW_BOUNDSERVICE_VOLUMES}")
