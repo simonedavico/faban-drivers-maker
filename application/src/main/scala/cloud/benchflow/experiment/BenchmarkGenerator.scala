@@ -45,6 +45,8 @@ class BenchmarkGenerator(experimentId: String,
       new PrettyPrinter(400, 2).format(fabanConfigGenerator.build(t))
 
     def generateDeploymentDescriptorForTrial(t: Trial): String = {
-      deploymentDescriptorGenerator.resolveDeploymentDescriptor(dd, t).toString
+      DockerCompose.toYaml(
+        deploymentDescriptorGenerator.resolveDeploymentDescriptor(dd, t)
+      )
     }
 }

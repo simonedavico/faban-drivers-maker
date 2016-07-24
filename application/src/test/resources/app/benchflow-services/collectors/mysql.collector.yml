@@ -21,7 +21,7 @@ mysql:
   - 8080
   ports:
   - '8080'
-  volumes:
+  volumes_from:
   - ${BENCHFLOW_BOUNDSERVICE_VOLUMES}
 
 

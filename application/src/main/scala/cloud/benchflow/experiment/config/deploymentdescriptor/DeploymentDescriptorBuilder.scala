@@ -203,6 +203,27 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       }.get
     }
 
+    private def resolveVolumesFrom(collector: Collector): Collector = {
+      
+      collector.volumesFrom.map[Collector] { someVolumesFrom =>
+
+        val mountVolumesIndex = someVolumesFrom.volumes.map(_._1).indexOf("${BENCHFLOW_BOUNDSERVICE_VOLUMES}")
+        if(mountVolumesIndex != -1) {
+
+          collector.copy(
+            volumesFrom = Some(VolumesFrom(
+                (self.name, Some(ReadOnly)) :: someVolumesFrom.volumes.patch(mountVolumesIndex, Nil, 1).toList
+              )
+            )
+
+          )
+
+        } else collector
+
+      }.getOrElse(collector)
+
+    }
+
 
     private def resolveCollectorVariables(collector: Collector): Collector = {
       collector.copy(
@@ -224,7 +245,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
               (deploymentDescriptorDefinition _
                 andThen resolveDeploymentInfo
                 andThen generateEnvVariables
-                andThen mountBoundServiceVolumes
+                andThen resolveVolumesFrom
+                //andThen mountBoundServiceVolumes
                 andThen resolveCollectorVariables)(collectorName)
         }
       }
