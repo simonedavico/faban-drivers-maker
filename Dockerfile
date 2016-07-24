@@ -64,14 +64,14 @@ RUN wget -q --no-check-certificate -O /app/drivers/templates/skeleton/benchmark/
 # COPY /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
 
 # Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
-RUN mkdir /tmp/monitors-deployment-descriptors && \
-    wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/ https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
+RUN mkdir -p /tmp/monitors-deployment-descriptors && \
+    wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
     tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz --include='*monitor.yml*' -C /tmp/monitors-deployment-descriptors/ && \
     find /tmp/monitors-deployment-descriptors/ -name '*.monitor.yml' -type f -exec mv -i {} ${BENCHFLOW_MONITORS_ROOT} \; && \
     rm -rf /tmp/monitors-deployment-descriptors/
 
 # Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
-RUN mkdir /tmp/collectors-deployment-descriptors && \
+RUN mkdir -p /tmp/collectors-deployment-descriptors && \
     wget -q --no-check-certificate -O /tmp/collectors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/collectors/archive/v-dev.tar.gz && \
     tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz --include='*collector.yml*' -C /tmp/collectors-deployment-descriptors/ && \
     find /tmp/collectors-deployment-descriptors/ -name '*.collector.yml' -type f -exec mv -i {} ${BENCHFLOW_COLLECTORS_ROOT} \; && \
