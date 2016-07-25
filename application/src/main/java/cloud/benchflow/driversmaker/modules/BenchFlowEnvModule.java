@@ -27,7 +27,7 @@ public class BenchFlowEnvModule extends AbstractModule {
         String configYmlPath = dmc.getBenchFlowEnvConfiguration().getConfigPath();
         String bfServicesPath = dmc.getBenchFlowEnvConfiguration().getBenchFlowServicesPath();
         String generationResourcesPath = dmc.getBenchFlowEnvConfiguration().getGenerationResourcesPath();
-        int privatePort = dmc.getBenchFlowEnvConfiguration().getPrivatePort();
+        String privatePort = dmc.getBenchFlowEnvConfiguration().getPrivatePort();
         BenchFlowEnv benv = new BenchFlowEnv(configYmlPath);
         return new DriversMakerEnv(benv, bfServicesPath, generationResourcesPath, privatePort);
     }

@@ -5,6 +5,7 @@ import io.minio.MinioClient;
 import io.minio.ObjectStat;
 import io.minio.Result;
 import io.minio.errors.*;
+import io.minio.messages.ErrorResponse;
 import io.minio.messages.Item;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.NotImplementedException;
@@ -179,6 +180,7 @@ public class BenchFlowMinioClient {
      * at benchmarks/{benchmarkId}/original/benchflow-benchmark.yml
      */
     public String getBenchFlowBenchmarkForExperiment(final String benchmarkId, final long experimentNumber) {
+        System.out.println(benchmarkId + "/" + experimentNumber + "/" + TEST_CONFIGURATION_NAME);
         return getTextFile(benchmarkId + "/" + experimentNumber + "/" + TEST_CONFIGURATION_NAME);
     }
 
@@ -342,7 +344,7 @@ public class BenchFlowMinioClient {
             try {
                 ObjectStat stat = mc.statObject(BENCHMARKS_BUCKET, benchmarkId + "/models");
             } catch(ErrorResponseException e) {
-                if(e.errorCode() == ErrorCode.NO_SUCH_KEY) return modelNames;
+                if(e.errorResponse().errorCode() ==   ErrorCode.NO_SUCH_KEY) return modelNames;
                 else throw new BenchFlowMinioClientException(e.getMessage(), e);
             }
             for(Result<Item> item : mc.listObjects(BENCHMARKS_BUCKET, benchmarkId + "/models")) {

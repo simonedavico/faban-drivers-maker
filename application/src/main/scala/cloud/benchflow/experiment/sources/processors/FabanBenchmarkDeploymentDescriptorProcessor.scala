@@ -14,7 +14,7 @@ import scala.xml.PrettyPrinter
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
-  *         Created on 11/05/16.
+  * Created on 11/05/16.
   */
 class FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark: BenchFlowExperiment,
                                                   experimentId: String,
@@ -25,7 +25,9 @@ class FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark: BenchFlowE
     super.isProcessable(element) &&
       (element.getSuperclass match {
         //is processable only if it extends DefaultFabanBenchmark2
-        case aClass: CtTypeReference[_] => aClass.getActualClass == classOf[DefaultFabanBenchmark2]
+        //case aClass: CtTypeReference[_] => aClass.getActualClass == classOf[DefaultFabanBenchmark2]
+        case aClass: CtTypeReference[_] => aClass.isSubtypeOf(getFactory.Type.createReference(classOf[DefaultFabanBenchmark2]))
+        //case aClass: CtTypeReference[_] => aClass.getActualClass.getName == "cloud.benchflow.experiment.harness.BenchFlowBenchmark"
         case _ => false
       })
   }

@@ -14,6 +14,7 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -60,6 +61,16 @@ public class FabanBenchmarkGeneratorResource {
         p.addReference("ant.projectHelper", helper);
         helper.parse(p, driverPath.resolve("build.xml").toFile());
         p.executeTarget("build");
+    }
+
+    //copies classes from package cloud.benchflow.driversmaker.generation
+    //into the benchmark skeleton
+    private void copyGenerationSources(final Path benchmarkPath) throws IOException {
+
+        Path generationSourcesPath = Paths.get("./application/src/main/java/cloud/benchflow/driversmaker/generation");
+        FileUtils.copyDirectory(generationSourcesPath.toFile(),
+                                benchmarkPath.resolve("src/cloud/benchflow/driversmaker/generation").toFile());
+
     }
 
     @Deprecated
@@ -164,6 +175,8 @@ public class FabanBenchmarkGeneratorResource {
             }
 
             logger.debug("About to build generated driver");
+
+            copyGenerationSources(driverPath);
             buildDriver(driverPath, experiment.getExperimentId());
 
             //save generated driver to minio

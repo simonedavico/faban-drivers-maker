@@ -31,7 +31,7 @@ object GenerationTest extends App {
   val benchFlowEnv = new DriversMakerEnv(configYml,
     "./application/src/test/resources/app/benchflow-services",
     "./application/src/test/resources/app/drivers",
-    8080)
+    "8080")
 
   val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
   val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
@@ -46,8 +46,8 @@ object GenerationTest extends App {
   )
   val resolvedDC = dcBuilder.resolveDeploymentDescriptor(parsedDc, trial)
   //  println(resolvedDC)
-  println(resolvedDC.toYaml.prettyPrint)
-//  println(resolvedDC.toString)
+  //println(resolvedDC.toYaml.prettyPrint)
+  println(DockerCompose.toYaml(resolvedDC))
 
   val runXmlBuilder = new FabanBenchmarkConfigurationBuilder(parsedBB,benchFlowEnv,parsedDc)
   //println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
@@ -61,6 +61,6 @@ object GenerationTest extends App {
     env = benchFlowEnv
   )
 
-  //benchmarkSourcesGenerator.generate()
+  benchmarkSourcesGenerator.generate()
 
 }

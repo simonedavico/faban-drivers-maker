@@ -24,6 +24,7 @@ package object processors {
       * - anonymous classes
       * - inner classes
       * - libraries and plugins
+      * - class BenchFlowBenchmark (base for each benchmark)
       */
     protected def isProcessable(element: CtClass[_]): Boolean = {
       (element match {
@@ -37,6 +38,10 @@ package object processors {
                elemPackage.getQualifiedName.contains("plugins"))
         //if it's an inner class, don't process it
         case elemClass: CtClass[_] => false
+        case _ => true
+      }) &&
+      (element match {
+        case elemClass: CtClass[_] => elemClass.getSimpleName != "BenchFlowBenchmark"
         case _ => true
       })
     }

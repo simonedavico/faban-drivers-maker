@@ -21,7 +21,9 @@ class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowExperiment,
     super.isProcessable(element) &&
     (element.getSuperclass match {
       //is processable only if it extends DefaultFabanBenchmark2
-      case aClass: CtTypeReference[_] => aClass.getActualClass == classOf[DefaultFabanBenchmark2]
+      case aClass: CtTypeReference[_] => aClass.isSubtypeOf(getFactory.Type.createReference(classOf[DefaultFabanBenchmark2]))
+        //aClass.getActualClass == classOf[DefaultFabanBenchmark2]
+      //case aClass: CtTypeReference[_] => aClass.getActualClass.getName == "cloud.benchflow.experiment.harness.BenchFlowBenchmark"
       case _ => false
     })
   }
@@ -31,15 +33,15 @@ class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowExperiment,
   //could impact on this processor!
   override def doProcess(element: CtClass[_]): Unit = {
 
-    val ifBody = element.getMethod("preRun").getBody.getStatement[CtFor](10)
+    val ifBody = element.getMethod("preRun").getBody.getStatement[CtFor](8)
                                .getBody.asInstanceOf[CtBlock[_]].getStatement(0)
                                .asInstanceOf[CtIf]
                                .getThenStatement[CtBlock[_]]
 
     ifBody.insertBefore(
-      new Filter[CtUnaryOperator[_]] {
-        override def matches(t: CtUnaryOperator[_]): Boolean = {
-          true
+      new Filter[CtInvocation[_]] {
+        override def matches(t: CtInvocation[_]): Boolean = {
+          t.toString.contains("addModel")
         }
       },
       getFactory.Code().createCodeSnippetStatement(

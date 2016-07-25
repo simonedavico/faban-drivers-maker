@@ -1,38 +1,53 @@
-package cloud.benchflow.experiment.drivers;
+package cloud.benchflow.driversmaker.generation;
+
+import cloud.benchflow.driversmaker.generation.utils.BenchmarkUtils;
+import cloud.benchflow.monitors.Monitor;
+import cloud.benchflow.monitors.MonitorFactory;
 
 import com.sun.faban.driver.*;
 import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
+/**
+ * @author Simone D'Avico (simonedavico@gmail.com)
+ *
+ * Created on 25/07/16.
+ *
+ * Base BenchFlow driver. Handles monitors and collectors lifecycle
+ */
+public class BenchFlowDriver {
 
-import cloud.benchflow.monitors.*;
+    protected DriverContext ctx;
+    protected ApacheHC3Transport http;
+    protected String sutEndpoint;
+    protected String trialId;
 
-public class Driver {
-
-    private DriverContext ctx;
-//    private HttpTransport http;
-    private ApacheHC3Transport http;
-    private String sutEndpoint;
     private Logger logger;
-    private Map<String,String> modelsStartID;
     private Map<String, ServiceInfo> serviceInfoMap;
+    private String deploymentManagerAddress;
 
-    //add plugin with spoon
-
-    public Driver() throws Exception {
+    public BenchFlowDriver() throws Exception {
         initialize();
         setSutEndpoint();
-        //added with spoon
-        //loadModelsInfo();
+    }
+
+    protected String getContextProperty(String property){
+        return ctx.getProperty(property);
+    }
+
+    protected String getXPathValue(String xPathExpression) throws Exception {
+        return ctx.getXPathValue(xPathExpression);
     }
 
     private static class ServiceInfo {
@@ -172,22 +187,28 @@ public class Driver {
 
     }
 
-    /**
-     * Retrieves the address for a benchflow service from the deployment manager
-     */
-    private String benchFlowServiceAddress(String benchFlowServiceId, String privatePort) throws Exception {
+    private void iterateOverBenchFlowServices(
+            Consumer<ServiceInfo> serviceInfoConsumer,
+            Consumer<CollectorInfo> collectorInfoConsumer,
+            Consumer<MonitorInfo> monitorInfoConsumer) {
 
-        String deploymentManagerPortsApi = benchFlowComposeAddress + "/projects/" +
-                trialId + "/port/" + benchFlowServiceId + "/" + privatePort;
+        for (ServiceInfo serviceInfo: serviceInfoMap.values()) {
 
-        HttpMethod getServiceAddress = new GetMethod(deploymentManagerPortsApi);
-        http.getHttpClient().executeMethod(getServiceAddress);
-        String serviceAddress = new String(getServiceAddress.getResponseBody(), "UTF-8");
-        getServiceAddress.releaseConnection();
-        return serviceAddress;
+            List<CollectorInfo> collectorInfoList = serviceInfo.getCollectors();
+            for (CollectorInfo collectorInfo : collectorInfoList) {
+
+                List<MonitorInfo> monitorInfoList = collectorInfo.getMonitors();
+                for (MonitorInfo monitorInfo : monitorInfoList) {
+                    monitorInfoConsumer.accept(monitorInfo);
+                }
+
+                collectorInfoConsumer.accept(collectorInfo);
+            }
+
+            serviceInfoConsumer.accept(serviceInfo);
+        }
 
     }
-
 
     @OnceBefore
     public void onceBefore() throws Exception {
@@ -197,114 +218,225 @@ public class Driver {
         Thread.sleep(20000);
         logger.info("Tested pre-run (sleep 20) done");
 
-        String privatePort = driverConfig.getXPathValue("benchFlowServices/privatePort");
-        for(ServiceInfo serviceInfo: serviceInfoMap.values()) {
+        final String privatePort = getXPathValue("benchFlowServices/privatePort");
 
-            List<CollectorInfo> collectorInfoList = serviceInfo.getCollectors();
-            for(CollectorInfo collectorInfo: collectorInfoList) {
+        //do nothing for services
+        Consumer<ServiceInfo> serviceInfoConsumer = new Consumer<ServiceInfo>() {
+            @Override
+            public void accept(ServiceInfo serviceInfo) {
+                //do nothing
+            }
+        };
 
-                List<MonitorInfo> monitorInfoList = collectorInfo.getMonitors();
-                for(MonitorInfo monitorInfo: monitorInfoList) {
+        //if runPhase == start -> start, monitor, stop
+        //if runPhase == all -> start
+        Consumer<MonitorInfo> monitorInfoConsumer = new Consumer<MonitorInfo>() {
+            @Override
+            public void accept(MonitorInfo monitorInfo) {
 
-                    //monitor at start of load
-                    if(monitorInfo.getRunPhase().equals("start")) {
+                Monitor monitor = null;
+                String monitorEndpoint = null;
 
-                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
-                        Monitor monitor = MonitorFactory.getMonitor(
+                if(monitorInfo.getRunPhase().equals("start")) {
+
+                    try {
+                        monitorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                deploymentManagerAddress,
+                                privatePort,
+                                monitorInfo.getId(),
+                                trialId,
+                                http);
+
+                        monitor = MonitorFactory.getMonitor(
                                 monitorInfo.getName(),
                                 monitorInfo.getParams(),
                                 monitorEndpoint,
                                 monitorInfo.startAPI,
                                 monitorInfo.stopAPI,
                                 monitorInfo.monitorAPI,
-                                logger
-                        );
-                        //run = start + monitor + stop
+                                logger);
+
                         monitor.run();
+
+                    } catch (Exception e) {
+                        //decide what to do here
+                        e.printStackTrace();
                     }
 
-                    else if(monitorInfo.getRunPhase().equals("all")) {
+                } else if(monitorInfo.getRunPhase().equals("all")) {
 
-                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
-                        Monitor monitor = MonitorFactory.getMonitor(
+                    try {
+                        monitorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                deploymentManagerAddress,
+                                privatePort,
+                                monitorInfo.getId(),
+                                trialId,
+                                http);
+
+                        monitor = MonitorFactory.getMonitor(
                                 monitorInfo.getName(),
                                 monitorInfo.getParams(),
                                 monitorEndpoint,
                                 monitorInfo.startAPI,
                                 monitorInfo.stopAPI,
                                 monitorInfo.monitorAPI,
-                                logger
-                        );
+                                logger);
+
                         monitor.start();
+                    } catch (Exception e) {
+                        //decide what  to do here
+                        e.printStackTrace();
                     }
 
-                }
-
-                if(collectorInfo.startAPI != null) {
-                    String collectorEndpoint = benchFlowServiceAddress(collectorInfo.getId(), privatePort);
-                    http.fetchURL(collectorEndpoint + collectorInfo.getStartAPI());
                 }
 
             }
 
-        }
+        };
+
+        //if startApi -> start
+        Consumer<CollectorInfo> collectorInfoConsumer = new Consumer<CollectorInfo>() {
+            @Override
+            public void accept(CollectorInfo collectorInfo) {
+
+                if(collectorInfo.startAPI != null) {
+
+                    try {
+                        String collectorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                deploymentManagerAddress,
+                                privatePort,
+                                collectorInfo.getId(),
+                                trialId,
+                                http);
+
+                        http.fetchURL(collectorEndpoint + collectorInfo.getStartAPI());
+
+                    } catch (Exception e) {
+                        //decide what to do here
+                        e.printStackTrace();
+                    }
+
+                }
+
+            }
+        };
+
+        iterateOverBenchFlowServices(
+                serviceInfoConsumer,
+                collectorInfoConsumer,
+                monitorInfoConsumer
+        );
 
     }
 
 
+    //if monitor == end -> start, monitor, stop
+    //if monitor == all -> monitor, stop
+    //collector -> stop
     @OnceAfter
-    //TODO: modify this
-    public void onceAfter() {
+    public void onceAfter() throws Exception {
 
-        String privatePort = driverConfig.getXPathValue("benchFlowServices/privatePort");
-        for(ServiceInfo serviceInfo: serviceInfoMap.values()) {
+        final String privatePort = getXPathValue("benchFlowServices/privatePort");
 
-            List<CollectorInfo> collectorInfoList = serviceInfo.getCollectors();
-            for(CollectorInfo collectorInfo: collectorInfoList) {
+        Consumer<ServiceInfo> serviceInfoConsumer = new Consumer<ServiceInfo>() {
+            @Override
+            public void accept(ServiceInfo serviceInfo) {
+                //do nothing
+            }
+        };
 
-                List<MonitorInfo> monitorInfoList = collectorInfo.getMonitors();
-                for(MonitorInfo monitorInfo: monitorInfoList) {
+        Consumer<MonitorInfo> monitorInfoConsumer = new Consumer<MonitorInfo>() {
+            @Override
+            public void accept(MonitorInfo monitorInfo) {
 
-                    //monitor at end of load
-                    if(monitorInfo.getRunPhase().equals("end")) {
-                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
+                String monitorEndpoint;
+                Monitor monitor;
 
-                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
-                        Monitor monitor = MonitorFactory.getMonitor(
+                if(monitorInfo.getRunPhase().equals("end")) {
+
+                    try {
+                        monitorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                deploymentManagerAddress,
+                                privatePort,
+                                monitorInfo.getId(),
+                                trialId,
+                                http);
+
+                        monitor = MonitorFactory.getMonitor(
                                 monitorInfo.getName(),
                                 monitorInfo.getParams(),
                                 monitorEndpoint,
                                 monitorInfo.startAPI,
                                 monitorInfo.stopAPI,
                                 monitorInfo.monitorAPI,
-                                logger
-                        );
+                                logger);
 
                         monitor.run();
+                    } catch (Exception e) {
+                        //decide what to do here
+                        e.printStackTrace();
+                    }
 
-                    } else if(monitorInfo.getRunPhase().equals("all")) {
-                        String monitorEndpoint = benchFlowServiceAddress(monitorInfo.getId(), privatePort);
-                        Monitor monitor = MonitorFactory.getMonitor(
+
+                } else if(monitorInfo.getRunPhase().equals("all")) {
+
+                    try {
+                        monitorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                deploymentManagerAddress,
+                                privatePort,
+                                monitorInfo.getId(),
+                                trialId,
+                                http);
+
+                        monitor = MonitorFactory.getMonitor(
                                 monitorInfo.getName(),
                                 monitorInfo.getParams(),
                                 monitorEndpoint,
                                 monitorInfo.startAPI,
                                 monitorInfo.stopAPI,
                                 monitorInfo.monitorAPI,
-                                logger
-                        );
+                                logger);
 
                         monitor.monitor();
                         monitor.stop();
+                    } catch(Exception e) {
+                        //decide what to do here
+                        e.printStackTrace();
                     }
 
                 }
 
-                String collectorEndpoint = benchFlowServiceAddress(collectorInfo.getId(), privatePort);
-                http.fetchURL(collectorEndpoint + collectorInfo.getStopAPI());
             }
+        };
 
-        }
+        Consumer<CollectorInfo> collectorInfoConsumer = new Consumer<CollectorInfo>() {
+            @Override
+            public void accept(CollectorInfo collectorInfo) {
+
+                try {
+
+                    String collectorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                            deploymentManagerAddress,
+                            privatePort,
+                            collectorInfo.getId(),
+                            trialId,
+                            http);
+
+                    http.fetchURL(collectorEndpoint + collectorInfo.getStopAPI());
+
+                } catch(Exception e) {
+                    //decide what to do here
+                    e.printStackTrace();
+                }
+
+            }
+        };
+
+        iterateOverBenchFlowServices(
+                serviceInfoConsumer,
+                collectorInfoConsumer,
+                monitorInfoConsumer
+        );
     }
 
 
@@ -312,7 +444,7 @@ public class Driver {
         sutEndpoint = getXPathValue("sutConfiguration/sutEndpoint");
     }
 
-    private boolean isStarted() {
+    protected boolean isStarted() {
 
         long steadyStateStartTime = ctx.getSteadyStateStartNanos();
         //If we don't have the steadyStateStartTime, it means it is not yet set,
@@ -344,40 +476,32 @@ public class Driver {
         return false;
     }
 
-    //TODO: add with spoon?
-    private void loadModelsInfo() {
-        int numModel = Integer.parseInt(getContextProperty("model_num"));
-        for (int i = 1; i <= numModel; i++) {
-            String name = getContextProperty("model_" + i + "_name");
-            String startID = getContextProperty("model_" + i + "_startID");
-            modelsStartID.put(name, startID);
-        }
-    }
-
-    private void initialize() {
+    protected void initialize() throws Exception {
         ctx = DriverContext.getContext();
         HttpTransport.setProvider("com.sun.faban.driver.transport.hc3.ApacheHC3Transport");
         http = (ApacheHC3Transport) HttpTransport.newInstance();
         logger = ctx.getLogger();
-        modelsStartID = new HashMap<String,String>();
         serviceInfoMap = new HashMap<String, ServiceInfo>();
         parseBenchmarkConfiguration();
-    }
-
-    private String getContextProperty(String property){
-        return ctx.getProperty(property);
-    }
-
-    private String getXPathValue(String xPathExpression) throws Exception {
-        return ctx.getXPathValue(xPathExpression);
     }
 
     /**
      * Parse run.xml to build a service info map
      */
-    private void parseBenchmarkConfiguration() {
+    private void parseBenchmarkConfiguration() throws Exception {
 
-        NodeList services = driverConfig.getNode("benchFlowServices/servicesConfiguration").getChildNodes();
+        logger.info("About to parse serialized BenchFlow services configuration");
+
+        String benchFlowServicesSerializedNode = getContextProperty("benchFlowServices");
+        benchFlowServicesSerializedNode = StringEscapeUtils.unescapeXml(benchFlowServicesSerializedNode);
+        Node benchFlowServices = BenchmarkUtils.stringToNode(benchFlowServicesSerializedNode);
+
+        logger.info("Successfully parsed BenchFlow services configuration");
+
+        deploymentManagerAddress = getXPathValue("benchFlowServices/deploymentManager");
+        trialId = getXPathValue("benchFlowRunConfiguration/trialId");
+
+        NodeList services = benchFlowServices.getChildNodes();
 
         //iterate over every service in the configuration
         for(int serviceIndex = 0; serviceIndex < services.getLength(); serviceIndex++) {
@@ -403,12 +527,14 @@ public class Driver {
                 NodeList collectorAPIs = apiNode.getChildNodes();
                 for(int apiIndex = 0; apiIndex < collectorAPIs.getLength(); apiIndex++) {
 
-                    Element currentAPI = (Element)collectorAPIs.item(apiIndex);
+                    Element currentAPI = (Element) collectorAPIs.item(apiIndex);
+
                     if(currentAPI.getTagName().equals("start")) {
                         collectorInfo.setStartAPI(currentAPI.getTextContent());
                     } else if(currentAPI.getTagName().equals("stop")) {
                         collectorInfo.setStopAPI(currentAPI.getTextContent());
                     }
+
                 }
 
                 NodeList monitors = collector.getElementsByTagName("monitors").item(0).getChildNodes();

@@ -55,27 +55,28 @@ RUN apk --update add wget tar && \
 # copy driver skeleton
 COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
 
-# Download monitors library into driver skeleton
-RUN wget -q --no-check-certificate -O /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
-    http://github.com/benchflow/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar && \
-    cp /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
 
-# Copy it also in /lib folder
-# COPY /app/drivers/templates/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar /app/drivers/templates/skeleton/benchmark/build/lib/
+# Download monitors library into driver skeleton
+RUN wget -q --no-check-certificate -O ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
+    http://github.com/simonedavico/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar && \
+    cp ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar ${TEMPLATES_ROOT}/skeleton/benchmark/build/lib/
+
 
 # Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
 RUN mkdir -p /tmp/monitors-deployment-descriptors && \
     wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
-    tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz --include='*monitor.yml*' -C /tmp/monitors-deployment-descriptors/ && \
+    tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz -C /tmp/monitors-deployment-descriptors/ --wildcards --no-anchored '*.monitor.yml'&& \
     find /tmp/monitors-deployment-descriptors/ -name '*.monitor.yml' -type f -exec mv -i {} ${BENCHFLOW_MONITORS_ROOT} \; && \
     rm -rf /tmp/monitors-deployment-descriptors/
+
 
 # Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
 RUN mkdir -p /tmp/collectors-deployment-descriptors && \
     wget -q --no-check-certificate -O /tmp/collectors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/collectors/archive/v-dev.tar.gz && \
-    tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz --include='*collector.yml*' -C /tmp/collectors-deployment-descriptors/ && \
+    tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz -C /tmp/collectors-deployment-descriptors/ --wildcards --no-anchored '*.collector.yml' && \
     find /tmp/collectors-deployment-descriptors/ -name '*.collector.yml' -type f -exec mv -i {} ${BENCHFLOW_COLLECTORS_ROOT} \; && \
     rm -rf /tmp/collectors-deployment-descriptors/
+
 
 # Install Ant (Source: https://hub.docker.com/r/webratio/ant/~/dockerfile/)
 ENV ANT_VERSION 1.9.4
@@ -87,6 +88,7 @@ RUN mkdir -p /opt/ant && \
     apk del --purge wget
 ENV ANT_HOME /opt/ant
 ENV PATH ${PATH}:/opt/ant/bin
+
 
 COPY ./services/envcp/config.tpl /app/config.tpl
 COPY ./services/envcp/add_servers_info.sh /app/add_servers_info.sh

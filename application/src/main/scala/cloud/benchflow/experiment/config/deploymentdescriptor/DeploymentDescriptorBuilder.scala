@@ -226,7 +226,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
 
 
     private def resolveCollectorVariables(collector: Collector): Collector = {
-      collector.copy(
+      println(self.name, collector.name)
+      val newC = collector.copy(
         environment = Environment(
           collector.environment.vars.map {
             case (variableName, variableValue) =>
@@ -234,6 +235,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
           }
         )
       )
+      println("finished")
+      newC
     }
 
     override def apply: List[Service] = {
@@ -304,7 +307,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       //val benchFlowServiceOriginalName = benchFlowService.name.split("\\.")(2)
       val benchFlowServiceOriginalName = CollectorType.getName(benchFlowService.name)
       testConfig.getBindingConfiguration(boundService.name, benchFlowServiceOriginalName)
-                .flatMap(_.properties.get(variable)).get.toString
+                .flatMap(_.properties.get(variable)).get.toString//.get.toString
     }
   }
   private object BenchFlowConfigVariable {

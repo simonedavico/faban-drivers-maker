@@ -23,7 +23,7 @@
         <jersey.multipart.version>2.19</jersey.multipart.version>
         <zt-zip.version>1.9</zt-zip.version>
         <commons-io.version>2.4</commons-io.version>
-        <minio-java.version>2.0.0</minio-java.version>
+        <minio-java.version>2.0.1</minio-java.version>
         <ant.version>1.9.6</ant.version>
         <spoon.core.version>5.2.0</spoon.core.version>
         <java.semver.version>0.9.0</java.semver.version>
@@ -145,6 +145,12 @@
             <groupId>cloud.benchflow</groupId>
             <artifactId>faban-agents</artifactId>
             <version>0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.simonedavico</groupId>
+            <artifactId>monitors</artifactId>
+            <version>v-dev</version>
         </dependency>
 
     </dependencies>

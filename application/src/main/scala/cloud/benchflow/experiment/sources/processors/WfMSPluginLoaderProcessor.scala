@@ -27,12 +27,6 @@ class WfMSPluginLoaderProcessor(benchFlowBenchmark: BenchFlowExperiment,
     val nestedPluginType: CtType[_] = element.getNestedType("WfMSPlugin")
     val nestedApiType: CtType[_] = element.getNestedType("WfMSApi")
 
-//    val nestedBenchFlowAsyncCallableType: CtType[_] = element.getNestedType("BenchFlowServicesAsynchInteraction")
-//    element.getMethodsByName("foo").get(0).getBody.forEach(new Consumer[CtStatement] {
-//      override def accept(t: CtStatement): Unit = if(t.toString.contains())
-//    }
-
-
     val pluginField = getFactory.Code().createCtField("plugin", nestedApiType.getReference, "null", ModifierKind.PRIVATE)
     element.addFieldAtTop(pluginField)
 

@@ -20,7 +20,7 @@ public class BenchFlowEnvConfiguration {
     private String generationResourcesPath;
 
     @NotEmpty
-    private int privatePort;
+    private String privatePort;
 
     @JsonProperty("config.yml")
     public String getConfigPath() {
@@ -53,12 +53,12 @@ public class BenchFlowEnvConfiguration {
     }
 
     @JsonProperty("privatePort")
-    public int getPrivatePort() {
+    public String getPrivatePort() {
         return privatePort;
     }
 
     @JsonProperty("privatePort")
-    public void setPrivatePort(int privatePort) {
+    public void setPrivatePort(String privatePort) {
         this.privatePort = privatePort;
     }
 }
