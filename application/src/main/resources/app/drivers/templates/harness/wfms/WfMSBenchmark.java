@@ -23,16 +23,6 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
         super.initialize();
     }
 
-    public void addProperty(Element properties, String name, String value) throws Exception {
-        // Document runDoc = params.getNode("benchFlowBenchmark").getOwnerDocument();
-        Document runDoc = params.getTopLevelElements().item(0).getOwnerDocument();
-        Element prop = runXml.addConfigurationNode(properties,"property","");
-        prop.setAttribute("name",name);
-        prop.appendChild(runDoc.createTextNode(value));
-        properties.appendChild(prop);
-        params.save();
-    }
-
     public void addModel(Element properties, int modelNum, String modelName, String processDefinitionId) throws Exception {
         //We need to attach them as driver properties otherwise it is not possible to access them in the Driver
         //Add the information about the deployed process in the run context
@@ -46,8 +36,8 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
          *  </model>
          * </models>
          */
-        addProperty(properties, "model_" + modelNum + "_name", modelName);
-        addProperty(properties, "model_" + modelNum + "_startID", processDefinitionId);
+        runXml.addProperty(properties, "model_" + modelNum + "_name", modelName);
+        runXml.addProperty(properties, "model_" + modelNum + "_startID", processDefinitionId);
     }
 
     /**
@@ -90,7 +80,7 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
             }
         }
 
-        addProperty(properties, "model_num", String.valueOf(numDeplProcesses));
+        runXml.addProperty(properties, "model_num", String.valueOf(numDeplProcesses));
         logger.info("END: Deploying processes...");
     }
 

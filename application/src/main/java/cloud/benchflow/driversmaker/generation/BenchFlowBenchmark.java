@@ -1,5 +1,6 @@
 package cloud.benchflow.driversmaker.generation;
 
+import cloud.benchflow.driversmaker.generation.utils.RunXml;
 import com.sun.faban.harness.*;
 import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
 
@@ -17,8 +18,6 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import cloud.benchflow.driversmaker.generation.utils.BenchmarkUtils;
 
@@ -33,52 +32,6 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
 
     protected RunXml runXml;
     public ApacheHC3Transport http;
-
-
-    /**
-     * Encapsulates methods to retrieve values from run.xml
-     */
-    protected class RunXml {
-
-        public Node getNode(String xPathExpression) {
-            return params.getNode(xPathExpression);
-        }
-
-        public Node getNode(String xPathExpression, Element top) {
-            return params.getNode(xPathExpression, top);
-        }
-
-        public NodeList getNodes(String xPathExpression) {
-            return params.getNodes(xPathExpression);
-        }
-
-        public String getXPathValue(String xPathExpression) throws RuntimeException {
-            try {
-                return params.getParameter(xPathExpression);
-            } catch(Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-
-        public Element addConfigurationNode(String baseXPath, String nodeName, String value) throws Exception {
-            Element node = params.addParameter(baseXPath, null, null, nodeName);
-            params.setParameter(node, value);
-            params.save();
-            return node;
-        }
-
-        public Element addConfigurationNode(Element parent, String nodeName, String value) throws Exception {
-            Element node = params.addParameter(parent, null, null, nodeName);
-            params.setParameter(node, value);
-            params.save();
-            return node;
-        }
-
-        public void save() throws Exception {
-            params.save();
-        }
-
-    }
 
     /***
      * This method deploys the sut
@@ -103,7 +56,14 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
         int statusUp = http.getHttpClient().executeMethod(putUp);
 
         logger.info("System Started. Status:" + statusUp);
+
+        //loop on deployment manager logs
     }
+
+    //public abstract boolean parseLog() <- returns true if log says "complete"
+
+
+
 
     /**
      * This method sets sut endpoint, deployment manager address, trial id
@@ -182,7 +142,7 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
                                                         privatePort,
                                                         targetServiceName,
                                                         trialId,
-                                                        http);
+                                                        http.getHttpClient());
 
         sutEndpoint = urlBuilder.append("http://")
                 .append(targetServiceAddress)
@@ -198,7 +158,7 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
     protected void initialize() throws Exception {
         this.benchmarkDir = Paths.get(RunContext.getBenchmarkDir());
         this.http = new ApacheHC3Transport();
-        this.runXml = new RunXml();
+        this.runXml = new RunXml(params);
         moveBenchFlowServicesConfigToProperties();
     }
 

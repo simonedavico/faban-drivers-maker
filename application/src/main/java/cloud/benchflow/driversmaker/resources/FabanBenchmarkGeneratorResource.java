@@ -14,7 +14,6 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -51,15 +50,15 @@ public class FabanBenchmarkGeneratorResource {
         this.logger = LoggerFactory.getLogger(this.getClass().getName());
     }
 
-    private void buildDriver(final Path driverPath, final String experimentId) {
+    private void buildBenchmark(final Path benchmarkPath, final String experimentId) {
         Project p = new Project();
-        p.setUserProperty("ant.file", driverPath.resolve("build.xml").toAbsolutePath().toString());
+        p.setUserProperty("ant.file", benchmarkPath.resolve("build.xml").toAbsolutePath().toString());
         p.setProperty("bench.shortname", experimentId);
         p.setProperty("faban.home", "faban/stage");
         p.init();
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         p.addReference("ant.projectHelper", helper);
-        helper.parse(p, driverPath.resolve("build.xml").toFile());
+        helper.parse(p, benchmarkPath.resolve("build.xml").toFile());
         p.executeTarget("build");
     }
 
@@ -87,6 +86,7 @@ public class FabanBenchmarkGeneratorResource {
         long experimentNumber = experiment.getExperimentNumber();
         Iterator<Trial> trials = experiment.getAllTrials();
         minio.removeBenchFlowBenchmark(minioBenchmarkId, experimentNumber);
+        //TODO: add removeDeploymentDescriptor(bmarkId, expNum)
         while(trials.hasNext()) {
             Trial trial = trials.next();
             int trialNumber = trial.getTrialNumber();
@@ -177,7 +177,7 @@ public class FabanBenchmarkGeneratorResource {
             logger.debug("About to build generated driver");
 
             copyGenerationSources(driverPath);
-            buildDriver(driverPath, experiment.getExperimentId());
+            buildBenchmark(driverPath, experiment.getExperimentId());
 
             //save generated driver to minio
             Path generatedDriverPath = driverPath.resolve("build/" + experiment.getExperimentId() + ".jar");

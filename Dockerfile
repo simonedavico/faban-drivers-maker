@@ -25,6 +25,9 @@ RUN wget -q --no-check-certificate -O /app/benchflow-drivers-maker.jar https://g
 
 COPY configuration.yml /app/
 
+# copy driver skeleton
+COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
+
 # Get benchflow-drivers-maker dependencies
 RUN apk --update add wget tar && \
 	wget -q --no-check-certificate -O /tmp/faban.tar.gz https://github.com/benchflow/faban/releases/download/${RELEASE_VERSION}/faban-kit-${FABAN_VERSION}.tar.gz && \
@@ -49,33 +52,49 @@ RUN apk --update add wget tar && \
     mkdir -p ${PLUGINS_ROOT} && \
     wget -q --no-check-certificate -O - https://github.com/benchflow/sut-plugins/archive/$SUT_PLUGINS_VERSION.tar.gz \
     | tar xz --strip-components=1 -C ${PLUGINS_ROOT} sut-plugins-$SUT_PLUGINS_VERSION && \
-	apk del --purge tar && \
-    rm -rf /var/cache/apk/* /tmp/* /var/tmp/* *.gz
-
-# copy driver skeleton
-COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
-
-
-# Download monitors library into driver skeleton
-RUN wget -q --no-check-certificate -O ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
+    # Download monitors library into driver skeleton
+    wget -q --no-check-certificate -O ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
     http://github.com/simonedavico/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar && \
-    cp ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar ${TEMPLATES_ROOT}/skeleton/benchmark/build/lib/
-
-
-# Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
-RUN mkdir -p /tmp/monitors-deployment-descriptors && \
+    cp ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar ${TEMPLATES_ROOT}/skeleton/benchmark/build/lib/ && \
+    # Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
+    mkdir -p /tmp/monitors-deployment-descriptors && \
     wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
-    tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz -C /tmp/monitors-deployment-descriptors/ --wildcards --no-anchored '*.monitor.yml'&& \
+    tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz -C /tmp/monitors-deployment-descriptors/ --wildcards --no-anchored '*.monitor.yml' && \
     find /tmp/monitors-deployment-descriptors/ -name '*.monitor.yml' -type f -exec mv -i {} ${BENCHFLOW_MONITORS_ROOT} \; && \
-    rm -rf /tmp/monitors-deployment-descriptors/
-
-
-# Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
-RUN mkdir -p /tmp/collectors-deployment-descriptors && \
+    rm -rf /tmp/monitors-deployment-descriptors/ && \
+    # Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
+    mkdir -p /tmp/collectors-deployment-descriptors && \
     wget -q --no-check-certificate -O /tmp/collectors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/collectors/archive/v-dev.tar.gz && \
     tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz -C /tmp/collectors-deployment-descriptors/ --wildcards --no-anchored '*.collector.yml' && \
     find /tmp/collectors-deployment-descriptors/ -name '*.collector.yml' -type f -exec mv -i {} ${BENCHFLOW_COLLECTORS_ROOT} \; && \
-    rm -rf /tmp/collectors-deployment-descriptors/
+    rm -rf /tmp/collectors-deployment-descriptors/ && \
+    # Cleanup
+	apk del --purge tar && \
+    rm -rf /var/cache/apk/* /tmp/* /var/tmp/* *.gz
+
+
+
+
+# Download monitors library into driver skeleton
+#RUN wget -q --no-check-certificate -O ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar \
+#    http://github.com/simonedavico/monitors/releases/download/${RELEASE_VERSION}/benchflow-monitors-driver-library.jar && \
+#    cp ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar ${TEMPLATES_ROOT}/skeleton/benchmark/build/lib/
+
+
+# Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
+#RUN mkdir -p /tmp/monitors-deployment-descriptors && \
+#    wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
+#    tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz -C /tmp/monitors-deployment-descriptors/ --wildcards --no-anchored '*.monitor.yml' && \
+#    find /tmp/monitors-deployment-descriptors/ -name '*.monitor.yml' -type f -exec mv -i {} ${BENCHFLOW_MONITORS_ROOT} \; && \
+#    rm -rf /tmp/monitors-deployment-descriptors/
+
+
+# Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
+#RUN mkdir -p /tmp/collectors-deployment-descriptors && \
+#    wget -q --no-check-certificate -O /tmp/collectors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/collectors/archive/v-dev.tar.gz && \
+#    tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz -C /tmp/collectors-deployment-descriptors/ --wildcards --no-anchored '*.collector.yml' && \
+#    find /tmp/collectors-deployment-descriptors/ -name '*.collector.yml' -type f -exec mv -i {} ${BENCHFLOW_COLLECTORS_ROOT} \; && \
+#    rm -rf /tmp/collectors-deployment-descriptors/
 
 
 # Install Ant (Source: https://hub.docker.com/r/webratio/ant/~/dockerfile/)

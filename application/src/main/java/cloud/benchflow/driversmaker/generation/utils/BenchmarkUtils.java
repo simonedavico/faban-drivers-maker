@@ -1,6 +1,6 @@
 package cloud.benchflow.driversmaker.generation.utils;
 
-import com.sun.faban.driver.transport.hc3.ApacheHC3Transport;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.w3c.dom.Node;
@@ -33,7 +33,7 @@ public class BenchmarkUtils {
             String privatePort,
             String benchFlowServiceId,
             String trialId,
-            ApacheHC3Transport http
+            HttpClient http
             ) throws Exception {
 
         try {
@@ -42,7 +42,7 @@ public class BenchmarkUtils {
                     trialId + "/port/" + benchFlowServiceId + "/" + privatePort;
 
             HttpMethod getServiceAddress = new GetMethod(deploymentManagerPortsApi);
-            http.getHttpClient().executeMethod(getServiceAddress);
+            http.executeMethod(getServiceAddress);
             String serviceAddress = new String(getServiceAddress.getResponseBody(), "UTF-8");
             getServiceAddress.releaseConnection();
             return serviceAddress;
