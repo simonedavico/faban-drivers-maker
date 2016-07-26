@@ -165,6 +165,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
         collector.environment.vars("KAFKA_PORT") = env.getConfigYml.getVariable[String]("BENCHFLOW_KAFKA_PORT")
         collector.environment.vars("SUT_NAME") = testConfig.sut.name
         collector.environment.vars("SUT_VERSION") = testConfig.sut.version.toString
+        collector.environment.vars("KAFKA_TOPIC") = collector.environment.vars.get("BENCHFLOW_DATA_NAME").get
         collector
         }
       }).apply(c)
@@ -307,7 +308,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       //val benchFlowServiceOriginalName = benchFlowService.name.split("\\.")(2)
       val benchFlowServiceOriginalName = CollectorType.getName(benchFlowService.name)
       testConfig.getBindingConfiguration(boundService.name, benchFlowServiceOriginalName)
-                .flatMap(_.properties.get(variable)).get.toString//.get.toString
+                .flatMap(_.properties.get(variable)).get.toString
     }
   }
   private object BenchFlowConfigVariable {
