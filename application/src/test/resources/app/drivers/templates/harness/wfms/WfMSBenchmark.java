@@ -21,6 +21,8 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
 
     protected void initialize() throws Exception {
         super.initialize();
+        //generate with spoon
+        //plugin = new WfMSPlugin(...)
     }
 
     public void addModel(Element properties, int modelNum, String modelName, String processDefinitionId) throws Exception {
