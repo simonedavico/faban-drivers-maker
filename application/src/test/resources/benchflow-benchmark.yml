@@ -32,17 +32,18 @@ drivers:
             deviation: 5
 
 
-sut-configuration:
+sutConfiguration:
 
-    target-service:
+    targetService:
         name: camunda
         endpoint: /engine-rest
+        sutReadyLogCheck: ...
 
     deploy:
         camunda: bull
         db: lisa1
 
-    benchflow-config:
+    benchflowConfig:
 
         camunda:
         - stats
