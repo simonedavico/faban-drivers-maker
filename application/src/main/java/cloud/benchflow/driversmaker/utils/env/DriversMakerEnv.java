@@ -11,12 +11,12 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
 
     private String benchFlowServicesPath;
     private String generationResourcesPath;
-    private BenchFlowEnv configYml;
+    private ConfigYml configYml;
     private GenerationDefaults heuristics;
     private String privatePort;
 
     public DriversMakerEnv(/*String configPath,*/
-                           BenchFlowEnv configYml,
+                           ConfigYml configYml,
                            String benchFlowServicesPath,
                            String generationResourcesPath,
                            String privatePort) {
@@ -32,7 +32,7 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
         return benchFlowServicesPath;
     }
 
-    public BenchFlowEnv getConfigYml() {
+    public ConfigYml getConfigYml() {
         return this.configYml;
     }
 

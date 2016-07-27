@@ -75,5 +75,5 @@ import io.minio.MinioClient
 //foo.getTextContent
 
 val mc = new MinioClient("http://localhost:19000", "AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")
-val is = mc.getObject("benchmarks", "BenchFlow/WfMSTest/1/benchflow-benchmark.yml")
+val is = mc.getObject("benchmarks", "BenchFlow/WfMSTest/1/benchflow-test.yml")
 

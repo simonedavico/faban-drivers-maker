@@ -12,12 +12,12 @@ import java.util.Map;
  * Created on 13/02/16.
  */
 @SuppressWarnings("unchecked")
-public class BenchFlowEnv {
+public class ConfigYml {
 
     private Map<String, Object> env;
     private String configPath;
 
-    public BenchFlowEnv(String configPath) throws FileNotFoundException {
+    public ConfigYml(String configPath) throws FileNotFoundException {
         this.configPath = configPath;
         reload();
     }

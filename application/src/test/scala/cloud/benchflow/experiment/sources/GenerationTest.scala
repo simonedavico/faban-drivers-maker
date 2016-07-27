@@ -6,11 +6,9 @@ import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.experiment.config.FabanBenchmarkConfigurationBuilder
 import cloud.benchflow.experiment.config.deploymentdescriptor.{SiblingVariableResolver, DeploymentDescriptorBuilder}
 import cloud.benchflow.experiment.sources.generators.BenchmarkSourcesGenerator
-import cloud.benchflow.driversmaker.utils.env.{DriversMakerEnv, BenchFlowEnv}
+import cloud.benchflow.driversmaker.utils.env.{DriversMakerEnv, ConfigYml}
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.deployment.docker.compose.DockerCompose
-
-import net.jcazevedo.moultingyaml._
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -19,14 +17,12 @@ import net.jcazevedo.moultingyaml._
   */
 object GenerationTest extends App {
 
-  import cloud.benchflow.test.deployment.docker.compose.DockerComposeYamlProtocol._
-
   val trial = new Trial
   trial.setBenchmarkId("fooBenchmark")
   trial.setExperimentNumber(1)
   trial.setTrialNumber(1)
   trial.setTotalTrials(3)
-  val configYml = new BenchFlowEnv("./application/src/test/resources/app/config.yml")
+  val configYml = new ConfigYml("./application/src/test/resources/app/config.yml")
 
   val benchFlowEnv = new DriversMakerEnv(configYml,
     "./application/src/test/resources/app/benchflow-services",
@@ -34,29 +30,26 @@ object GenerationTest extends App {
     "8080")
 
   val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
-  val bb = scala.io.Source.fromFile("./application/src/test/resources/benchflow-benchmark.yml").mkString
-  val parsedBB = BenchFlowExperiment.fromYaml(bb)
+  val expConfig = scala.io.Source.fromFile("./application/src/test/resources/benchflow-test.yml").mkString
+  val parsedExpConfig = BenchFlowExperiment.fromYaml(expConfig)
 
   val parsedDc = DockerCompose.fromYaml(dc)
-  val parsedTestConfig = BenchFlowExperiment.fromYaml(bb)
 
   val dcBuilder = new DeploymentDescriptorBuilder(
-    testConfig = parsedTestConfig,
+    testConfig = parsedExpConfig,
     env = benchFlowEnv
   )
   val resolvedDC = dcBuilder.resolveDeploymentDescriptor(parsedDc, trial)
-  //  println(resolvedDC)
-  //println(resolvedDC.toYaml.prettyPrint)
   println(DockerCompose.toYaml(resolvedDC))
 
-  val runXmlBuilder = new FabanBenchmarkConfigurationBuilder(parsedBB,benchFlowEnv,parsedDc)
+  val runXmlBuilder = new FabanBenchmarkConfigurationBuilder(parsedExpConfig,benchFlowEnv,parsedDc)
   //println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
 
-  val siblingResolver = new SiblingVariableResolver(parsedDc, benchFlowEnv, parsedBB)
+  val siblingResolver = new SiblingVariableResolver(parsedDc, benchFlowEnv, parsedExpConfig)
 
   val benchmarkSourcesGenerator = BenchmarkSourcesGenerator(
     experimentId = trial.getExperimentId,
-    benchFlowBenchmark = parsedBB,
+    expConfig = parsedExpConfig,
     generatedBenchmarkOutputDir = Paths.get("./application/src/test/resources/generated"),
     env = benchFlowEnv
   )

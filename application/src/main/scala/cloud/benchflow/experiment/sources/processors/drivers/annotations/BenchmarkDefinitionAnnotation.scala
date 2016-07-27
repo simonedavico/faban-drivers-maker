@@ -11,16 +11,16 @@ import spoon.reflect.declaration.CtClass
   *
   * Created on 05/05/16.
   */
-class BenchmarkDefinitionAnnotation(benchFlowBenchmark: BenchFlowExperiment,
+class BenchmarkDefinitionAnnotation(expConfig: BenchFlowExperiment,
                                     experimentId: String)(implicit env: DriversMakerEnv)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
+  extends BenchmarkSourcesProcessor(expConfig, experimentId)(env) {
 
   override def doProcess(e: CtClass[_]): Unit = {
 
     //adds @BenchmarkDefinition annotation
     //TODO: make at least metric configurable
     val benchmarkDefinitionAnnotation = getFactory.Annotation().annotate(e, classOf[BenchmarkDefinition])
-    benchmarkDefinitionAnnotation.addValue("name", s"[$experimentId] ${benchFlowBenchmark.name} Workload")
+    benchmarkDefinitionAnnotation.addValue("name", s"[$experimentId] ${expConfig.name} Workload")
     benchmarkDefinitionAnnotation.addValue("version", "0.1")
     benchmarkDefinitionAnnotation.addValue("metric", "req/s")
 

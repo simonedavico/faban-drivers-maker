@@ -1,12 +1,12 @@
 package cloud.benchflow.experiment
 
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.experiment.heuristics.allocation._
 import cloud.benchflow.experiment.heuristics.jvm._
 import cloud.benchflow.experiment.heuristics.scale._
 import cloud.benchflow.experiment.heuristics.threadstart._
 
-class GenerationDefaults(private implicit val benv: BenchFlowEnv) {
+class GenerationDefaults(private implicit val bEnv: ConfigYml) {
 
   lazy val jvm = JvmParamsHeuristic(
     strategy = "simple",

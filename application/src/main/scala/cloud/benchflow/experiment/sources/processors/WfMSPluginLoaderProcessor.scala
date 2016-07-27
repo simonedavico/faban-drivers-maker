@@ -9,16 +9,16 @@ import spoon.reflect.declaration.{CtClass, CtType, ModifierKind}
   *
   * Created on 11/05/16.
   */
-class WfMSPluginLoaderProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class WfMSPluginLoaderProcessor(expConfig: BenchFlowExperiment,
                                 experimentId: String)(implicit env: DriversMakerEnv)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
+  extends BenchmarkSourcesProcessor(expConfig, experimentId)(env) {
 
 
   override protected def doProcess(element: CtClass[_]): Unit = {
 
     val apiType: CtType[_] = getFactory.Type().get("cloud.benchflow.libraries.wfms.WfMSApi")
     val pluginType = getFactory.Type()
-      .get(s"cloud.benchflow.plugins.wfms.${benchFlowBenchmark.sut.name}.WfMSPlugin")
+      .get(s"cloud.benchflow.plugins.wfms.${expConfig.sut.name}.WfMSPlugin")
 
     element.addNestedType(apiType)
     element.addNestedType(pluginType)

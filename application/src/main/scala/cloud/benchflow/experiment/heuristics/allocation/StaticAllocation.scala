@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.heuristics.allocation
 
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.experiment.heuristics.HeuristicConfiguration
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
 import cloud.benchflow.test.config.Driver
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
@@ -22,18 +22,18 @@ class StaticAllocationHeuristicConfiguration(config: Map[String, Any])
 
 }
 
-class StaticAllocationHeuristic(mapConfig: Map[String, Any])(implicit env: BenchFlowEnv)
+class StaticAllocationHeuristic(mapConfig: Map[String, Any])(implicit env: ConfigYml)
   extends AllocationHeuristic[StaticAllocationHeuristicConfiguration](mapConfig)(env) {
 
   override protected def agentHostWeight = config.agentHostWeight
   override protected def masterHostWeight = config.masterHostWeight
 
   //returns a mapping driver -> (host, agents) for a given configuration
-  override def agents(bb: BenchFlowExperiment): Map[Driver[_], Set[(HostAddress, Int)]] = {
+  override def agents(expConfig: BenchFlowExperiment): Map[Driver[_], Set[(HostAddress, Int)]] = {
 
     def allocate(driver: Driver[_]): Set[(HostAddress, Int)] = {
 
-      def scale(driver: Driver[_]) = config.scaleBalancer(bb).scale(driver)
+      def scale(driver: Driver[_]) = config.scaleBalancer(expConfig).scale(driver)
 
       def distribute(numOfAgents: Int, hosts: List[Host]) = {
 
@@ -68,7 +68,7 @@ class StaticAllocationHeuristic(mapConfig: Map[String, Any])(implicit env: Bench
       hosts
     }
 
-    bb.drivers.map(d => (d, allocate(d))).toMap
+    expConfig.drivers.map(d => (d, allocate(d))).toMap
 
   }
 

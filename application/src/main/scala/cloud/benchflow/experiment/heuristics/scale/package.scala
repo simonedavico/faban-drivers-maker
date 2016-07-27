@@ -21,10 +21,10 @@ package object scale {
 
   object ScaleBalancer {
 
-    def apply(strategy: String, configuration: Map[String, Any]) = (bb: BenchFlowExperiment) => {
+    def apply(strategy: String, configuration: Map[String, Any]) = (expConfig: BenchFlowExperiment) => {
       strategy match {
-        case "balance" => new BaseScaleBalancer(configuration)(bb) with ExtendedScaleBalancer
-        case "simple" => new BaseScaleBalancer(configuration)(bb) with FixedScaleBalancer
+        case "balance" => new BaseScaleBalancer(configuration)(expConfig) with ExtendedScaleBalancer
+        case "simple" => new BaseScaleBalancer(configuration)(expConfig) with FixedScaleBalancer
         case _ => throw new Exception("Unknown strategy for ScaleBalancer. Implement the strategy into " +
                                       "the ScaleBalancer factory.")
       }

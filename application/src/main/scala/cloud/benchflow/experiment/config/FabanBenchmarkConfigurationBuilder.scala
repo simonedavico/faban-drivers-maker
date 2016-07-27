@@ -21,9 +21,9 @@ import scala.xml.transform.{RuleTransformer, RewriteRule}
   *
   * Created on 23/02/16.
   */
-class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
+class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
                                          benv: DriversMakerEnv,
-                                         dd: DockerCompose) {
+                                         deploymentDescriptor: DockerCompose) {
 
   //Faban doesn't like when there are newlines in the content of the tags,
   //so we remove them
@@ -118,7 +118,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
 
   private def getJavaOpts: String = {
     val jvm = benv.getHeuristics.jvm
-    s"-Xmx${jvm.xmx(bb)}m -Xms${jvm.xms(bb)}m -XX:+DisableExplicitGC"
+    s"-Xmx${jvm.xmx(expConfig)}m -Xms${jvm.xms(expConfig)}m -XX:+DisableExplicitGC"
   }
 
   private def collectorDefinition(collectorName: String) = {
@@ -189,7 +189,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
 
   private def serviceConfiguration(serviceName: String) = {
     //1. get the list of collectors for the service
-    val bindings = bb.getBindingsForService(serviceName)
+    val bindings = expConfig.getBindingsForService(serviceName)
 
     //2. getCollectorConfiguration(serviceName, collectorName) for each collector
     <service name={serviceName}>
@@ -201,8 +201,8 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
 
   def build(trial: Trial) = {
 
-    val scaleBalancer = benv.getHeuristics.scaleBalancer(bb)
-    val agents = benv.getHeuristics.allocationHeuristic.agents(bb)
+    val scaleBalancer = benv.getHeuristics.scaleBalancer(expConfig)
+    val agents = benv.getHeuristics.allocationHeuristic.agents(expConfig)
     val usedHosts = agents.values.reduce(_.union(_))
 
     removeNewlines(
@@ -213,11 +213,11 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
           <fh:jvmOptions>{ getJavaOpts }</fh:jvmOptions>
         </jvmConfig>
 
-        <fa:runConfig definition={s"cloud.benchflow.benchmark.drivers.${bb.drivers.head.getClass.getSimpleName}"}
+        <fa:runConfig definition={s"cloud.benchflow.benchmark.drivers.${expConfig.drivers.head.getClass.getSimpleName}"}
                       xmlns:fa="http://faban.sunsource.net/ns/faban"
                       xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                       xmlns="http://faban.sunsource.net/ns/fabandriver">
-          <fh:description>{ bb.description }</fh:description>
+          <fh:description>{ expConfig.description }</fh:description>
           <fa:scale>{ scaleBalancer.scale }</fa:scale>
           <fh:timeSync>{ GenerationDefaults.timeSync }</fh:timeSync>
           <fa:hostConfig>
@@ -226,7 +226,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
           </fa:hostConfig>
 
           {
-            val xmlProps = convert(bb.properties).map(addFabanNamespace)
+            val xmlProps = convert(expConfig.properties).map(addFabanNamespace)
             xmlProps.map(insertIntervalIfNotExists)
             //++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
           }
@@ -234,27 +234,27 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
           { agents.map { case (d, hosts) => convertDriver(d, hosts) } }
 
           <fa:runControl unit="time">
-            <fa:rampUp>{ bb.execution.rampUp }</fa:rampUp>
-            <fa:steadyState>{ bb.execution.steadyState }</fa:steadyState>
-            <fa:rampDown>{ bb.execution.rampDown }</fa:rampDown>
+            <fa:rampUp>{ expConfig.execution.rampUp }</fa:rampUp>
+            <fa:steadyState>{ expConfig.execution.steadyState }</fa:steadyState>
+            <fa:rampDown>{ expConfig.execution.rampDown }</fa:rampDown>
           </fa:runControl>
 
           <threadStart>
-            <delay>{ benv.getHeuristics.threadStart.delay(bb, usedHosts.size) }</delay>
-            <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(bb) }</simultaneous>
-            <parallel>{ benv.getHeuristics.threadStart.parallel(bb) }</parallel>
+            <delay>{ benv.getHeuristics.threadStart.delay(expConfig, usedHosts.size) }</delay>
+            <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(expConfig) }</simultaneous>
+            <parallel>{ benv.getHeuristics.threadStart.parallel(expConfig) }</parallel>
           </threadStart>
 
           <sutConfiguration>
-            <serviceName>{ bb.sutConfiguration.targetService.name }</serviceName>
-            <endpoint>{ bb.sutConfiguration.targetService.endpoint }</endpoint>
+            <serviceName>{ expConfig.sutConfiguration.targetService.name }</serviceName>
+            <endpoint>{ expConfig.sutConfiguration.targetService.endpoint }</endpoint>
           </sutConfiguration>
 
           <benchFlowServices>
               <privatePort>{ benv.getPrivatePort }</privatePort>
               <deploymentManager>{ benv.getDeploymentManagerAddress }</deploymentManager>
               <servicesConfiguration>
-                { dd.services.keys.map(serviceConfiguration)  }
+                { deploymentDescriptor.services.keys.map(serviceConfiguration)  }
               </servicesConfiguration>
            </benchFlowServices>
 
@@ -264,7 +264,7 @@ class FabanBenchmarkConfigurationBuilder(bb: BenchFlowExperiment,
 
         </fa:runConfig>
 
-      </xml>.copy(label = bb.name)
+      </xml>.copy(label = expConfig.name)
     )
 
   }

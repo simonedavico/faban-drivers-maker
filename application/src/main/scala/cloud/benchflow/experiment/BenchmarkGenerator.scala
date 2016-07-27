@@ -30,13 +30,13 @@ class BenchmarkGenerator(experimentId: String,
                  sourcesGenerator: BenchmarkSourcesGenerator,
                  fabanConfigGenerator: FabanBenchmarkConfigurationBuilder) =
     {
-      val bb = BenchFlowExperiment.fromYaml(experimentDescriptor)
-      (new DeploymentDescriptorBuilder(bb, env),
+      val expConfig = BenchFlowExperiment.fromYaml(experimentDescriptor)
+      (new DeploymentDescriptorBuilder(expConfig, env),
        BenchmarkSourcesGenerator.apply(experimentId,
-                                       bb,
+                                       expConfig,
                                        generatedBenchmarkOutputDir,
                                        env),
-       new FabanBenchmarkConfigurationBuilder(bb,env,dd))
+       new FabanBenchmarkConfigurationBuilder(expConfig,env,dd))
     }
 
     def generateSources() = sourcesGenerator.generate()

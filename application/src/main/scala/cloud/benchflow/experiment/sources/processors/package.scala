@@ -15,7 +15,7 @@ import spoon.reflect.declaration.{CtPackage, CtClass}
 package object processors {
 
   /** base class for every processor */
-  abstract class BenchmarkSourcesProcessor(val benchflowBenchmark: BenchFlowExperiment,
+  abstract class BenchmarkSourcesProcessor(val expConfig: BenchFlowExperiment,
                                            val experimentId: String)(implicit env: DriversMakerEnv)
     extends AbstractProcessor[CtClass[_]] {
 

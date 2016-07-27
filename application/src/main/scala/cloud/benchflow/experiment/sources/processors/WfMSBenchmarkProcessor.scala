@@ -13,9 +13,9 @@ import spoon.reflect.visitor.Filter
   *
   * Created on 20/04/16.
   */
-class WfMSBenchmarkProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class WfMSBenchmarkProcessor(expConfig: BenchFlowExperiment,
                              experimentId: String)(implicit env: DriversMakerEnv)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
+  extends BenchmarkSourcesProcessor(expConfig, experimentId)(env) {
 
   override def isProcessable(element: CtClass[_]): Boolean = {
     super.isProcessable(element) &&

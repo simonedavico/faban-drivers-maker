@@ -13,9 +13,9 @@ import spoon.reflect.reference.{CtFieldReference, CtTypeReference}
   *
   * Created on 01/05/16.
   */
-class TimeAnnotationProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class TimeAnnotationProcessor(expConfig: BenchFlowExperiment,
                               experimentId: String)(implicit env: DriversMakerEnv)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
+  extends BenchmarkSourcesProcessor(expConfig, experimentId)(env) {
 
   override def doProcess(e: CtClass[_]): Unit = {
 

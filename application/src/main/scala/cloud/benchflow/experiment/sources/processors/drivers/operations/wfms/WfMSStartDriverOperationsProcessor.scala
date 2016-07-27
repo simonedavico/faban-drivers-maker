@@ -17,10 +17,10 @@ import spoon.reflect.reference.{CtFieldReference, CtTypeReference}
   * An implementation of [[WfMSDriverOperationsProcessor]] that generates
   * operations and related annotations for a wfms benchmark
   */
-class WfMSStartDriverOperationsProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class WfMSStartDriverOperationsProcessor(expConfig: BenchFlowExperiment,
                                          driver: WfMSStartDriver,
                                          experimentId: String)(implicit env: DriversMakerEnv)
-  extends WfMSDriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)(env)  {
+  extends WfMSDriverOperationsProcessor(expConfig, driver, experimentId)(env)  {
 
   override def doProcess(e: CtClass[_]): Unit = {
 

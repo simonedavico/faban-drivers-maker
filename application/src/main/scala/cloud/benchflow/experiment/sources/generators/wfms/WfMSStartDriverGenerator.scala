@@ -15,26 +15,25 @@ import cloud.benchflow.test.config.sut.wfms.WfMSStartDriver
   * Created on 25/07/16.
   *
   * A generator for a start driver
-  *
   * @param generatedDriverClassOutputDir directory where the generated driver will be saved
   * @param generationResources location on file system of generation resources (libraries, plugins, templates)
-  * @param benchFlowBenchmark configuration from which the driver will be generated
+  * @param expConfig configuration from which the driver will be generated
   * @param driver driver configuration
   */
 class WfMSStartDriverGenerator(generatedDriverClassOutputDir: Path,
                                generationResources: Path,
-                               benchFlowBenchmark: BenchFlowExperiment,
+                               expConfig: BenchFlowExperiment,
                                experimentId: String,
                                driver: WfMSStartDriver)
                               (implicit env: DriversMakerEnv)
   extends WfMSDriverGenerator[WfMSStartDriverOperationsProcessor](generatedDriverClassOutputDir,
     generationResources,
-    benchFlowBenchmark,
+    expConfig,
     experimentId,
     driver)(env)
 {
   override def additionalProcessors: Seq[BenchmarkSourcesProcessor] =
-    super.additionalProcessors :+ new BenchmarkDefinitionAnnotation(benchFlowBenchmark, experimentId)(env)
+    super.additionalProcessors :+ new BenchmarkDefinitionAnnotation(expConfig, experimentId)(env)
 
   protected val driverPath: Path = driversPath.resolve("wfms/Driver.java")
 }

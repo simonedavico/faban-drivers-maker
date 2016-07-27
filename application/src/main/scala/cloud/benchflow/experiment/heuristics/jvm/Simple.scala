@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.heuristics.jvm
 
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.experiment.heuristics.HeuristicConfiguration
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 /**
@@ -16,7 +16,7 @@ class JvmParamsHeuristicConfiguration(mapConfig: Map[String, Any]) extends Heuri
 }
 
 
-class SimpleJvmParamsHeuristic(mapConfig: Map[String, Any])(implicit env: BenchFlowEnv)
+class SimpleJvmParamsHeuristic(mapConfig: Map[String, Any])(implicit env: ConfigYml)
   extends JvmParamsHeuristic[JvmParamsHeuristicConfiguration](mapConfig)(env) {
 
   override def xms(bb: BenchFlowExperiment) = config.xms

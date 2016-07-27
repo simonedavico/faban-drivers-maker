@@ -1,6 +1,6 @@
 package cloud.benchflow.experiment
 
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 
 import scala.reflect.ClassTag
 
@@ -13,7 +13,7 @@ package object heuristics {
 
   abstract class HeuristicConfiguration(config: Map[String, Any])
 
-  abstract class Heuristic[A <: HeuristicConfiguration : ClassTag](val mapConfig: Map[String, Any])(val env: BenchFlowEnv)
+  abstract class Heuristic[A <: HeuristicConfiguration : ClassTag](val mapConfig: Map[String, Any])(val env: ConfigYml)
   {
     protected val config = scala.reflect.classTag[A].runtimeClass
       .getConstructor(classOf[Map[String, Any]])

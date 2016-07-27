@@ -1,8 +1,8 @@
 package cloud.benchflow.experiment.heuristics.threadstart
 
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.experiment.heuristics.HeuristicConfiguration
 import cloud.benchflow.experiment.heuristics.scale.ScaleBalancer
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 /**
@@ -18,7 +18,7 @@ class ComputeDelayConfiguration(mapConfig: Map[String, Any]) extends HeuristicCo
 
 }
 
-class ComputeDelayHeuristic(mapConfig: Map[String, Any])(implicit env: BenchFlowEnv)
+class ComputeDelayHeuristic(mapConfig: Map[String, Any])(implicit env: ConfigYml)
   extends ThreadStartHeuristic[ComputeDelayConfiguration](mapConfig)(env) {
 
   override def delay(bb: BenchFlowExperiment, numOfUsedHosts: Int): Int = {
@@ -39,7 +39,7 @@ class ComputeDelayHeuristic(mapConfig: Map[String, Any])(implicit env: BenchFlow
 
   }
 
-  override def simultaneous(bb: BenchFlowExperiment): Boolean = config.simultaneous
+  override def simultaneous(expConfig: BenchFlowExperiment): Boolean = config.simultaneous
 
-  override def parallel(bb: BenchFlowExperiment): Boolean = config.parallel
+  override def parallel(expConfig: BenchFlowExperiment): Boolean = config.parallel
 }

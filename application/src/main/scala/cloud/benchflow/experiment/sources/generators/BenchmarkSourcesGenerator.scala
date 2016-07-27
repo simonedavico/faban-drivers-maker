@@ -28,13 +28,13 @@ import scala.reflect.ClassTag
   *
   * @param generatedDriverClassOutputDir directory where the generated driver will be saved
   * @param generationResources location on file system of generation resources (libraries, plugins, templates)
-  * @param benchFlowBenchmark configuration from which the driver will be generated
+  * @param expConfig configuration from which the driver will be generated
   * @param driver driver configuration
   * @tparam A implementation of [[DriverOperationsProcessor]]
   */
 abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val generatedDriverClassOutputDir: Path,
                                                                          val generationResources: Path,
-                                                                         val benchFlowBenchmark: BenchFlowExperiment,
+                                                                         val expConfig: BenchFlowExperiment,
                                                                          val driver: Driver[_ <: Operation],
                                                                          val experimentId: String)(val env: DriversMakerEnv)
 {
@@ -51,7 +51,7 @@ abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val gen
                                              driver.getClass,
                                              classOf[String],
                                              classOf[DriversMakerEnv])
-                             .newInstance(benchFlowBenchmark, driver, experimentId, env)
+                             .newInstance(expConfig, driver, experimentId, env)
                              .asInstanceOf[A]
 
   //each driver generator has to define what template resources has to be added to the spoon launcher
@@ -70,9 +70,9 @@ abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val gen
 
       //add processors applied to all drivers
       spoonLauncher.addProcessor(driverOperationsProcessor)
-      spoonLauncher.addProcessor(new TimeAnnotationProcessor(benchFlowBenchmark, experimentId)(env))
-      spoonLauncher.addProcessor(new MixAnnotationProcessor(benchFlowBenchmark, driver, experimentId)(env))
-      spoonLauncher.addProcessor(new BenchmarkDriverAnnotationProcessor(benchFlowBenchmark, driver, experimentId)(env))
+      spoonLauncher.addProcessor(new TimeAnnotationProcessor(expConfig, experimentId)(env))
+      spoonLauncher.addProcessor(new MixAnnotationProcessor(expConfig, driver, experimentId)(env))
+      spoonLauncher.addProcessor(new BenchmarkDriverAnnotationProcessor(expConfig, driver, experimentId)(env))
 
       //apply driver specific processors
       additionalProcessors.foreach(additionalProcessor =>
@@ -89,12 +89,12 @@ abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val gen
 /**
   * A generator for a Faban benchmark. Generates the Benchmark and Driver classes
   *
-  * @param benchFlowBenchmark configuration from which the benchmark will be generated
+  * @param expConfig configuration from which the benchmark will be generated
   * @param experimentId experiment id
   * @param generatedBenchmarkOutputDir directory where the benchmark will be saved
   * @param env env info (heuristics, resources location, config.yml)
   */
-abstract class BenchmarkSourcesGenerator(val benchFlowBenchmark: BenchFlowExperiment,
+abstract class BenchmarkSourcesGenerator(val expConfig: BenchFlowExperiment,
                                          val experimentId: String,
                                          val generatedBenchmarkOutputDir: Path,
                                          implicit val env: DriversMakerEnv) {
@@ -125,7 +125,7 @@ abstract class BenchmarkSourcesGenerator(val benchFlowBenchmark: BenchFlowExperi
 
     //creates the file benchmark.xml
     spoonLauncher.addProcessor(
-      new FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark,experimentId,generatedBenchmarkOutputDir)(env)
+      new FabanBenchmarkDeploymentDescriptorProcessor(expConfig,experimentId,generatedBenchmarkOutputDir)(env)
     )
 
 //    val args = Seq("--source-classpath", classPath)
@@ -143,12 +143,12 @@ abstract class BenchmarkSourcesGenerator(val benchFlowBenchmark: BenchFlowExperi
 }
 object BenchmarkSourcesGenerator {
   def apply(experimentId: String,
-            benchFlowBenchmark: BenchFlowExperiment,
+            expConfig: BenchFlowExperiment,
             generatedBenchmarkOutputDir: Path,
             env: DriversMakerEnv) =
-    benchFlowBenchmark.sut.sutsType match {
-      case Http => HttpBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
-      case WfMS => WfMSBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
+    expConfig.sut.sutsType match {
+      case Http => HttpBenchmarkSourcesGenerator(expConfig, experimentId, generatedBenchmarkOutputDir, env)
+      case WfMS => WfMSBenchmarkSourcesGenerator(expConfig, experimentId, generatedBenchmarkOutputDir, env)
     }
 }
 

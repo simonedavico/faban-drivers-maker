@@ -1,7 +1,7 @@
 package cloud.benchflow.driversmaker.modules;
 
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv;
+import cloud.benchflow.driversmaker.utils.env.ConfigYml;
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -28,7 +28,7 @@ public class BenchFlowEnvModule extends AbstractModule {
         String bfServicesPath = dmc.getBenchFlowEnvConfiguration().getBenchFlowServicesPath();
         String generationResourcesPath = dmc.getBenchFlowEnvConfiguration().getGenerationResourcesPath();
         String privatePort = dmc.getBenchFlowEnvConfiguration().getPrivatePort();
-        BenchFlowEnv benv = new BenchFlowEnv(configYmlPath);
+        ConfigYml benv = new ConfigYml(configYmlPath);
         return new DriversMakerEnv(benv, bfServicesPath, generationResourcesPath, privatePort);
     }
 

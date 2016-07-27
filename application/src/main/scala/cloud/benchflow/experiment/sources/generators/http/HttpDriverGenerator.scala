@@ -16,18 +16,18 @@ import cloud.benchflow.test.config.sut.http.HttpDriver
   */
 class HttpDriverGenerator(generatedDriverClassOutputDir: Path,
                           generationResources: Path,
-                          benchFlowBenchmark: BenchFlowExperiment,
+                          expConfig: BenchFlowExperiment,
                           experimentId: String,
                           driver: HttpDriver)(env: DriversMakerEnv)
   extends DriverGenerator[HttpDriverOperationsProcessor](generatedDriverClassOutputDir,
     generationResources,
-    benchFlowBenchmark,
+    expConfig,
     driver,
     experimentId)(env) {
 
   override def templateResources: Seq[Path] = Seq()
   override def additionalProcessors =
-    Seq(new BenchmarkDefinitionAnnotation(benchFlowBenchmark, experimentId)(env))
+    Seq(new BenchmarkDefinitionAnnotation(expConfig, experimentId)(env))
 
   protected val driverPath: Path = driversPath.resolve("http/Driver.java")
 }

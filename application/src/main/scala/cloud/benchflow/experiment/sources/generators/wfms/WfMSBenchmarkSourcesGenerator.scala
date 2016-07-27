@@ -14,32 +14,32 @@ import cloud.benchflow.test.config.sut.wfms.WfMSStartDriver
   *
   * Created on 25/07/16.
   */
-class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowExperiment,
+class WfMSBenchmarkSourcesGenerator(expConfig: BenchFlowExperiment,
                                     experimentId: String,
                                     generatedBenchmarkOutputDir: Path,
                                     env: DriversMakerEnv)
-  extends BenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env) {
+  extends BenchmarkSourcesGenerator(expConfig, experimentId, generatedBenchmarkOutputDir, env) {
 
   val benchmarkTemplate: Path = templatesPath.resolve("harness/wfms/WfMSBenchmark.java")
 
   override protected def benchmarkGenerationResources: Seq[Path] = {
-    val wfmsPluginsPath = pluginsPath.resolve(s"wfms/${benchFlowBenchmark.sut.name}")
-    val pluginPath = ResolvePlugin(wfmsPluginsPath, "WfMSPlugin.java", benchFlowBenchmark.sut.version)
+    val wfmsPluginsPath = pluginsPath.resolve(s"wfms/${expConfig.sut.name}")
+    val pluginPath = ResolvePlugin(wfmsPluginsPath, "WfMSPlugin.java", expConfig.sut.version)
     val wfmsLibraryPath = librariesPath.resolve("wfms/WfMSApi.java")
     super.benchmarkGenerationResources ++ Seq(wfmsLibraryPath, pluginPath)
   }
 
   override protected def benchmarkGenerationProcessors: Seq[BenchmarkSourcesProcessor] =
-    Seq(new WfMSPluginLoaderProcessor(benchFlowBenchmark, experimentId)(env),
-      new WfMSBenchmarkProcessor(benchFlowBenchmark, experimentId)(env))
+    Seq(new WfMSPluginLoaderProcessor(expConfig, experimentId)(env),
+      new WfMSBenchmarkProcessor(expConfig, experimentId)(env))
 
   //for each driver type, create a driver generator and run it
   override protected def generateDriversSources() = {
-    val startDriver = benchFlowBenchmark.drivers.find(_.isInstanceOf[WfMSStartDriver]).get.asInstanceOf[WfMSStartDriver]
+    val startDriver = expConfig.drivers.find(_.isInstanceOf[WfMSStartDriver]).get.asInstanceOf[WfMSStartDriver]
     new WfMSStartDriverGenerator(
       generatedBenchmarkOutputDir.resolve("src"),
       generationResources,
-      benchFlowBenchmark,
+      expConfig,
       experimentId,
       startDriver)(env).generate()
   }
@@ -47,9 +47,9 @@ class WfMSBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowExperiment,
 }
 
 object WfMSBenchmarkSourcesGenerator {
-  def apply(benchFlowBenchmark: BenchFlowExperiment,
+  def apply(expConfig: BenchFlowExperiment,
             experimentId: String,
             generatedBenchmarkOutputDir: Path,
             env: DriversMakerEnv) =
-    new WfMSBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
+    new WfMSBenchmarkSourcesGenerator(expConfig, experimentId, generatedBenchmarkOutputDir, env)
 }

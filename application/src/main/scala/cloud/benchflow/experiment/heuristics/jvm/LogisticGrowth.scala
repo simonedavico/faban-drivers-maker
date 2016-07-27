@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.heuristics.jvm
 
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.experiment.heuristics.HeuristicConfiguration
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 /**
@@ -20,17 +20,17 @@ class LogisticsGrowthJvmParamsHeuristicConfiguration(mapConfig: Map[String, Any]
 }
 
 
-class LogisticsGrowthJvmParamsHeuristic(mapConfig: Map[String, Any])(env: BenchFlowEnv)
+class LogisticsGrowthJvmParamsHeuristic(mapConfig: Map[String, Any])(env: ConfigYml)
   extends JvmParamsHeuristic[LogisticsGrowthJvmParamsHeuristicConfiguration](mapConfig)(env) {
 
   //see https://en.wikipedia.org/wiki/Logistic_function
-  override def xmx(bb: BenchFlowExperiment): Int = {
+  override def xmx(expConfig: BenchFlowExperiment): Int = {
     val L = config.maxMemory
-    val x = bb.users.users
+    val x = expConfig.users.users
     val x0 = config.maxUsers/2
     (L/(1 + Math.exp(-config.k * (x - x0))) + config.xms).toInt
   }
 
-  override def xms(bb: BenchFlowExperiment): Int = config.xms
+  override def xms(expConfig: BenchFlowExperiment): Int = config.xms
 
 }

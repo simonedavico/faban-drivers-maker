@@ -85,12 +85,12 @@ public class FabanBenchmarkGeneratorResource {
         String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
         long experimentNumber = experiment.getExperimentNumber();
         Iterator<Trial> trials = experiment.getAllTrials();
-        minio.removeBenchFlowBenchmark(minioBenchmarkId, experimentNumber);
-        //TODO: add removeDeploymentDescriptor(bmarkId, expNum)
+        minio.removeTestConfigurationForExperiment(minioBenchmarkId, experimentNumber);
+        //TODO: add removeDeploymentDescriptorForTrial(bmarkId, expNum)
         while(trials.hasNext()) {
             Trial trial = trials.next();
             int trialNumber = trial.getTrialNumber();
-            minio.removeDeploymentDescriptor(minioBenchmarkId, experimentNumber, trialNumber);
+            minio.removeDeploymentDescriptorForTrial(minioBenchmarkId, experimentNumber, trialNumber);
             minio.removeFabanConfiguration(minioBenchmarkId, experimentNumber, trialNumber);
         }
     }
@@ -129,8 +129,8 @@ public class FabanBenchmarkGeneratorResource {
             Iterator<Trial> trials = experiment.getAllTrials();
 //            String deploymentDescriptor = minio.getOriginalDeploymentDescriptor(minioBenchmarkId);
             String deploymentDescriptor = minio.getDeploymentDescriptorForExperiment(minioBenchmarkId, experimentNumber);
-//            String benchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
-            String benchmarkConfiguration = minio.getBenchFlowBenchmarkForExperiment(minioBenchmarkId, experimentNumber);
+//            String benchmarkConfiguration = minio.getOriginalTestConfiguration(minioBenchmarkId);
+            String benchmarkConfiguration = minio.getTestConfigurationForExperiment(minioBenchmarkId, experimentNumber);
 
             Path descriptorsPath = driverPath.resolve("build/sut/");
 
@@ -158,7 +158,7 @@ public class FabanBenchmarkGeneratorResource {
                 Path descriptorPath = descriptorsPath.resolve("docker-compose-" + trial.getTrialId() + ".yml");
                 FileUtils.writeStringToFile(descriptorPath.toFile(), dd, Charsets.UTF_8);
 
-                minio.saveDeploymentDescriptor(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), dd);
+                minio.saveDeploymentDescriptorForTrial(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), dd);
                 minio.saveFabanConfiguration(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), runXml);
 
                 logger.debug("Saved on minio deployment descriptor and configuration for trial " + trial.getTrialId());
@@ -181,7 +181,7 @@ public class FabanBenchmarkGeneratorResource {
 
             //save generated driver to minio
             Path generatedDriverPath = driverPath.resolve("build/" + experiment.getExperimentId() + ".jar");
-            minio.saveGeneratedDriver(minioBenchmarkId, experimentNumber, generatedDriverPath.toAbsolutePath().toString());
+            minio.saveGeneratedBenchmark(minioBenchmarkId, experimentNumber, generatedDriverPath.toAbsolutePath().toString());
 
             logger.debug("Successfully saved generated driver on Minio");
 

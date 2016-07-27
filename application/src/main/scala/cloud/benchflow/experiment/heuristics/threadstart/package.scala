@@ -1,6 +1,6 @@
 package cloud.benchflow.experiment.heuristics
 
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 import scala.reflect.ClassTag
@@ -12,17 +12,17 @@ import scala.reflect.ClassTag
   */
 package object threadstart {
 
-  abstract class ThreadStartHeuristic[A <: HeuristicConfiguration : ClassTag](config: Map[String, Any])(env: BenchFlowEnv)
+  abstract class ThreadStartHeuristic[A <: HeuristicConfiguration : ClassTag](config: Map[String, Any])(env: ConfigYml)
     extends Heuristic[A](config)(env) {
 
-    def delay(bb: BenchFlowExperiment, numOfUsedHosts: Int): Int
-    def simultaneous(bb: BenchFlowExperiment): Boolean
-    def parallel(bb: BenchFlowExperiment): Boolean
+    def delay(expConfig: BenchFlowExperiment, numOfUsedHosts: Int): Int
+    def simultaneous(expConfig: BenchFlowExperiment): Boolean
+    def parallel(expConfig: BenchFlowExperiment): Boolean
 
   }
   object ThreadStartHeuristic {
 
-    def apply(strategy: String, configuration: Map[String, Any])(implicit env: BenchFlowEnv): ThreadStartHeuristic[_] = strategy match {
+    def apply(strategy: String, configuration: Map[String, Any])(implicit env: ConfigYml): ThreadStartHeuristic[_] = strategy match {
       case "computeDelay" => new ComputeDelayHeuristic(configuration)
     }
   }

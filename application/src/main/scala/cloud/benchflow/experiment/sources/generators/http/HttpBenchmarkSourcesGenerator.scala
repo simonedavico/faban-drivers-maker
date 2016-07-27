@@ -13,31 +13,31 @@ import cloud.benchflow.test.config.sut.http.HttpDriver
   *
   * Created on 25/07/16.
   */
-class HttpBenchmarkSourcesGenerator(benchFlowBenchmark: BenchFlowExperiment,
+class HttpBenchmarkSourcesGenerator(expConfig: BenchFlowExperiment,
                                     experimentId: String,
                                     generatedBenchmarkOutputDir: Path,
                                     env: DriversMakerEnv)
-  extends BenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env) {
+  extends BenchmarkSourcesGenerator(expConfig, experimentId, generatedBenchmarkOutputDir, env) {
 
   val benchmarkTemplate = templatesPath.resolve("harness/http/HttpBenchmark.java")
   override protected def benchmarkGenerationResources: Seq[Path] = super.benchmarkGenerationResources
   override protected def benchmarkGenerationProcessors: Seq[BenchmarkSourcesProcessor] = Seq()
 
   override protected def generateDriversSources() = {
-    val httpDriver = benchFlowBenchmark.drivers.find(_.isInstanceOf[HttpDriver]).get.asInstanceOf[HttpDriver]
+    val httpDriver = expConfig.drivers.find(_.isInstanceOf[HttpDriver]).get.asInstanceOf[HttpDriver]
     new HttpDriverGenerator(
       generatedBenchmarkOutputDir.resolve("src"),
       generationResources,
-      benchFlowBenchmark,
+      expConfig,
       experimentId,
       httpDriver)(env).generate()
   }
 }
 
 object HttpBenchmarkSourcesGenerator {
-  def apply(benchFlowBenchmark: BenchFlowExperiment,
+  def apply(expConfig: BenchFlowExperiment,
             experimentId: String,
             generatedBenchmarkOutputDir: Path,
             env: DriversMakerEnv) =
-    new HttpBenchmarkSourcesGenerator(benchFlowBenchmark, experimentId, generatedBenchmarkOutputDir, env)
+    new HttpBenchmarkSourcesGenerator(expConfig, experimentId, generatedBenchmarkOutputDir, env)
 }

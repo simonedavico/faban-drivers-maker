@@ -18,23 +18,23 @@ import scala.reflect.ClassTag
   */
 abstract class WfMSDriverGenerator[A <: WfMSDriverOperationsProcessor: ClassTag](generatedDriverClassOutputDir: Path,
                                                                                  generationResources: Path,
-                                                                                 benchFlowBenchmark: BenchFlowExperiment,
+                                                                                 expConfig: BenchFlowExperiment,
                                                                                  experimentId: String,
                                                                                  driver: WfMSDriver)(env: DriversMakerEnv)
   extends DriverGenerator[A](generatedDriverClassOutputDir,
     generationResources,
-    benchFlowBenchmark,
+    expConfig,
     driver,
     experimentId)(env) {
 
   override def templateResources: Seq[Path] = {
-    val pluginsPath = generationResources.resolve(s"plugins/wfms/${benchFlowBenchmark.sut.name}")
-    val pluginPath = ResolvePlugin(pluginsPath, "WfMSPlugin.java", benchFlowBenchmark.sut.version)
+    val pluginsPath = generationResources.resolve(s"plugins/wfms/${expConfig.sut.name}")
+    val pluginPath = ResolvePlugin(pluginsPath, "WfMSPlugin.java", expConfig.sut.version)
     val wfmsLibraryPath = generationResources.resolve("libraries/wfms/WfMSApi.java")
     Seq(wfmsLibraryPath, pluginPath)
   }
 
   override def additionalProcessors: Seq[BenchmarkSourcesProcessor] =
-    Seq(new WfMSPluginLoaderProcessor(benchFlowBenchmark, experimentId)(env))
+    Seq(new WfMSPluginLoaderProcessor(expConfig, experimentId)(env))
   //, new ModelsLoaderProcessor(benchFlowBenchmark, experimentId)(env))
 }

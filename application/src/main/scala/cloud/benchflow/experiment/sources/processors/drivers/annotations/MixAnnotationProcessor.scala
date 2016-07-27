@@ -14,10 +14,10 @@ import spoon.reflect.declaration.{CtAnnotation, CtClass}
   *
   * Created on 01/05/16.
   */
-class MixAnnotationProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class MixAnnotationProcessor(expConfig: BenchFlowExperiment,
                              driver: Driver[_ <: Operation],
                              experimentId: String)(implicit env: DriversMakerEnv)
-  extends DriverProcessor(benchFlowBenchmark, driver, experimentId)(env){
+  extends DriverProcessor(expConfig, driver, experimentId)(env){
 
 
   private def createMatrixMix(e: CtClass[_], mix: MatrixMix): Unit = {

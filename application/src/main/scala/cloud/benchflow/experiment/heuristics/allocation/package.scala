@@ -1,6 +1,6 @@
 package cloud.benchflow.experiment.heuristics
 
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.test.config.Driver
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
   */
 package object allocation {
 
-  abstract class AllocationHeuristic[A <: HeuristicConfiguration : ClassTag](config: Map[String, Any])(env: BenchFlowEnv)
+  abstract class AllocationHeuristic[A <: HeuristicConfiguration : ClassTag](config: Map[String, Any])(env: ConfigYml)
     extends Heuristic[A](config)(env) {
 
     type HostAddress = String
@@ -37,12 +37,12 @@ package object allocation {
     }
 
     //returns a mapping driver -> (host, agents) for a given configuration
-    def agents(bb: BenchFlowExperiment): Map[Driver[_], Set[(HostAddress, Int)]]
+    def agents(expConfig: BenchFlowExperiment): Map[Driver[_], Set[(HostAddress, Int)]]
 
   }
   object AllocationHeuristic {
 
-    def apply(strategy: String, configuration: Map[String, Any])(implicit env: BenchFlowEnv) = strategy match {
+    def apply(strategy: String, configuration: Map[String, Any])(implicit env: ConfigYml) = strategy match {
       case "static" => new StaticAllocationHeuristic(configuration)(env)
     }
 

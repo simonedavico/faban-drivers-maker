@@ -16,10 +16,10 @@ import scala.xml.PrettyPrinter
   *
   * Created on 11/05/16.
   */
-class FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class FabanBenchmarkDeploymentDescriptorProcessor(expConfig: BenchFlowExperiment,
                                                   experimentId: String,
                                                   benchmarkOutputDir: Path)(implicit env: DriversMakerEnv)
-  extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env) {
+  extends BenchmarkSourcesProcessor(expConfig, experimentId)(env) {
 
   override def isProcessable(element: CtClass[_]): Boolean = {
     super.isProcessable(element) &&
@@ -35,7 +35,7 @@ class FabanBenchmarkDeploymentDescriptorProcessor(benchFlowBenchmark: BenchFlowE
   override protected def doProcess(element: CtClass[_]): Unit = {
 
     val benchmarkClassQualifiedName = element.getQualifiedName
-    val benchmarkName = benchFlowBenchmark.name
+    val benchmarkName = expConfig.name
 
     val benchmarkDeploymentDescriptor =
       <benchmark>

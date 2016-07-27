@@ -1,6 +1,6 @@
 package cloud.benchflow.experiment.heuristics
 
-import cloud.benchflow.driversmaker.utils.env.BenchFlowEnv
+import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 import scala.reflect.ClassTag
@@ -13,17 +13,17 @@ import scala.reflect.ClassTag
 package object jvm {
 
   //configure xmx and xms params
-  abstract class JvmParamsHeuristic[A <: HeuristicConfiguration : ClassTag](mapConfig: Map[String, Any])(env: BenchFlowEnv)
+  abstract class JvmParamsHeuristic[A <: HeuristicConfiguration : ClassTag](mapConfig: Map[String, Any])(env: ConfigYml)
     extends Heuristic[A](mapConfig)(env) {
 
-    def xmx(bb: BenchFlowExperiment): Int
+    def xmx(expConfig: BenchFlowExperiment): Int
 
-    def xms(bb: BenchFlowExperiment): Int
+    def xms(expConfig: BenchFlowExperiment): Int
 
   }
 
   object JvmParamsHeuristic {
-    def apply(strategy: String, configuration: Map[String, Any])(implicit env: BenchFlowEnv) = strategy match {
+    def apply(strategy: String, configuration: Map[String, Any])(implicit env: ConfigYml) = strategy match {
       case "simple" => new SimpleJvmParamsHeuristic(configuration)(env)
       case "logistic" => new LogisticsGrowthJvmParamsHeuristic(configuration)(env)
     }

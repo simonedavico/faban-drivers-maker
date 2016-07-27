@@ -12,10 +12,10 @@ import spoon.reflect.declaration.CtClass
   * An implementation of [[DriverOperationsProcessor]] that generates
   * operations and related annotations for an http driver
   */
-class HttpDriverOperationsProcessor(benchFlowBenchmark: BenchFlowExperiment,
+class HttpDriverOperationsProcessor(expConfig: BenchFlowExperiment,
                                     driver: HttpDriver,
                                     experimentId: String)(implicit env: DriversMakerEnv)
-  extends DriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)(env) {
+  extends DriverOperationsProcessor(expConfig, driver, experimentId)(env) {
 
   override def doProcess(e: CtClass[_]): Unit = {
     e.setSimpleName(driver.getClass.getSimpleName)
