@@ -1,7 +1,9 @@
 benchflowEnv:
   config.yml: /app/config.yml
   benchflowServices: /app/benchflow-services
+  privatePort: 8080
   generationResources: /app/drivers
+
 
 minio:
   address: ${env.MINIO_ADDRESS}
