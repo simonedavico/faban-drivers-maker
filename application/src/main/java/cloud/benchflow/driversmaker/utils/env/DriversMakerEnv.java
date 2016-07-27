@@ -1,6 +1,6 @@
 package cloud.benchflow.driversmaker.utils.env;
 
-import cloud.benchflow.benchmark.heuristics.GenerationDefaults;
+import cloud.benchflow.experiment.GenerationDefaults;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
@@ -11,26 +11,28 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
 
     private String benchFlowServicesPath;
     private String generationResourcesPath;
-    private BenchFlowEnv configYml;
+    private ConfigYml configYml;
     private GenerationDefaults heuristics;
-
+    private String privatePort;
 
     public DriversMakerEnv(/*String configPath,*/
-                           BenchFlowEnv configYml,
+                           ConfigYml configYml,
                            String benchFlowServicesPath,
-                           String generationResourcesPath) {
+                           String generationResourcesPath,
+                           String privatePort) {
         //super(configPath);
         this.configYml = configYml;
         this.benchFlowServicesPath = benchFlowServicesPath;
         this.generationResourcesPath = generationResourcesPath;
         this.heuristics = new GenerationDefaults(configYml);
+        this.privatePort = privatePort;
     }
 
     public String getBenchFlowServicesPath() {
         return benchFlowServicesPath;
     }
 
-    public BenchFlowEnv getConfigYml() {
+    public ConfigYml getConfigYml() {
         return this.configYml;
     }
 
@@ -38,8 +40,8 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
         return this.heuristics;
     }
 
-    public String getBenchFlowComposeAddress() {
-        return this.configYml.<String>getVariable("BENCHFLOW_COMPOSE_ADDRESS");
+    public String getDeploymentManagerAddress() {
+        return this.configYml.<String>getVariable("BENCHFLOW_DEPLOYMENT_MANAGER_ADDRESS");
         //return this.<String>getVariable("BENCHFLOW_COMPOSE_ADDRESS");
 //        return benchFlowComposeAddress;
     }
@@ -56,4 +58,23 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
         this.generationResourcesPath = generationResourcesPath;
     }
 
+    public String getPrivatePort() {
+        return privatePort;
+    }
+
+    public String getPublicIp(String serverAlias) {
+        return configYml.getVariable("BENCHFLOW_SERVER_" + serverAlias.toUpperCase() + "_PUBLICIP");
+    }
+
+    public String getLocalIp(String serverAlias) {
+        return configYml.getVariable("BENCHFLOW_SERVER_" + serverAlias.toUpperCase() + "_PRIVATEIP");
+    }
+
+    public String getIp(String serverAlias) {
+        String privateIp = getLocalIp(serverAlias);
+        if(privateIp == null) {
+            return getPublicIp(serverAlias);
+        }
+        return privateIp;
+    }
 }

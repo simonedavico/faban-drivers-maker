@@ -1,13 +1,13 @@
 package cloud.benchflow.driversmaker.resources;
 
-import cloud.benchflow.benchmark.BenchmarkGenerator;
+import cloud.benchflow.experiment.BenchmarkGenerator;
 import cloud.benchflow.driversmaker.exceptions.BenchmarkGenerationException;
 import cloud.benchflow.driversmaker.requests.Experiment;
 import cloud.benchflow.driversmaker.requests.Trial;
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv;
-import cloud.benchflow.driversmaker.utils.minio.BenchFlowMinioClient;
 
 import cloud.benchflow.driversmaker.utils.ManagedDirectory;
+import cloud.benchflow.minio.BenchFlowMinioClient;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -50,16 +50,26 @@ public class FabanBenchmarkGeneratorResource {
         this.logger = LoggerFactory.getLogger(this.getClass().getName());
     }
 
-    private void buildDriver(final Path driverPath, final String experimentId) {
+    private void buildBenchmark(final Path benchmarkPath, final String experimentId) {
         Project p = new Project();
-        p.setUserProperty("ant.file", driverPath.resolve("build.xml").toAbsolutePath().toString());
+        p.setUserProperty("ant.file", benchmarkPath.resolve("build.xml").toAbsolutePath().toString());
         p.setProperty("bench.shortname", experimentId);
         p.setProperty("faban.home", "faban/stage");
         p.init();
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         p.addReference("ant.projectHelper", helper);
-        helper.parse(p, driverPath.resolve("build.xml").toFile());
+        helper.parse(p, benchmarkPath.resolve("build.xml").toFile());
         p.executeTarget("build");
+    }
+
+    //copies classes from package cloud.benchflow.driversmaker.generation
+    //into the benchmark skeleton
+    private void copyGenerationSources(final Path benchmarkPath) throws IOException {
+
+        Path generationSourcesPath = Paths.get("./application/src/main/java/cloud/benchflow/driversmaker/generation");
+        FileUtils.copyDirectory(generationSourcesPath.toFile(),
+                                benchmarkPath.resolve("src/cloud/benchflow/driversmaker/generation").toFile());
+
     }
 
     @Deprecated
@@ -75,11 +85,12 @@ public class FabanBenchmarkGeneratorResource {
         String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
         long experimentNumber = experiment.getExperimentNumber();
         Iterator<Trial> trials = experiment.getAllTrials();
-        minio.removeBenchFlowBenchmark(minioBenchmarkId, experimentNumber);
+        minio.removeTestConfigurationForExperiment(minioBenchmarkId, experimentNumber);
+        //TODO: add removeDeploymentDescriptorForTrial(bmarkId, expNum)
         while(trials.hasNext()) {
             Trial trial = trials.next();
             int trialNumber = trial.getTrialNumber();
-            minio.removeDeploymentDescriptor(minioBenchmarkId, experimentNumber, trialNumber);
+            minio.removeDeploymentDescriptorForTrial(minioBenchmarkId, experimentNumber, trialNumber);
             minio.removeFabanConfiguration(minioBenchmarkId, experimentNumber, trialNumber);
         }
     }
@@ -118,8 +129,8 @@ public class FabanBenchmarkGeneratorResource {
             Iterator<Trial> trials = experiment.getAllTrials();
 //            String deploymentDescriptor = minio.getOriginalDeploymentDescriptor(minioBenchmarkId);
             String deploymentDescriptor = minio.getDeploymentDescriptorForExperiment(minioBenchmarkId, experimentNumber);
-//            String benchmarkConfiguration = minio.getOriginalBenchFlowBenchmark(minioBenchmarkId);
-            String benchmarkConfiguration = minio.getBenchFlowBenchmarkForExperiment(minioBenchmarkId, experimentNumber);
+//            String benchmarkConfiguration = minio.getOriginalTestConfiguration(minioBenchmarkId);
+            String benchmarkConfiguration = minio.getTestConfigurationForExperiment(minioBenchmarkId, experimentNumber);
 
             Path descriptorsPath = driverPath.resolve("build/sut/");
 
@@ -147,7 +158,7 @@ public class FabanBenchmarkGeneratorResource {
                 Path descriptorPath = descriptorsPath.resolve("docker-compose-" + trial.getTrialId() + ".yml");
                 FileUtils.writeStringToFile(descriptorPath.toFile(), dd, Charsets.UTF_8);
 
-                minio.saveDeploymentDescriptor(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), dd);
+                minio.saveDeploymentDescriptorForTrial(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), dd);
                 minio.saveFabanConfiguration(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), runXml);
 
                 logger.debug("Saved on minio deployment descriptor and configuration for trial " + trial.getTrialId());
@@ -164,11 +175,13 @@ public class FabanBenchmarkGeneratorResource {
             }
 
             logger.debug("About to build generated driver");
-            buildDriver(driverPath, experiment.getExperimentId());
+
+            copyGenerationSources(driverPath);
+            buildBenchmark(driverPath, experiment.getExperimentId());
 
             //save generated driver to minio
             Path generatedDriverPath = driverPath.resolve("build/" + experiment.getExperimentId() + ".jar");
-            minio.saveGeneratedDriver(minioBenchmarkId, experimentNumber, generatedDriverPath.toAbsolutePath().toString());
+            minio.saveGeneratedBenchmark(minioBenchmarkId, experimentNumber, generatedDriverPath.toAbsolutePath().toString());
 
             logger.debug("Successfully saved generated driver on Minio");
 
