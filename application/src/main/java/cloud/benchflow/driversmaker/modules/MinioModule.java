@@ -2,7 +2,7 @@ package cloud.benchflow.driversmaker.modules;
 
 import cloud.benchflow.driversmaker.configurations.DriversMakerConfiguration;
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv;
-import cloud.benchflow.driversmaker.utils.minio.BenchFlowMinioClient;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import io.minio.errors.InvalidEndpointException;
 import io.minio.errors.InvalidPortException;
+import cloud.benchflow.minio.BenchFlowMinioClient;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)

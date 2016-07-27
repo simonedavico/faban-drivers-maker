@@ -153,6 +153,12 @@
             <version>v-dev</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.benchflow.commons</groupId>
+            <artifactId>client</artifactId>
+            <version>v-dev</version>
+        </dependency>
+
     </dependencies>
 
     <build>

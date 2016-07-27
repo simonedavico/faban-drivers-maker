@@ -5,9 +5,9 @@ import cloud.benchflow.driversmaker.exceptions.BenchmarkGenerationException;
 import cloud.benchflow.driversmaker.requests.Experiment;
 import cloud.benchflow.driversmaker.requests.Trial;
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv;
-import cloud.benchflow.driversmaker.utils.minio.BenchFlowMinioClient;
 
 import cloud.benchflow.driversmaker.utils.ManagedDirectory;
+import cloud.benchflow.minio.BenchFlowMinioClient;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
