@@ -91,12 +91,14 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       val alias = getAliasFromCollector(collector)
       val aliasIp = env.getPublicIp(alias)
 
-      monitor.environment.vars("constraint") = alias
+      //monitor.environment.vars("constraint") = alias
+      monitor.environment.vars("constraint") = env.getHostname(alias)
 
       monitor.copy(
         name = name,
         containerName = Some(ContainerName(s"${name}_${trial.getTrialId}")),
-        ports = monitor.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}")))
+        ports = monitor.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
+        net = Some(Network("bridge"))
       )
     }
 
@@ -178,12 +180,14 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       val alias = testConfig.getAliasForService(self.name).get
       val aliasIp = env.getPublicIp(alias)
 
-      collector.environment.vars("constraint") = alias
+      //collector.environment.vars("constraint") = alias
+      collector.environment.vars("constraint") = env.getHostname(alias)
 
       collector.copy(
         name = name,
         containerName = Some(ContainerName(s"${name}_${trial.getTrialId}")),
-        ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}")))
+        ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
+        net = Some(Network("bridge"))
       )
     }
 
