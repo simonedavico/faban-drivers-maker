@@ -4,10 +4,11 @@ import java.nio.file.Path
 
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.experiment.sources.generators.DriverGenerator
-import cloud.benchflow.experiment.sources.processors.{WfMSPluginLoaderProcessor, BenchmarkSourcesProcessor, WfMSDriverOperationsProcessor}
+import cloud.benchflow.experiment.sources.processors.drivers.operations.wfms.WfMSDriverOperationsProcessor
+import cloud.benchflow.experiment.sources.processors.{WfMSPluginLoaderProcessor, BenchmarkSourcesProcessor}
 import cloud.benchflow.experiment.sources.utils.ResolvePlugin
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
-import cloud.benchflow.test.config.sut.wfms.WfMSDriver
+import cloud.benchflow.test.config.sut.wfms.{WfMSOperation, WfMSDriver}
 
 import scala.reflect.ClassTag
 
@@ -16,7 +17,7 @@ import scala.reflect.ClassTag
   *
   * Created on 25/07/16.
   */
-abstract class WfMSDriverGenerator[A <: WfMSDriverOperationsProcessor: ClassTag](generatedDriverClassOutputDir: Path,
+abstract class WfMSDriverGenerator[A <: WfMSDriverOperationsProcessor[_ <: WfMSOperation]: ClassTag](generatedDriverClassOutputDir: Path,
                                                                                  generationResources: Path,
                                                                                  expConfig: BenchFlowExperiment,
                                                                                  experimentId: String,

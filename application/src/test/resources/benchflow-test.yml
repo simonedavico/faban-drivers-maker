@@ -1,7 +1,8 @@
 sut:
     name: camunda
     version: 3.5.0
-    type: WfMS
+    type: http
+#    type: WfMS
 
 testName: WfMSTest
 description: A WfMS test
@@ -20,16 +21,26 @@ properties:
 
 
 drivers:
-- start:
+- http:
     properties:
-        stats:
-            interval: 30
+      stats:
+        interval: 30
     operations:
-    - myModel.bpmn
-    configuration:
-        mix:
-            fixedSequence: [ myModel ]
-            deviation: 5
+    - getProfile:
+        endpoint: /get-profile
+        method: GET
+        headers:
+          Content-Type: foobar
+#- start:
+#    properties:
+#        stats:
+#            interval: 30
+#    operations:
+#    - myModel.bpmn
+#    configuration:
+#        mix:
+#            fixedSequence: [ myModel ]
+#            deviation: 5
 
 
 sutConfiguration:

@@ -14,8 +14,8 @@ public class Experiment {
 
     private String userId;
 
-    @JsonProperty("benchmarkName")
-    private String benchmarkName;
+    @JsonProperty("experimentName")
+    private String experimentName;
 
     @JsonProperty("experimentNumber")
     private long experimentNumber;
@@ -23,12 +23,12 @@ public class Experiment {
     @JsonProperty("trials")
     private int totalTrials;
 
-    public String getBenchmarkName() {
-        return benchmarkName;
+    public String getExperimentName() {
+        return experimentName;
     }
 
-    public void setBenchmarkName(String benchmarkName) {
-        this.benchmarkName = benchmarkName;
+    public void setExperimentName(String experimentName) {
+        this.experimentName = experimentName;
     }
 
     public long getExperimentNumber() {
@@ -49,7 +49,7 @@ public class Experiment {
 
     public String getExperimentId() { return getBenchmarkId() + "." + experimentNumber; }
 
-    public String getBenchmarkId() { return userId + "." + benchmarkName; }
+    public String getBenchmarkId() { return userId + "." + experimentName; }
 
     public Trial getTrial(int trialNumber) {
         if(trialNumber > totalTrials)

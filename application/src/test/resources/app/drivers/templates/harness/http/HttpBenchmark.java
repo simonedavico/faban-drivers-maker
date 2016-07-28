@@ -8,6 +8,7 @@ public class HttpBenchmark extends BenchFlowBenchmark {
 
     private static Logger logger = Logger.getLogger(HttpBenchmark.class.getName());
 
+    @Override
     protected void initialize() throws Exception {
         super.initialize();
     }
