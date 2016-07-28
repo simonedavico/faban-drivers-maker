@@ -16,7 +16,7 @@ ENV GENERATION_RESOURCES_ROOT /app/drivers
 ENV LIBRARIES_ROOT ${GENERATION_RESOURCES_ROOT}/libraries
 ENV PLUGINS_ROOT ${GENERATION_RESOURCES_ROOT}/plugins
 ENV TEMPLATES_ROOT ${GENERATION_RESOURCES_ROOT}/templates
-ENV BENCHFLOW_SERVICES_ROOT ${GENERATION_RESOURCES_ROOT}/benchflow-services
+ENV BENCHFLOW_SERVICES_ROOT /app/benchflow-services
 ENV BENCHFLOW_COLLECTORS_ROOT ${BENCHFLOW_SERVICES_ROOT}/collectors
 ENV BENCHFLOW_MONITORS_ROOT ${BENCHFLOW_SERVICES_ROOT}/monitors
 
@@ -58,12 +58,14 @@ RUN apk --update add wget tar && \
     cp ${TEMPLATES_ROOT}/skeleton/benchmark/lib/benchflow-monitors-driver-library.jar ${TEMPLATES_ROOT}/skeleton/benchmark/build/lib/ && \
     # Download monitors release, extract deployment descriptors, move them to the right place, and delete the rest
     mkdir -p /tmp/monitors-deployment-descriptors && \
+    mkdir -p ${BENCHFLOW_MONITORS_ROOT} && \
     wget -q --no-check-certificate -O /tmp/monitors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/monitors/archive/v-dev.tar.gz && \
     tar -xzf /tmp/monitors-deployment-descriptors/v-dev.tar.gz -C /tmp/monitors-deployment-descriptors/ --wildcards --no-anchored '*.monitor.yml' && \
     find /tmp/monitors-deployment-descriptors/ -name '*.monitor.yml' -type f -exec mv -i {} ${BENCHFLOW_MONITORS_ROOT} \; && \
     rm -rf /tmp/monitors-deployment-descriptors/ && \
     # Download collectors release, extract deployment descriptors, move them to the right place, and delete the rest
     mkdir -p /tmp/collectors-deployment-descriptors && \
+    mkdir -p ${BENCHFLOW_COLLECTORS_ROOT} && \
     wget -q --no-check-certificate -O /tmp/collectors-deployment-descriptors/v-dev.tar.gz https://github.com/benchflow/collectors/archive/v-dev.tar.gz && \
     tar -xzf /tmp/collectors-deployment-descriptors/v-dev.tar.gz -C /tmp/collectors-deployment-descriptors/ --wildcards --no-anchored '*.collector.yml' && \
     find /tmp/collectors-deployment-descriptors/ -name '*.collector.yml' -type f -exec mv -i {} ${BENCHFLOW_COLLECTORS_ROOT} \; && \

@@ -159,8 +159,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
         collector.environment.vars("BENCHFLOW_DATA_NAME") = CollectorType.getName(collector.name)
         collector.environment.vars("MINIO_HOST") = env.getConfigYml.getVariable[String]("BENCHFLOW_MINIO_IP")
         collector.environment.vars("MINIO_PORT") = env.getConfigYml.getVariable[String]("BENCHFLOW_MINIO_PORT")
-        collector.environment.vars("MINIO_SECRETACCESSKEY") = env.getConfigYml.getVariable[String]("BENCHFLOW_MINIO_SECRET_KEY")
-        collector.environment.vars("MINIO_ACCESSKEYID") = env.getConfigYml.getVariable[String]("BENCHFLOW_MINIO_ACCESS_KEY")
+        collector.environment.vars("MINIO_SECRETACCESSKEY") = env.getConfigYml.getVariable[String]("MINIO_SECRET_KEY")
+        collector.environment.vars("MINIO_ACCESSKEYID") = env.getConfigYml.getVariable[String]("MINIO_ACCESS_KEY")
         collector.environment.vars("KAFKA_HOST") = env.getConfigYml.getVariable[String]("BENCHFLOW_KAFKA_IP")
         collector.environment.vars("KAFKA_PORT") = env.getConfigYml.getVariable[String]("BENCHFLOW_KAFKA_PORT")
         collector.environment.vars("SUT_NAME") = testConfig.sut.name

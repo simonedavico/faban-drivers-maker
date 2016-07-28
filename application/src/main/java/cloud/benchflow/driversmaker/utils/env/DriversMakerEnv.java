@@ -42,8 +42,6 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
 
     public String getDeploymentManagerAddress() {
         return this.configYml.<String>getVariable("BENCHFLOW_DEPLOYMENT_MANAGER_ADDRESS");
-        //return this.<String>getVariable("BENCHFLOW_COMPOSE_ADDRESS");
-//        return benchFlowComposeAddress;
     }
 
     public String getEnvConsulAddress() {
