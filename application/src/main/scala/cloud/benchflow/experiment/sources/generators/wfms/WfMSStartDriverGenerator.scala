@@ -7,7 +7,7 @@ import cloud.benchflow.experiment.sources.processors.BenchmarkSourcesProcessor
 import cloud.benchflow.experiment.sources.processors.drivers.annotations.BenchmarkDefinitionAnnotation
 import cloud.benchflow.experiment.sources.processors.drivers.operations.wfms.WfMSStartDriverOperationsProcessor
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
-import cloud.benchflow.test.config.sut.wfms.WfMSStartDriver
+import cloud.benchflow.test.config.sut.wfms.{WfMSOperation, WfMSStartDriver}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -26,7 +26,7 @@ class WfMSStartDriverGenerator(generatedDriverClassOutputDir: Path,
                                experimentId: String,
                                driver: WfMSStartDriver)
                               (implicit env: DriversMakerEnv)
-  extends WfMSDriverGenerator[WfMSStartDriverOperationsProcessor](generatedDriverClassOutputDir,
+  extends WfMSDriverGenerator[WfMSStartDriverOperationsProcessor[WfMSOperation]](generatedDriverClassOutputDir,
     generationResources,
     expConfig,
     experimentId,

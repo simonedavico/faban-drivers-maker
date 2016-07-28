@@ -32,7 +32,7 @@ import scala.reflect.ClassTag
   * @param driver driver configuration
   * @tparam A implementation of [[DriverOperationsProcessor]]
   */
-abstract class DriverGenerator[A <: DriverOperationsProcessor: ClassTag](val generatedDriverClassOutputDir: Path,
+abstract class DriverGenerator[A <: DriverOperationsProcessor[_]: ClassTag](val generatedDriverClassOutputDir: Path,
                                                                          val generationResources: Path,
                                                                          val expConfig: BenchFlowExperiment,
                                                                          val driver: Driver[_ <: Operation],

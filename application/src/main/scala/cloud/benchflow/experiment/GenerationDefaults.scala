@@ -53,4 +53,6 @@ object GenerationDefaults {
 
   val interval = 1
 
+  val max90th = Double.MaxValue
+
 }

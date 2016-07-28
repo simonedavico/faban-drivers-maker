@@ -7,7 +7,7 @@ import cloud.benchflow.experiment.sources.generators.DriverGenerator
 import cloud.benchflow.experiment.sources.processors.drivers.annotations.BenchmarkDefinitionAnnotation
 import cloud.benchflow.experiment.sources.processors.drivers.operations.http.HttpDriverOperationsProcessor
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
-import cloud.benchflow.test.config.sut.http.HttpDriver
+import cloud.benchflow.test.config.sut.http.{HttpOperation, HttpDriver}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
@@ -18,8 +18,8 @@ class HttpDriverGenerator(generatedDriverClassOutputDir: Path,
                           generationResources: Path,
                           expConfig: BenchFlowExperiment,
                           experimentId: String,
-                          driver: HttpDriver)(env: DriversMakerEnv)
-  extends DriverGenerator[HttpDriverOperationsProcessor](generatedDriverClassOutputDir,
+                          driver: HttpDriver)(implicit env: DriversMakerEnv)
+  extends DriverGenerator[HttpDriverOperationsProcessor[HttpOperation]](generatedDriverClassOutputDir,
     generationResources,
     expConfig,
     driver,

@@ -1,7 +1,7 @@
 package cloud.benchflow.experiment.sources
 
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
-import cloud.benchflow.test.config.sut.wfms.WfMSDriver
+import cloud.benchflow.test.config.sut.wfms.{WfMSOperation, WfMSDriver}
 import cloud.benchflow.test.config.{Operation, Driver}
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import spoon.processing.AbstractProcessor
@@ -62,15 +62,18 @@ package object processors {
     extends BenchmarkSourcesProcessor(benchFlowBenchmark, experimentId)(env)
 
   /** base class for a processor that generates operations for a driver */
-  abstract class DriverOperationsProcessor(benchflowBenchmark: BenchFlowExperiment,
-                                           driver: Driver[_ <: Operation],
+  abstract class DriverOperationsProcessor[T <: Operation](benchflowBenchmark: BenchFlowExperiment,
+                                           driver: Driver[T],
                                            experimentId: String)(implicit env: DriversMakerEnv)
-    extends DriverProcessor(benchflowBenchmark, driver, experimentId)(env)
+    extends DriverProcessor(benchflowBenchmark, driver, experimentId)(env) {
 
-  /** base class for a processor that generates operations for a wfms driver */
-  abstract class WfMSDriverOperationsProcessor(benchFlowBenchmark: BenchFlowExperiment,
-                                               driver: WfMSDriver,
-                                               experimentId: String)(implicit env: DriversMakerEnv)
-    extends DriverOperationsProcessor(benchFlowBenchmark, driver, experimentId)(env)
+    protected def generateOperation(element: CtClass[_])(op: T): Unit
+
+    override def doProcess(element: CtClass[_]) = {
+      element.setSimpleName(driver.getClass.getSimpleName)
+      driver.operations.foreach(generateOperation(element))
+    }
+
+  }
 
 }
