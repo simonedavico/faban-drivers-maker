@@ -32,8 +32,8 @@ public class MinioModule extends AbstractModule {
             throws InvalidPortException, InvalidEndpointException {
 
         String minioAddress = dc.getMinioConfiguration().getAddress();
-        String accessKey = generationEnv.getConfigYml().<String>getVariable("BENCHFLOW_MINIO_ACCESS_KEY");
-        String secretKey = generationEnv.getConfigYml().<String>getVariable("BENCHFLOW_MINIO_SECRET_KEY");
+        String accessKey = generationEnv.getConfigYml().<String>getVariable("MINIO_ACCESS_KEY");
+        String secretKey = generationEnv.getConfigYml().<String>getVariable("MINIO_SECRET_KEY");
         return new BenchFlowMinioClient(minioAddress,accessKey,secretKey);
     }
 }
