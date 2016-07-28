@@ -97,7 +97,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       monitor.copy(
         name = name,
         containerName = Some(ContainerName(s"${name}_${trial.getTrialId}")),
-        ports = monitor.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}")))
+        ports = monitor.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
+        net = Some(Network("bridge"))
       )
     }
 
@@ -185,7 +186,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       collector.copy(
         name = name,
         containerName = Some(ContainerName(s"${name}_${trial.getTrialId}")),
-        ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}")))
+        ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
+        net = Some(Network("bridge"))
       )
     }
 
