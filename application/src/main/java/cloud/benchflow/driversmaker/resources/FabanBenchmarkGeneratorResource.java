@@ -82,7 +82,7 @@ public class FabanBenchmarkGeneratorResource {
     }
 
     private void cleanUp(Experiment experiment) {
-        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
+        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getExperimentName();
         long experimentNumber = experiment.getExperimentNumber();
         Iterator<Trial> trials = experiment.getAllTrials();
         minio.removeTestConfigurationForExperiment(minioBenchmarkId, experimentNumber);
@@ -100,26 +100,19 @@ public class FabanBenchmarkGeneratorResource {
         //temporary user id
         experiment.setUserId("BenchFlow");
         String benchmarkId = experiment.getBenchmarkId();
-        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getBenchmarkName();
+        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getExperimentName();
 
         String experimentId = experiment.getExperimentId();
         String minioExperimentId = experimentId.replace(".", "/");
         long experimentNumber = experiment.getExperimentNumber();
-
-        //temporary: get zip of sources and copy in temporary folder
-//        InputStream sources = minio.getBenchmarkSources(minioBenchmarkId);
-//        logger.debug("Retrieved driver sources from minio");
 
         try(ManagedDirectory managedDriverPath = new ManagedDirectory(
                 "./tmp/" + benchmarkId + "/" + experiment.getExperimentId())
             ) {
 
             Path driverPath = managedDriverPath.getPath();
-//            FileUtils.forceMkdir(driverPath.toFile());
-//            ZipUtil.unwrap(sources, driverPath.toFile());
 
             //copy skeleton in temporary folder
-//            Path generationResources = Paths.get("./application/src/test/resources/app/drivers");
             Path generationResources = Paths.get(benv.getGenerationResourcesPath());
             Path skeletonPath = generationResources.resolve("templates/skeleton/benchmark");
             FileUtils.copyDirectory(skeletonPath.toFile(), driverPath.toFile());
