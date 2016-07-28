@@ -91,7 +91,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       val alias = getAliasFromCollector(collector)
       val aliasIp = env.getPublicIp(alias)
 
-      monitor.environment.vars("constraint") = alias
+      //monitor.environment.vars("constraint") = alias
+      monitor.environment.vars("constraint") = env.getHostname(alias)
 
       monitor.copy(
         name = name,
@@ -178,7 +179,8 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       val alias = testConfig.getAliasForService(self.name).get
       val aliasIp = env.getPublicIp(alias)
 
-      collector.environment.vars("constraint") = alias
+      //collector.environment.vars("constraint") = alias
+      collector.environment.vars("constraint") = env.getHostname(alias)
 
       collector.copy(
         name = name,

@@ -48,6 +48,10 @@ public class DriversMakerEnv /*extends BenchFlowEnv*/ {
         return this.configYml.<String>getVariable("BENCHFLOW_ENVCONSUL_CONSUL_ADDRESS");
     }
 
+    public String getHostname(String serverAlias) {
+        return this.configYml.<String>getVariable("BENCHFLOW_SERVER_" + serverAlias.toUpperCase() + "_HOSTNAME");
+    }
+
     public String getGenerationResourcesPath() {
         return generationResourcesPath;
     }

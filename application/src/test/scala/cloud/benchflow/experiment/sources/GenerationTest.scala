@@ -40,10 +40,10 @@ object GenerationTest extends App {
     env = benchFlowEnv
   )
   val resolvedDC = dcBuilder.resolveDeploymentDescriptor(parsedDc, trial)
-  //println(DockerCompose.toYaml(resolvedDC))
+  println(DockerCompose.toYaml(resolvedDC))
 
   val runXmlBuilder = new FabanBenchmarkConfigurationBuilder(parsedExpConfig,benchFlowEnv,parsedDc)
-  //println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
+//  println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
 
   val siblingResolver = new SiblingVariableResolver(parsedDc, benchFlowEnv, parsedExpConfig)
 
