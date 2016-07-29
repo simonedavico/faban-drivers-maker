@@ -1,4 +1,4 @@
-version: 2
+version: '2'
 services:
   camunda:
     image: camunda/camunda-bpm-platform:tomcat-7.4.0

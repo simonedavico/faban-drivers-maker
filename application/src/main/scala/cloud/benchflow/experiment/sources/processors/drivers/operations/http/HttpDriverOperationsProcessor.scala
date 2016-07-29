@@ -58,7 +58,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     method.getBody.insertEnd(
       getFactory.Code().createCodeSnippetStatement(
-        s"""http.fetchUrl("${op.endpoint}", $headersMapName)"""
+        s"""http.fetchUrl(sutEndpoint + "${op.endpoint}", $headersMapName)"""
       )
     )
 
@@ -76,7 +76,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
-        s"""http.deleteUrl("${op.endpoint}")"""
+        s"""http.deleteUrl(sutEndpoint + "${op.endpoint}")"""
       )
     )
 
@@ -99,7 +99,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
-        s"""http.putUrl("${op.endpoint}",
+        s"""http.putUrl(sutEndpoint + "${op.endpoint}",
            |"${op.data}".getBytes(java.nio.charset.Charset.forName("UTF-8")),
            |"$contentType", $headersMapName)""".stripMargin
       )
@@ -120,8 +120,8 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
         op.data match {
-          case Some(payload) => s"""http.fetchUrl("${op.endpoint}", "$payload", $headersMapName)"""
-          case None =>   s"""http.fetchUrl("${op.endpoint}", $headersMapName)"""
+          case Some(payload) => s"""http.fetchUrl(sutEndpoint + "${op.endpoint}", "$payload", $headersMapName)"""
+          case None =>   s"""http.fetchUrl(sutEndpoint + "${op.endpoint}", $headersMapName)"""
         }
       )
     )
