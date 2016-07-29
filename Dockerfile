@@ -2,6 +2,8 @@ FROM benchflow/base-images:dns-envconsul-java8_dev
 
 MAINTAINER Vincenzo FERME <info@vincenzoferme.it>
 
+ENV JAVA_HOME /usr/lib/jvm/java8
+
 ENV FABAN_DRIVERS_MAKER_VERSION v-dev
 ENV RELEASE_VERSION v-dev
 ENV FABAN_VERSION dev
@@ -27,6 +29,9 @@ COPY configuration.yml /app/
 
 # copy driver skeleton
 COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
+
+# copy cloud.benchflow.driversmaker.generation package classes
+COPY ./application/src/main/java/cloud/benchflow/driversmaker/generation /app/application/src/main/java/cloud/benchflow/driversmaker/generation/
 
 # Get benchflow-drivers-maker dependencies
 RUN apk --update add wget tar && \
