@@ -21,14 +21,18 @@ public class BenchFlowEnvModule extends AbstractModule {
 
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     @Named("generationEnv")
     public DriversMakerEnv providesBenchFlowEnv(DriversMakerConfiguration dmc) throws FileNotFoundException {
+
         String configYmlPath = dmc.getBenchFlowEnvConfiguration().getConfigPath();
         String bfServicesPath = dmc.getBenchFlowEnvConfiguration().getBenchFlowServicesPath();
         String generationResourcesPath = dmc.getBenchFlowEnvConfiguration().getGenerationResourcesPath();
         String privatePort = dmc.getBenchFlowEnvConfiguration().getPrivatePort();
+
         ConfigYml benv = new ConfigYml(configYmlPath);
+
         return new DriversMakerEnv(benv, bfServicesPath, generationResourcesPath, privatePort);
     }
 
