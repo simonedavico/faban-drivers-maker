@@ -28,6 +28,9 @@ COPY configuration.yml /app/
 # copy driver skeleton
 COPY ./application/src/main/resources/app/drivers/templates /app/drivers/templates/
 
+# copy cloud.benchflow.driversmaker.generation package classes
+COPY ./application/src/main/java/cloud/benchflow/driversmaker/generation /app/application/src/main/java/cloud/benchflow/driversmaker/generation/
+
 # Get benchflow-drivers-maker dependencies
 RUN apk --update add wget tar && \
 	wget -q --no-check-certificate -O /tmp/faban.tar.gz https://github.com/benchflow/faban/releases/download/${RELEASE_VERSION}/faban-kit-${FABAN_VERSION}.tar.gz && \
@@ -92,5 +95,5 @@ COPY ./services/envcp/add_servers_info.sh /app/add_servers_info.sh
 RUN chmod +x /app/add_servers_info.sh
 
 COPY ./services/300-drivers-maker.conf /apps/chaperone.d/300-drivers-maker.conf
- 
+
 EXPOSE 8080
