@@ -13,7 +13,7 @@ addons:
 
 # whitelist
 branches:
-  only: 
+  only:
     - dev
   except:
     - v-dev
@@ -36,7 +36,7 @@ script:
 
 cache:
   directories:
-    - $HOME/.m2
+    # - $HOME/.m2
     - /usr/bin
 
 before_deploy:
