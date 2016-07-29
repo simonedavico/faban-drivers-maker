@@ -31,7 +31,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     //first, declare the headers map
     stmts += getFactory.Code().createCodeSnippetStatement(
-      s"Map<String, String> $headersMapName = new HashMap<String, String>()"
+      s"java.util.Map<String, String> $headersMapName = new java.util.HashMap<String, String>()"
     )
 
     //then, add all headers
@@ -46,6 +46,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
     stmts.toList
   }
 
+  //TODO: think about moving normalisation into BenchFlowDriver and calling it in each operation
   private def normalizedURIStmt(op: HttpOperation): CtStatement = {
 
     getFactory.Code.createCodeSnippetStatement(
@@ -68,7 +69,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     method.getBody.insertEnd(
       getFactory.Code().createCodeSnippetStatement(
-        s"""http.fetchUrl($normalisedEndpointName, $headersMapName)"""
+        s"""http.fetchURL($normalisedEndpointName, $headersMapName)"""
       )
     )
 
@@ -88,7 +89,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
-        s"""http.deleteUrl($normalisedEndpointName)"""
+        s"""http.deleteURL($normalisedEndpointName)"""
       )
     )
 
@@ -113,7 +114,7 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
-        s"""http.putUrl($normalisedEndpointName,
+        s"""http.putURL($normalisedEndpointName,
            |"${op.data}".getBytes(java.nio.charset.Charset.forName("UTF-8")),
            |"$contentType", $headersMapName)""".stripMargin
       )
@@ -136,8 +137,8 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
         op.data match {
-          case Some(payload) => s"""http.fetchUrl($normalisedEndpointName, "$payload", $headersMapName)"""
-          case None =>   s"""http.fetchUrl($normalisedEndpointName, $headersMapName)"""
+          case Some(payload) => s"""http.fetchURL($normalisedEndpointName, "$payload", $headersMapName)"""
+          case None =>   s"""http.fetchURL($normalisedEndpointName, $headersMapName)"""
         }
       )
     )
