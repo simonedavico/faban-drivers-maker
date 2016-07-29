@@ -100,7 +100,8 @@ public class FabanBenchmarkGeneratorResource {
         //temporary user id
         experiment.setUserId("BenchFlow");
         String benchmarkId = experiment.getBenchmarkId();
-        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getExperimentName();
+        String minioBenchmarkId = benchmarkId.replace('.', '/');
+//        String minioBenchmarkId = experiment.getUserId() + "/" + experiment.getExperimentName();
 
         String experimentId = experiment.getExperimentId();
         String minioExperimentId = experimentId.replace(".", "/");
