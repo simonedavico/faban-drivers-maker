@@ -42,7 +42,7 @@ package object benchflowservices {
 
     val servicePath = benchflowServicesPath
       .resolve(serviceTypeString + "s")
-      .resolve(s"$serviceName.$serviceType.yml")
+      .resolve(s"$serviceName.$serviceTypeString.yml")
 
     fromFile(servicePath.toFile).mkString
   }
