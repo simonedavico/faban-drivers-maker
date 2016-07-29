@@ -5,6 +5,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
@@ -36,6 +37,14 @@ public class ConfigYml {
     }
 
     public void reload() throws FileNotFoundException {
-        this.env = loadFromFile();
+        Map<String, Object> parsedConfigYml = loadFromFile();
+
+        //remote key that map to "" values
+        parsedConfigYml.keySet().stream().filter(
+                key -> parsedConfigYml.get(key).equals("")
+        )
+        .forEach(parsedConfigYml::remove);
+
+        this.env = parsedConfigYml;
     }
 }
