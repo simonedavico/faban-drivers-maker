@@ -46,6 +46,14 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
     stmts.toList
   }
 
+  private def normalizedURIStmt(op: HttpOperation): CtStatement = {
+
+    getFactory.Code.createCodeSnippetStatement(
+      s"""String $normalisedEndpointName = new java.net.URI(sutEndpoint + "${op.endpoint}").normalize().toString()"""
+    )
+
+  }
+
 
   private def generateGetOperation(method: CtMethod[Void], op: HttpOperation): Unit = {
 
@@ -56,9 +64,11 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
       ()
     }
 
+    method.getBody.insertEnd(normalizedURIStmt(op))
+
     method.getBody.insertEnd(
       getFactory.Code().createCodeSnippetStatement(
-        s"""http.fetchUrl(sutEndpoint + "${op.endpoint}", $headersMapName)"""
+        s"""http.fetchUrl($normalisedEndpointName, $headersMapName)"""
       )
     )
 
@@ -74,9 +84,11 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
       ()
     }
 
+    method.getBody.insertEnd(normalizedURIStmt(op))
+
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
-        s"""http.deleteUrl(sutEndpoint + "${op.endpoint}")"""
+        s"""http.deleteUrl($normalisedEndpointName)"""
       )
     )
 
@@ -97,9 +109,11 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
       case None => "text/plain"
     }
 
+    method.getBody.insertEnd(normalizedURIStmt(op))
+
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
-        s"""http.putUrl(sutEndpoint + "${op.endpoint}",
+        s"""http.putUrl($normalisedEndpointName,
            |"${op.data}".getBytes(java.nio.charset.Charset.forName("UTF-8")),
            |"$contentType", $headersMapName)""".stripMargin
       )
@@ -117,11 +131,13 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
       ()
     }
 
+    method.getBody.insertEnd(normalizedURIStmt(op))
+
     method.getBody.insertEnd(
       getFactory.Code.createCodeSnippetStatement(
         op.data match {
-          case Some(payload) => s"""http.fetchUrl(sutEndpoint + "${op.endpoint}", "$payload", $headersMapName)"""
-          case None =>   s"""http.fetchUrl(sutEndpoint + "${op.endpoint}", $headersMapName)"""
+          case Some(payload) => s"""http.fetchUrl($normalisedEndpointName, "$payload", $headersMapName)"""
+          case None =>   s"""http.fetchUrl($normalisedEndpointName, $headersMapName)"""
         }
       )
     )
@@ -168,5 +184,6 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
 object HttpDriverOperationsProcessor {
 
   val headersMapName = "headers"
+  val normalisedEndpointName = "normalisedEndpoint"
 
 }
