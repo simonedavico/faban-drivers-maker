@@ -2,6 +2,8 @@ FROM benchflow/base-images:dns-envconsul-java8_dev
 
 MAINTAINER Vincenzo FERME <info@vincenzoferme.it>
 
+ENV JAVA_HOME /usr/lib/jvm/java8
+
 ENV FABAN_DRIVERS_MAKER_VERSION v-dev
 ENV RELEASE_VERSION v-dev
 ENV FABAN_VERSION dev
