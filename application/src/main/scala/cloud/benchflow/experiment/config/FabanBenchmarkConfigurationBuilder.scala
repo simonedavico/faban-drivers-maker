@@ -213,7 +213,7 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
           <fh:jvmOptions>{ getJavaOpts }</fh:jvmOptions>
         </jvmConfig>
 
-        <fa:runConfig definition={s"cloud.benchflow.benchmark.drivers.${expConfig.drivers.head.getClass.getSimpleName}"}
+        <fa:runConfig definition={s"cloud.benchflow.experiment.drivers.${expConfig.drivers.head.getClass.getSimpleName}"}
                       xmlns:fa="http://faban.sunsource.net/ns/faban"
                       xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                       xmlns="http://faban.sunsource.net/ns/fabandriver">

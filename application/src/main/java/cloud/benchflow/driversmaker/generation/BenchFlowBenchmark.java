@@ -168,7 +168,7 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
     protected void moveBenchFlowServicesConfigToProperties() throws Exception {
 
         Document runDoc = params.getTopLevelElements().item(0).getOwnerDocument();
-        String driverConfigNodeXPath = "fa:runConfig/fd:driverConfig[1]";
+        String driverConfigNodeXPath = "fa:runConfig/driverConfig[1]";
         Element driverConfigNode = (Element) runXml.getNode(driverConfigNodeXPath);
         Element driverProperties = (Element) runXml.getNode("properties", driverConfigNode);
         Element benchFlowServicesConfiguration = (Element) runXml.getNode("benchFlowServices");
