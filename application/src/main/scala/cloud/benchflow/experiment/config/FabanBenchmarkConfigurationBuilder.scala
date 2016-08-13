@@ -106,15 +106,15 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
 
 
   private def convertDriver(driver: Driver[_], agents: Set[(String, Int)]): Elem =
-    <fd:driverConfig name={driver.getClass.getSimpleName}>
-      <fd:agents>{agents.map { case (host, numOfAgents) => s"$host:$numOfAgents" }.mkString(" ")}</fd:agents>
+    <driverConfig name={driver.getClass.getSimpleName}>
+      <agents>{agents.map { case (host, numOfAgents) => s"$host:$numOfAgents" }.mkString(" ")}</agents>
       {
         driver.properties match {
           case None => scala.xml.Null
           case Some(properties) => convert(properties).map(insertIntervalIfNotExists)
         }
       }
-    </fd:driverConfig>
+    </driverConfig>
 
   private def getJavaOpts: String = {
     val jvm = benv.getHeuristics.jvm

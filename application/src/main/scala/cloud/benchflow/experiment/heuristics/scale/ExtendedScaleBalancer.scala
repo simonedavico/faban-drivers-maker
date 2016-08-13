@@ -19,3 +19,4 @@ trait ExtendedScaleBalancer extends ScaleBalancer {
   abstract override def threadPerScale(driver: Driver[_]) = super.threadPerScale(driver) * scalingFactor
 
 }
+

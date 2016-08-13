@@ -155,6 +155,16 @@ public class FabanBenchmarkGeneratorResource {
                 minio.saveDeploymentDescriptorForTrial(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), dd);
                 minio.saveFabanConfiguration(minioBenchmarkId, experimentNumber, trial.getTrialNumber(), runXml);
 
+                //we include the first run.xml in the benchmark package
+                //so that the benchmark is deployable from the harness web UI
+                if(trial.getTrialNumber() == 1) {
+                    FileUtils.writeStringToFile(
+                            driverPath.resolve("deploy/run.xml").toFile(),
+                            runXml,
+                            Charsets.UTF_8
+                    );
+                }
+
                 logger.debug("Saved on minio deployment descriptor and configuration for trial " + trial.getTrialId());
             }
 
