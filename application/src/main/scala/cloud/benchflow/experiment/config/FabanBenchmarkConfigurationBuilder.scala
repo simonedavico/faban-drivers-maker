@@ -217,52 +217,54 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
                       xmlns:fa="http://faban.sunsource.net/ns/faban"
                       xmlns:fh="http://faban.sunsource.net/ns/fabanharness"
                       xmlns="http://faban.sunsource.net/ns/fabandriver">
-          <fh:description>{ expConfig.description }</fh:description>
-          <fa:scale>{ scaleBalancer.scale }</fa:scale>
-          <fh:timeSync>{ GenerationDefaults.timeSync }</fh:timeSync>
-          <fa:hostConfig>
-            <fa:host>{ usedHosts.map { case (host, numOfAgents) => s"$host" }.mkString(" ") }</fa:host>
-            <fh:tools>NONE</fh:tools>
-          </fa:hostConfig>
+            <fh:description>{ expConfig.description }</fh:description>
 
-          {
-            val xmlProps = convert(expConfig.properties).map(addFabanNamespace)
-            xmlProps.map(insertIntervalIfNotExists)
-            //++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
-          }
+            <fa:scale>{ scaleBalancer.scale }</fa:scale>
+            <fh:timeSync>{ GenerationDefaults.timeSync }</fh:timeSync>
 
-          { agents.map { case (d, hosts) => convertDriver(d, hosts) } }
+            <fa:hostConfig>
+              <fa:host>{ usedHosts.map { case (host, numOfAgents) => s"$host" }.mkString(" ") }</fa:host>
+              <fh:tools>NONE</fh:tools>
+            </fa:hostConfig>
 
-          <fa:runControl unit="time">
-            <fa:rampUp>{ expConfig.execution.rampUp }</fa:rampUp>
-            <fa:steadyState>{ expConfig.execution.steadyState }</fa:steadyState>
-            <fa:rampDown>{ expConfig.execution.rampDown }</fa:rampDown>
-          </fa:runControl>
+            {
+              val xmlProps = convert(expConfig.properties).map(addFabanNamespace)
+              xmlProps.map(insertIntervalIfNotExists)
+              //++ bb.drivers.map(convertDriver).map(addFabanNamespace) }
+            }
 
-          <threadStart>
-            <delay>{ benv.getHeuristics.threadStart.delay(expConfig, usedHosts.size) }</delay>
-            <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(expConfig) }</simultaneous>
-            <parallel>{ benv.getHeuristics.threadStart.parallel(expConfig) }</parallel>
-          </threadStart>
+            { agents.map { case (d, hosts) => convertDriver(d, hosts) } }
 
-          <sutConfiguration>
-            <serviceName>{ expConfig.sutConfiguration.targetService.name }</serviceName>
-            <endpoint>{ expConfig.sutConfiguration.targetService.endpoint }</endpoint>
-          </sutConfiguration>
+            <fa:runControl unit="time">
+              <fa:rampUp>{ expConfig.execution.rampUp }</fa:rampUp>
+              <fa:steadyState>{ expConfig.execution.steadyState }</fa:steadyState>
+              <fa:rampDown>{ expConfig.execution.rampDown }</fa:rampDown>
+            </fa:runControl>
 
-          <benchFlowServices>
-              <privatePort>{ benv.getPrivatePort }</privatePort>
-              <deploymentManager>{ benv.getDeploymentManagerAddress }</deploymentManager>
-              <servicesConfiguration>
-                { deploymentDescriptor.services.keys.map(serviceConfiguration)  }
-              </servicesConfiguration>
-           </benchFlowServices>
-
-           <benchFlowRunConfiguration>
-             <trialId>{trial.getTrialId}</trialId>
-           </benchFlowRunConfiguration>
+            <threadStart>
+              <delay>{ benv.getHeuristics.threadStart.delay(expConfig, usedHosts.size) }</delay>
+              <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(expConfig) }</simultaneous>
+              <parallel>{ benv.getHeuristics.threadStart.parallel(expConfig) }</parallel>
+            </threadStart>
 
         </fa:runConfig>
+
+        <sutConfiguration>
+          <serviceName>{ expConfig.sutConfiguration.targetService.name }</serviceName>
+          <endpoint>{ expConfig.sutConfiguration.targetService.endpoint }</endpoint>
+        </sutConfiguration>
+
+        <benchFlowServices>
+            <privatePort>{ benv.getPrivatePort }</privatePort>
+            <deploymentManager>{ benv.getDeploymentManagerAddress }</deploymentManager>
+            <servicesConfiguration>
+              { deploymentDescriptor.services.keys.map(serviceConfiguration)  }
+            </servicesConfiguration>
+         </benchFlowServices>
+
+         <benchFlowRunConfiguration>
+           <trialId>{trial.getTrialId}</trialId>
+         </benchFlowRunConfiguration>
 
       </xml>.copy(label = expConfig.name)
     )
