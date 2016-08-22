@@ -26,7 +26,7 @@ class BenchmarkDriverAnnotationProcessor(expConfig: BenchFlowExperiment,
     //adds @BenchmarkDriver annotation
     val benchmarkDriverAnnotation = getFactory.Annotation().annotate(e, classOf[BenchmarkDriver])
     benchmarkDriverAnnotation.addValue("name", driver.getClass.getSimpleName)
-//    benchmarkDriverAnnotation.addValue("threadPerScale", 1)
+
     benchmarkDriverAnnotation.addValue("threadPerScale",
       java.lang.Float.valueOf(env.getHeuristics.scaleBalancer(expConfig).threadPerScale(driver)))
     benchmarkDriverAnnotation.addValue("opsUnit", "requests")
@@ -34,8 +34,11 @@ class BenchmarkDriverAnnotationProcessor(expConfig: BenchFlowExperiment,
     benchmarkDriverAnnotation.addValue("percentiles", GenerationDefaults.percentiles.toArray[String])
     val fieldRead: CtFieldAccess[TimeUnit] = getFactory.Core().createFieldRead()
     val enumReference: CtTypeReference[TimeUnit] = getFactory.Type().createReference(classOf[TimeUnit])
+
+    //we would have liked to use nanoseconds as timeunit, but Faban forbids it. See
+    //https://github.com/akara/faban/blob/d6832a3833dd0ce0d713d7fa7f178ea24e77d605/driver/src/com/sun/faban/driver/engine/BenchmarkDefinition.java#L203
     val fieldReference: CtFieldReference[TimeUnit] = getFactory.Field()
-      .createReference(enumReference,enumReference, TimeUnit.NANOSECONDS.name())
+      .createReference(enumReference,enumReference, TimeUnit.MICROSECONDS.name())
     fieldReference.setStatic(true)
     fieldRead.setVariable(fieldReference)
     benchmarkDriverAnnotation.addValue("responseTimeUnit", fieldRead)

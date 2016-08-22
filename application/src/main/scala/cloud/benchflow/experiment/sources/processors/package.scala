@@ -1,5 +1,7 @@
 package cloud.benchflow.experiment.sources
 
+import java.util.concurrent.TimeUnit
+
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.test.config.sut.wfms.{WfMSOperation, WfMSDriver}
 import cloud.benchflow.test.config.{Operation, Driver}
@@ -41,7 +43,9 @@ package object processors {
         case _ => true
       }) &&
       (element match {
-        case elemClass: CtClass[_] => elemClass.getSimpleName != "BenchFlowBenchmark"
+        case elemClass: CtClass[_] =>
+          elemClass.getSimpleName != "BenchFlowBenchmark" ||
+          elemClass.getSimpleName != "BenchFlowDriver"
         case _ => true
       })
     }
@@ -66,6 +70,10 @@ package object processors {
                                            driver: Driver[T],
                                            experimentId: String)(implicit env: DriversMakerEnv)
     extends DriverProcessor(benchflowBenchmark, driver, experimentId)(env) {
+
+    protected def convertMax90th(timeUnit: TimeUnit, max90th: Double): Double = {
+      timeUnit.convert(max90th.toLong, TimeUnit.SECONDS).toDouble
+    }
 
     protected def generateOperation(element: CtClass[_])(op: T): Unit
 

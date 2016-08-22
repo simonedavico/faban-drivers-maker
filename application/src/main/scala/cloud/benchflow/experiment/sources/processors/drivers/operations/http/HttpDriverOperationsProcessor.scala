@@ -165,11 +165,18 @@ class HttpDriverOperationsProcessor[T <: HttpOperation](expConfig: BenchFlowExpe
       case Delete => generateDeleteOperation(method, op)
     }
 
+    val max90th = convertMax90th(GenerationDefaults.timeUnit,
+      driver.configuration.flatMap(_.max90th)
+        .getOrElse(GenerationDefaults.max90th))
+
     //add @BenchmarkOperation annotation
     val benchmarkOperationAnnotation = getFactory.Annotation().annotate(method, classOf[BenchmarkOperation])
     val benchmarkOperationName = getFactory.Code().createLiteral(op.name)
     benchmarkOperationAnnotation.addValue("name", benchmarkOperationName)
-    benchmarkOperationAnnotation.addValue("max90th", driver.configuration.flatMap(_.max90th).getOrElse(GenerationDefaults.max90th))
+    //benchmarkOperationAnnotation.addValue("max90th", driver.configuration.flatMap(_.max90th).getOrElse(GenerationDefaults.max90th))
+    benchmarkOperationAnnotation.addValue("max90th", max90th)
+    benchmarkOperationAnnotation.addValue("percentileLimits",
+      GenerationDefaults.percentileLimits(max90th).map(java.lang.Double.valueOf).toArray[java.lang.Double])
     val fieldRead: CtFieldAccess[Timing] = getFactory.Core().createFieldRead()
     val enumReference: CtTypeReference[Timing] = getFactory.Type().createReference(classOf[Timing])
     val fieldReference: CtFieldReference[Timing] = getFactory.Field()

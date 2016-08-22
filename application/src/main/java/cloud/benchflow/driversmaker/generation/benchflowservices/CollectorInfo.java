@@ -1,5 +1,6 @@
 package cloud.benchflow.driversmaker.generation.benchflowservices;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,8 +15,10 @@ public class CollectorInfo {
     private List<MonitorInfo> monitors;
     private String startAPI;
     private String stopAPI;
+    private String address;
 
     public CollectorInfo(String name, String id) {
+        monitors = new ArrayList<MonitorInfo>();
         collectorName = name;
         collectorId = id;
     }
@@ -52,4 +55,11 @@ public class CollectorInfo {
         monitors.add(monitor);
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

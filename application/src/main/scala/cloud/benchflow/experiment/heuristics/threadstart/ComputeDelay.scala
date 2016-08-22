@@ -21,7 +21,7 @@ class ComputeDelayConfiguration(mapConfig: Map[String, Any]) extends HeuristicCo
 class ComputeDelayHeuristic(mapConfig: Map[String, Any])(implicit env: ConfigYml)
   extends ThreadStartHeuristic[ComputeDelayConfiguration](mapConfig)(env) {
 
-  override def delay(bb: BenchFlowExperiment, numOfUsedHosts: Int): Int = {
+  override def delay(bb: BenchFlowExperiment, numOfAgentProcesses: Int): Int = {
 
     val rampUp = bb.execution.rampUp
     val scale = config.scaleBalancer(bb).scale
@@ -31,7 +31,7 @@ class ComputeDelayHeuristic(mapConfig: Map[String, Any])(implicit env: ConfigYml
       // rampUp/scale * 1000
       case (_, false) => rampUp.toFloat/scale * 1000
       // (rampUp/scale) * #(agents+master utilised) * 1000
-      case _ => rampUp.toFloat/scale * numOfUsedHosts * 1000
+      case _ => rampUp.toFloat/scale * numOfAgentProcesses * 1000
     }
 
     //round result half to even

@@ -56,7 +56,9 @@ class StaticAllocationHeuristic(mapConfig: Map[String, Any])(implicit env: Confi
         hostsWithAgents.toSet
       }
 
-      val numOfAgents = scale(driver) / config.agentAllocationThreshold
+      var numOfAgents = scale(driver) / config.agentAllocationThreshold
+      //make sure to have at least one agent
+      numOfAgents = if (numOfAgents == 0) 1 else numOfAgents
 
       val hosts = numOfAgents < agentHosts.size + 1 match {
         //allocate one agent to each host

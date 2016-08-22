@@ -21,6 +21,13 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
 
     protected void initialize() throws Exception {
         super.initialize();
+        modelsStartID = new HashMap<String, String>();
+    }
+
+    @Configure
+    public void configure() throws Exception {
+        super.configure();
+        logger.info("About to configure wfms plugin...");
     }
 
     public void addModel(Element properties, int modelNum, String modelName, String processDefinitionId) throws Exception {

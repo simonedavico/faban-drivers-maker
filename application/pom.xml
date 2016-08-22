@@ -129,10 +129,16 @@
             <version>${jgrapht.core.version}</version>
         </dependency>
 
+        <!--<dependency>-->
+            <!--<groupId>com.github.simonedavico</groupId>-->
+            <!--<artifactId>test-definition-model</artifactId>-->
+            <!--<version>v-dev</version>-->
+        <!--</dependency>-->
+
         <dependency>
             <groupId>com.github.simonedavico</groupId>
             <artifactId>test-definition-model</artifactId>
-            <version>v-dev</version>
+            <version>30d5011</version>
         </dependency>
 
         <dependency>
@@ -159,10 +165,15 @@
             <!--<version>v-dev</version>-->
         <!--</dependency>-->
 
+        <!--<dependency>-->
+            <!--<groupId>com.github.simonedavico</groupId>-->
+            <!--<artifactId>commons</artifactId>-->
+            <!--<version>v-dev</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.github.simonedavico</groupId>
             <artifactId>commons</artifactId>
-            <version>v-dev</version>
+            <version>21d8f9d</version>
         </dependency>
 
     </dependencies>

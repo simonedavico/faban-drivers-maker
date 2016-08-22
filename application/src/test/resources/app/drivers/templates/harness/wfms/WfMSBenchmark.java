@@ -19,10 +19,24 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
 
     private Map<String, String> modelsStartID;
 
-    protected void initialize() throws Exception {
+    //override validate instead of initialize?
+//    protected void initialize() throws Exception {
+//        super.initialize();
+//        logger.info("About to initialize wfms plugin...");
+//        //generate with spoon
+//        //plugin = new WfMSPlugin(...)
+//    }
+    public void initialize() throws Exception {
         super.initialize();
+        modelsStartID = new HashMap<String, String>();
+    }
+
+    @Configure
+    public void configure() throws Exception {
+        super.configure();
+        logger.info("About to configure wfms plugin...");
         //generate with spoon
-        //plugin = new WfMSPlugin(...)
+        //plugin = new WfMSPlugin(sutEndpoint);
     }
 
     public void addModel(Element properties, int modelNum, String modelName, String processDefinitionId) throws Exception {
@@ -49,6 +63,8 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
     public void preRun() throws Exception {
 
         logger.info("START: Deploying processes...");
+//        logger.info("WfMSBenchmark preRun");
+//        logger.info("Sut Endpoint is: " + sutEndpoint);
 
         int numDeplProcesses = 0;
         Path modelDir = benchmarkDir.resolve("models");
@@ -69,9 +85,14 @@ public class WfMSBenchmark extends BenchFlowBenchmark {
         for (int i = 0; i < listOfModels.length; i++) {
             if (listOfModels[i].isFile()) {
                 String modelName = listOfModels[i].getName();
+
+                //logger.info("Found model " + modelName);
+
                 String modelPath = modelDir + "/" + modelName;
                 File modelFile = new File(modelPath);
                 String processDefinitionId = null;
+
+                //logger.info("About to deploy model " + modelName);
 
                 //add with spoon
                 //processDefinitionId = plugin.deploy(modelFile).get(modelName);

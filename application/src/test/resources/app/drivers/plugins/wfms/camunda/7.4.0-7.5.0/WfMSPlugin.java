@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.logging.*;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -35,6 +36,7 @@ private class WfMSPlugin extends WfMSApi {
     public WfMSPlugin(String sutEndpoint) {
         super(sutEndpoint, "/deployment/create");
         processDefinitionAPI = sutEndpoint + "/process-definition";
+        logger.info("Process definition api: " + processDefinitionAPI);
         parser = new JsonParser();
         //this.modelsStartID = new HashMap<String, String>();
         JSONHeaders = new TreeMap<String, String>();
@@ -53,6 +55,7 @@ private class WfMSPlugin extends WfMSApi {
         parts.add(deploymentName);
         parts.add(process);
         StringBuilder deployDef = http.fetchURL(deployAPI, parts);
+
 
         JsonObject deployObj = parser.parse(deployDef.toString()).getAsJsonObject();
         String deploymentId = deployObj.get("id").getAsString();

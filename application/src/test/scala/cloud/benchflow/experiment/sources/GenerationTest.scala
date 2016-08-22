@@ -20,10 +20,11 @@ import scala.xml.PrettyPrinter
 object GenerationTest extends App {
 
   val trial = new Trial
-  trial.setBenchmarkId("fooBenchmark")
+  trial.setBenchmarkId("wfmsTest.1")
   trial.setExperimentNumber(1)
   trial.setTrialNumber(1)
-  trial.setTotalTrials(3)
+  trial.setTotalTrials(2)
+
   val configYml = new ConfigYml("./application/src/test/resources/app/config.yml")
 
   val benchFlowEnv = new DriversMakerEnv(configYml,
@@ -31,8 +32,13 @@ object GenerationTest extends App {
     "./application/src/test/resources/app/drivers",
     "8080")
 
-  val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
-  val expConfig = scala.io.Source.fromFile("./application/src/test/resources/benchflow-test.yml").mkString
+  //val dc = scala.io.Source.fromFile("./application/src/test/resources/docker-compose.yml").mkString
+  val deploymentDescriptor = "/Users/simonedavico/Desktop/docker-compose.yml"
+  val testConfigurationDescriptor = "/Users/simonedavico/Desktop/benchflow-test.yml"
+
+
+  val dc = scala.io.Source.fromFile(deploymentDescriptor).mkString
+  val expConfig = scala.io.Source.fromFile(testConfigurationDescriptor).mkString
   val parsedExpConfig = BenchFlowExperiment.fromYaml(expConfig)
 
   val parsedDc = DockerCompose.fromYaml(dc)
@@ -42,12 +48,12 @@ object GenerationTest extends App {
     env = benchFlowEnv
   )
   val resolvedDC = dcBuilder.resolveDeploymentDescriptor(parsedDc, trial)
-//  println(DockerCompose.toYaml(resolvedDC))
+  println(DockerCompose.toYaml(resolvedDC))
 
   val runXmlBuilder = new FabanBenchmarkConfigurationBuilder(parsedExpConfig,benchFlowEnv,parsedDc)
-  println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
+//  println(new PrettyPrinter(400, 2).format(runXmlBuilder.build(trial)))
 
-  val siblingResolver = new SiblingVariableResolver(parsedDc, benchFlowEnv, parsedExpConfig)
+//  val siblingResolver = new SiblingVariableResolver(parsedDc, benchFlowEnv, parsedExpConfig)
 
   val benchmarkSourcesGenerator = BenchmarkSourcesGenerator(
     experimentId = trial.getExperimentId,
@@ -56,6 +62,6 @@ object GenerationTest extends App {
     env = benchFlowEnv
   )
 
-//  benchmarkSourcesGenerator.generate()
+  benchmarkSourcesGenerator.generate()
 
 }

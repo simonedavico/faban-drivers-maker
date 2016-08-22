@@ -1,81 +1,129 @@
-import java.net.{URI, URL}
+import org.apache.http.client.fluent.Request
 
-import io.minio.MinioClient
+var address = "http://195.176.181.55:8050/projects/BenchFlow.provaGo.1.1.1/port/benchflow.collector.stats.outyet/8080";
+println(Request.Get(address).execute().returnResponse().getStatusLine.getStatusCode)
 
-//import java.io.{ByteArrayInputStream, StringWriter}
-//import javax.xml.parsers.{DocumentBuilderFactory, DocumentBuilder}
-//import javax.xml.transform.{TransformerException, OutputKeys, Transformer, TransformerFactory}
-//import javax.xml.transform.dom.DOMSource
-//import javax.xml.transform.stream.StreamResult
-//import javax.xml.xpath._
+//import java.io.ByteArrayInputStream
+//import java.net.{URI, URL}
+//import javax.xml.parsers.DocumentBuilderFactory
 //
-//import com.sun.org.apache.xerces.internal.dom.DocumentImpl
+//import cloud.benchflow.driversmaker.generation.utils.BenchmarkUtils
+//import io.minio.MinioClient
 //import org.apache.commons.lang3.StringEscapeUtils
-//import org.w3c.dom.{NodeList, Node, Document}
-//
-//def nodeToString(node: Node, omitDecl: Boolean, pretty: Boolean) = {
-//
-//  if(node == null) {
-//    throw new Exception("")
-//  }
-//
-//  try {
-//
-//    val xpath: XPath = XPathFactory.newInstance().newXPath()
-//    val xpathExpr: XPathExpression = xpath.compile("//text()[normalize-space()='']")
-//    val nodeList: NodeList = xpathExpr.evaluate(node, XPathConstants.NODESET).asInstanceOf[NodeList]
-//
-//    var i = 0
-//
-//    while(i < nodeList.getLength) {
-//      val nd: Node = nodeList.item(i)
-//      nd.getParentNode.removeChild(nd)
-//      i = i + 1
+//import org.w3c.dom.{NodeList, Element, Node}
+//val servicesConfiguration = """<servicesConfiguration>
+//                              |      <service name="camunda">
+//                              |        <collectors>
+//                              |          <collector name="stats">
+//                              |            <id>benchflow.collector.stats.camunda</id>
+//                              |            <api>
+//                              |              <start>/start</start>
+//                              |              <stop>/stop</stop>
+//                              |            </api>
+//                              |            <monitors></monitors>
+//                              |          </collector>
+//                              |          <collector name="logs">
+//                              |            <id>benchflow.collector.logs.camunda</id>
+//                              |            <api>
+//                              |              <stop>/store</stop>
+//                              |            </api>
+//                              |            <monitors></monitors>
+//                              |          </collector>
+//                              |          <collector name="properties">
+//                              |            <id>benchflow.collector.properties.camunda</id>
+//                              |            <api>
+//                              |              <stop>/store</stop>
+//                              |            </api>
+//                              |            <monitors></monitors>
+//                              |          </collector>
+//                              |          <collector name="zip">
+//                              |            <id>benchflow.collector.zip.camunda</id>
+//                              |            <api>
+//                              |              <stop>/store</stop>
+//                              |            </api>
+//                              |            <monitors></monitors>
+//                              |          </collector>
+//                              |        </collectors>
+//                              |      </service>
+//                              |      <service name="db">
+//                              |        <collectors>
+//                              |          <collector name="mysql">
+//                              |            <id>benchflow.collector.mysql.db</id>
+//                              |            <api>
+//                              |              <stop>/store</stop>
+//                              |            </api>
+//                              |            <monitors>
+//                              |              <monitor name="cpu">
+//                              |                <id>benchflow.monitor.mysql.db.cpu</id>
+//                              |                <configuration></configuration>
+//                              |                <api>
+//                              |                  <monitor>/data</monitor>
+//                              |                </api>
+//                              |                <runPhase>all</runPhase>
+//                              |              </monitor>
+//                              |              <monitor name="querymysql">
+//                              |                <id>benchflow.monitor.mysql.db.querymysql</id>
+//                              |                <configuration>
+//                              |                  <param name="QUERYMYSQL_COMPLETE_QUERY">completeQuery</param>
+//                              |                </configuration>
+//                              |                <api>
+//                              |                  <start>/start</start>
+//                              |                  <monitor>/data</monitor>
+//                              |                  <stop>/stop</stop>
+//                              |                </api>
+//                              |                <runPhase>end</runPhase>
+//                              |              </monitor>
+//                              |            </monitors>
+//                              |          </collector>
+//                              |        </collectors>
+//                              |      </service>
+//                              |</servicesConfiguration>""".stripMargin
+//val escapedServicesConfiguration = StringEscapeUtils.escapeXml10(servicesConfiguration)
+//val unescapedServicesConfiguration = StringEscapeUtils.unescapeXml(escapedServicesConfiguration)
+//val parsedServicesConfiguration = BenchmarkUtils.stringToNode(unescapedServicesConfiguration)
+//val asFabanSerializedConfiguration = BenchmarkUtils.nodeToString(parsedServicesConfiguration, true, false)
+//val asFabanDeserializedConfiguration = BenchmarkUtils.stringToNode(asFabanSerializedConfiguration)
+//val services: NodeList = asFabanDeserializedConfiguration.getChildNodes
+//for { i <- 0.until(services.getLength) } {
+//  val serviceNode = services.item(i).asInstanceOf[Element]
+//  val serviceName = serviceNode.getAttribute("name")
+//  println(serviceName)
+//  val collectorNodes = serviceNode.getElementsByTagName("collector")
+//  for { j <- 0.until(collectorNodes.getLength) } {
+//    val collectorNode = collectorNodes.item(j).asInstanceOf[Element]
+//    val collectorName = collectorNode.getAttribute("name")
+//    println(collectorName)
+//    val collectorId = collectorNode.getElementsByTagName("id").item(0).getTextContent
+//    println(collectorId)
+//    val collectorApiNode = collectorNode.getElementsByTagName("api").item(0).asInstanceOf[Element]
+//    val collectorApis = collectorApiNode.getChildNodes
+//    for { apiIndex <- 0 until collectorApis.getLength } {
+//      val collectorApi = collectorApis.item(apiIndex).asInstanceOf[Element]
+//      collectorApi.getTagName match {
+//        case "start" => println(collectorApi.getTextContent)
+//        case "stop" =>  println(collectorApi.getTextContent)
+//      }
 //    }
-//
-//    val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
-//    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8")
-//    transformer.setOutputProperty(OutputKeys.VERSION, "1.1")
-//    if(omitDecl) {
-//      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
+//    val monitorNodes = collectorNode.getElementsByTagName("monitors").item(0).asInstanceOf[Element].getChildNodes
+//    for { k <- 0 until monitorNodes.getLength } {
+//      val monitorNode = monitorNodes.item(k).asInstanceOf[Element]
+//      val monitorName = monitorNode.getAttribute("name")
+//      val monitorId = monitorNode.getElementsByTagName("id").item(0).asInstanceOf[Element].getTextContent
+//      println(monitorName)
+//      println(monitorId)
+//      val monitorConfig = monitorNode.getElementsByTagName("configuration").item(0).asInstanceOf[Element]
+//      val params = monitorConfig.getChildNodes
+//      for { monitorConfigIndex <- 0 until params.getLength } {
+//        val param = params.item(monitorConfigIndex).asInstanceOf[Element]
+//        val paramName = param.getAttribute("name")
+//        val paramValue = param.getTextContent
+//        println(paramName)
+//        println(paramValue)
+//      }
 //    }
-//
-//    if(pretty) {
-//      transformer.setOutputProperty(OutputKeys.INDENT, "yes")
-//      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4")
-//    }
-//
-//    val writer = new StringWriter()
-//    transformer.transform(new DOMSource(node), new StreamResult(writer))
-//    writer.toString
 //  }
-//  catch {
-//    case e: TransformerException => ???
-//    case e2: XPathExpressionException => ???
-//  }
-//
 //}
-//
-//val xmlDoc: Document = new DocumentImpl()
-//
-//val root = xmlDoc.createElement("root")
-//
-//xmlDoc.appendChild(root)
-//root.setTextContent(StringEscapeUtils.escapeXml11("""<ciao name="foobar"></ciao>"""))
-//
-//val escaped = xmlDoc.getElementsByTagName("root").item(0).getTextContent
-//
-////println(StringEscapeUtils.unescapeXml(escaped))
-//println(nodeToString(root, omitDecl = false, pretty = true))
-//
-////node to string
-//val stringified = nodeToString(root, omitDecl = false, pretty = true)
-//
-////string to node
-//val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-//val foo: Node = docBuilder.parse(new ByteArrayInputStream(stringified.getBytes("utf-8"))).getDocumentElement
-//foo.getTextContent
+//val fromFaban = """lt;servicesConfiguration&amp;gt;&amp;lt;service name=&amp;quot;outyet&amp;quot;&amp;gt;&amp;lt;collectors&amp;gt;&amp;lt;collector name=&amp;quot;stats&amp;quot;&amp;gt;&amp;lt;id&amp;gt;benchflow.collector.stats.outyet&amp;lt;/id&amp;gt;&amp;lt;api&amp;gt;&amp;lt;start&amp;gt;/start&amp;lt;/start&amp;gt;&amp;lt;stop&amp;gt;/stop&amp;lt;/stop&amp;gt;&amp;lt;/api&amp;gt;&amp;lt;monitors/&amp;gt;&amp;lt;/collector&amp;gt;&amp;lt;/collectors&amp;gt;&amp;lt;/service&amp;gt;&amp;lt;/servicesConfiguration&amp;gt;&amp;lt;/benchFlowServices&amp;gt;""".stripMargin
+//BenchmarkUtils.stringToNode(StringEscapeUtils.unescapeXml(fromFaban))
+//"ciaociao\n/stop".trim.replaceAll("\\s+", "")
 
-//val mc = new MinioClient("http://localhost:19000", "AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")
-//val is = mc.getObject("benchmarks", "BenchFlow/WfMSTest/1/benchflow-test.yml")
-val url = new URI("http://localhost:8080//").normalize().toString

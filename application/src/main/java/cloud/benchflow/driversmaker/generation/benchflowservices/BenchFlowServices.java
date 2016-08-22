@@ -1,12 +1,13 @@
 package cloud.benchflow.driversmaker.generation.benchflowservices;
 
 import cloud.benchflow.driversmaker.generation.utils.BenchmarkUtils;
+import cloud.benchflow.driversmaker.generation.utils.Consumer;
 import cloud.benchflow.monitors.Monitor;
 import cloud.benchflow.monitors.MonitorFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+//import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -126,14 +127,28 @@ public class BenchFlowServices {
                 if(collectorInfo.getStartAPI() != null) {
 
                     try {
-                        String collectorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
-                                deploymentManagerAddress,
-                                privatePort,
-                                collectorInfo.getId(),
-                                trialId,
-                                http);
+                        String collectorEndpoint;
 
+                        if(collectorInfo.getAddress() != null) {
 
+                            collectorEndpoint = "http://" + collectorInfo.getAddress();
+
+                        } else {
+
+                            collectorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                    deploymentManagerAddress,
+                                    privatePort,
+                                    collectorInfo.getId(),
+                                    trialId,
+                            http);
+
+                        }
+
+                        logger.info("About to start collector " + collectorInfo.getName());
+                        logger.info("Collector id: " + collectorInfo.getId());
+                        logger.info("Start API endpoint: " + collectorEndpoint + collectorInfo.getStartAPI());
+
+                        HttpClient http = new HttpClient();
                         HttpMethod post = new PostMethod(collectorEndpoint + collectorInfo.getStartAPI());
                         http.executeMethod(post);
 
@@ -192,13 +207,28 @@ public class BenchFlowServices {
 
                 try {
 
-                    String collectorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
-                            deploymentManagerAddress,
-                            privatePort,
-                            collectorInfo.getId(),
-                            trialId,
-                            http);
+                    String collectorEndpoint;
 
+                    if(collectorInfo.getAddress() != null) {
+
+                        collectorEndpoint = "http://" + collectorInfo.getAddress();
+
+                    } else {
+
+                        collectorEndpoint = BenchmarkUtils.benchFlowServiceAddress(
+                                deploymentManagerAddress,
+                                privatePort,
+                                collectorInfo.getId(),
+                                trialId,
+                                http);
+
+                    }
+
+                    logger.info("About to stop collector " + collectorInfo.getName());
+                    logger.info("Collector id: " + collectorInfo.getId());
+                    logger.info("Stop API endpoint: " + collectorEndpoint + collectorInfo.getStopAPI());
+
+                    HttpClient http = new HttpClient();
                     HttpMethod put = new PutMethod(collectorEndpoint + collectorInfo.getStopAPI());
                     http.executeMethod(put);
 

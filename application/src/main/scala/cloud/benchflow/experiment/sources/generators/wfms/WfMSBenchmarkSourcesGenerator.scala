@@ -4,7 +4,7 @@ import java.nio.file.Path
 
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.experiment.sources.generators.BenchmarkSourcesGenerator
-import cloud.benchflow.experiment.sources.processors.{WfMSBenchmarkProcessor, WfMSPluginLoaderProcessor, BenchmarkSourcesProcessor}
+import cloud.benchflow.experiment.sources.processors.{BenchmarkWfMSPluginLoaderProcessor, WfMSBenchmarkProcessor, WfMSPluginLoaderProcessor, BenchmarkSourcesProcessor}
 import cloud.benchflow.experiment.sources.utils.ResolvePlugin
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import cloud.benchflow.test.config.sut.wfms.WfMSStartDriver
@@ -30,8 +30,9 @@ class WfMSBenchmarkSourcesGenerator(expConfig: BenchFlowExperiment,
   }
 
   override protected def benchmarkGenerationProcessors: Seq[BenchmarkSourcesProcessor] =
-    Seq(new WfMSPluginLoaderProcessor(expConfig, experimentId)(env),
-      new WfMSBenchmarkProcessor(expConfig, experimentId)(env))
+    //Seq(new WfMSPluginLoaderProcessor(expConfig, experimentId)(env),
+    Seq(new BenchmarkWfMSPluginLoaderProcessor(expConfig, experimentId)(env),
+        new WfMSBenchmarkProcessor(expConfig, experimentId)(env))
 
   //for each driver type, create a driver generator and run it
   override protected def generateDriversSources() = {

@@ -11,7 +11,7 @@ import cloud.benchflow.test.deployment.docker.compose.DockerCompose
 import cloud.benchflow.driversmaker.requests.Trial
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.experiment.config.benchflowservices._
-import cloud.benchflow.test.deployment.docker.service.Service
+import cloud.benchflow.test.deployment.docker.service.{Network, Service}
 
 import scala.xml.{Text, Node, Elem}
 import scala.xml.transform.{RuleTransformer, RewriteRule}
@@ -164,15 +164,31 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
 
   }
 
+  private def resolveServiceAddress(serviceName: String) = {
+    val serverAlias = expConfig.getAliasForService(serviceName).get
+    benv.getPublicIp(serverAlias)
+  }
+
   private def collectorConfiguration(serviceName: String, binding: Binding) = {
     val collectorName = binding.boundService
     val collectorDescriptor = collectorDefinition(collectorName)
     val definition = Service.fromYaml(collectorDescriptor)
+
     val collectorDependencies = CollectorDependencies.fromYaml(collectorDescriptor).monitors
     val collectorApi = CollectorAPI.fromYaml(collectorDescriptor)
 
     <collector name={collectorName}>
       <id>{ collectorId(serviceName, collectorName) }</id>
+      {
+        definition.net match {
+
+          case(Some(Network("host"))) =>
+            <address>{s"${resolveServiceAddress(serviceName)}:${definition.getPublicPort.get}"}</address>
+          case _ =>
+            scala.xml.Null
+        }
+
+      }
       <api>
         { collectorApi.start.map(start => <start>{ start }</start>).getOrElse(scala.xml.Null) }
         <stop>{ collectorApi.stop }</stop>
@@ -199,11 +215,26 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
     </service>
   }
 
+  private def resolveSutEndpoint() = {
+    val targetServiceName = expConfig.sutConfiguration.targetService.name
+    val serverAlias = expConfig.getAliasForService(targetServiceName).get
+    val serverIp = benv.getIp(serverAlias)
+    val publicPort = deploymentDescriptor.services.get(targetServiceName).get.getPublicPort.get
+    s"$serverIp:$publicPort"
+  }
+
   def build(trial: Trial) = {
 
     val scaleBalancer = benv.getHeuristics.scaleBalancer(expConfig)
     val agents = benv.getHeuristics.allocationHeuristic.agents(expConfig)
     val usedHosts = agents.values.reduce(_.union(_))
+
+
+    def agentProcesses(hostsForDriver: Set[(String, Int)]): Int = {
+      hostsForDriver.map(_._2).sum
+    }
+
+    val totalAgentProcesses = agents.values.map(agentProcesses).sum
 
     removeNewlines(
       <xml>
@@ -242,7 +273,7 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
             </fa:runControl>
 
             <threadStart>
-              <delay>{ benv.getHeuristics.threadStart.delay(expConfig, usedHosts.size) }</delay>
+              <delay>{ benv.getHeuristics.threadStart.delay(expConfig, totalAgentProcesses) }</delay>
               <simultaneous>{ benv.getHeuristics.threadStart.simultaneous(expConfig) }</simultaneous>
               <parallel>{ benv.getHeuristics.threadStart.parallel(expConfig) }</parallel>
             </threadStart>
@@ -252,6 +283,7 @@ class FabanBenchmarkConfigurationBuilder(expConfig: BenchFlowExperiment,
         <sutConfiguration>
           <serviceName>{ expConfig.sutConfiguration.targetService.name }</serviceName>
           <endpoint>{ expConfig.sutConfiguration.targetService.endpoint }</endpoint>
+          <address>{resolveSutEndpoint()}</address>
         </sutConfiguration>
 
         <benchFlowServices>

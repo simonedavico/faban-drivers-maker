@@ -42,6 +42,8 @@ class BenchmarkGenerator(experimentId: String,
     def generateSources() = sourcesGenerator.generate()
 
     def generateFabanConfigurationForTrial(t: Trial): String =
+      """<?xml version="1.0" encoding="UTF-8"?>""" +
+      System.lineSeparator() +
       new PrettyPrinter(400, 2).format(fabanConfigGenerator.build(t))
 
     def generateDeploymentDescriptorForTrial(t: Trial): String = {

@@ -1,5 +1,7 @@
 package cloud.benchflow.experiment
 
+import java.util.concurrent.TimeUnit
+
 import cloud.benchflow.driversmaker.utils.env.ConfigYml
 import cloud.benchflow.experiment.heuristics.allocation._
 import cloud.benchflow.experiment.heuristics.jvm._
@@ -47,6 +49,10 @@ object GenerationDefaults {
 
   val percentiles = Seq("25", "50", "75", "90", "95", "99.9")
 
+  def percentileLimits(max90th: Double) = Seq[Double](0,0,0,max90th,0,0)
+
+  val timeUnit = TimeUnit.MICROSECONDS
+
   val deviation: Double = 5
 
   val timeSync = false
@@ -54,5 +60,6 @@ object GenerationDefaults {
   val interval = 1
 
   val max90th = Double.MaxValue
+
 
 }

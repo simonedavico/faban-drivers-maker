@@ -14,6 +14,7 @@ public class Driver extends BenchFlowDriver {
 
     public Driver() throws Exception {
         super();
+        modelsStartID = new HashMap<String, String>();
         loadModelsInfo();
     }
 

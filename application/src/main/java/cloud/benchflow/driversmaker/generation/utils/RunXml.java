@@ -6,6 +6,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.logging.Logger;
+
 /**
  * @author Simone D'Avico (simonedavico@gmail.com)
  *
@@ -14,8 +16,10 @@ import org.w3c.dom.NodeList;
 public class RunXml {
 
     private ParamRepository params;
+    private Logger logger;
 
-    public RunXml(ParamRepository params) {
+    public RunXml(ParamRepository params, Logger logger) {
+        this.logger = logger;
         this.params = params;
     }
 
@@ -24,19 +28,28 @@ public class RunXml {
     }
 
     public Node getNode(String xPathExpression, Element top) {
-        return params.getNode(xPathExpression, top);
+        Node toReturn = null;
+        try {
+            toReturn = params.getNode(xPathExpression, top);
+        } catch (Exception e) {
+            //TODO: add log
+            logger.finest("Caught exception " + e.getClass().getSimpleName());
+        }
+        return toReturn;
     }
 
     public NodeList getNodes(String xPathExpression) {
         return params.getNodes(xPathExpression);
     }
 
-    public String getXPathValue(String xPathExpression) throws RuntimeException {
+    public String getXPathValue(String xPathExpression) {
+        String toReturn = null;
         try {
-            return params.getParameter(xPathExpression);
+            toReturn = params.getParameter(xPathExpression);
         } catch(Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            logger.info("xPathExpression " + xPathExpression + " not found in config file");
         }
+        return toReturn;
     }
 
     public Element addConfigurationNode(String baseXPath, String nodeName, String value) throws Exception {

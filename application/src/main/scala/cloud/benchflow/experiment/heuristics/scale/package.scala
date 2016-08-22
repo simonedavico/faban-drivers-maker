@@ -10,9 +10,11 @@ import cloud.benchflow.test.config.experiment.BenchFlowExperiment
   */
 package object scale {
 
-  trait ScaleBalancer {
-    protected val configuration: Map[String, Any]
+  trait ScaleBalancerDecorator {
+    def decorate: ScaleBalancer
+  }
 
+  trait ScaleBalancer {
     def users: Int
     def scale: Int
     def scale(driver: Driver[_]): Int
@@ -23,8 +25,8 @@ package object scale {
 
     def apply(strategy: String, configuration: Map[String, Any]) = (expConfig: BenchFlowExperiment) => {
       strategy match {
-        case "balance" => new BaseScaleBalancer(configuration)(expConfig) with ExtendedScaleBalancer
-        case "simple" => new BaseScaleBalancer(configuration)(expConfig) with FixedScaleBalancer
+        case "balance" => new ExtendedScaleBalancer(configuration)(expConfig)
+        case "simple" => new FixedScaleBalancer(configuration)(expConfig) //with FixedScaleBalancer
         case _ => throw new Exception("Unknown strategy for ScaleBalancer. Implement the strategy into " +
                                       "the ScaleBalancer factory.")
       }

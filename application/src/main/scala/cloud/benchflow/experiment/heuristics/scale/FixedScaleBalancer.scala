@@ -1,6 +1,8 @@
 package cloud.benchflow.experiment.heuristics.scale
 
+import cloud.benchflow.experiment.heuristics.Configurable
 import cloud.benchflow.test.config.Driver
+import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 
 
 /**
@@ -8,11 +10,15 @@ import cloud.benchflow.test.config.Driver
   *
   * Created on 27/06/16.
   */
-trait FixedScaleBalancer extends ScaleBalancer {
+class FixedScaleBalancer(val configuration: Map[String, Any])
+                        (expConfig: BenchFlowExperiment)
+  extends BaseScaleBalancer(expConfig)
+  with Configurable
+{
 
-  abstract override def scale = users
+  override def scale = users
 
-  abstract override def threadPerScale(driver: Driver[_]) = {
+  override def threadPerScale(driver: Driver[_]) = {
     configuration.get("threadPerScale").get.asInstanceOf[Float]
   }
 

@@ -14,6 +14,7 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
+import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -59,7 +60,14 @@ public class FabanBenchmarkGeneratorResource {
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         p.addReference("ant.projectHelper", helper);
         helper.parse(p, benchmarkPath.resolve("build.xml").toFile());
-        p.executeTarget("build");
+        try {
+            p.executeTarget("build");
+        } catch(BuildException e) {
+            logger.error(e.getLocation().getFileName());
+            logger.error("" + e.getLocation().getLineNumber());
+            throw e;
+        }
+
     }
 
     //copies classes from package cloud.benchflow.driversmaker.generation
@@ -170,9 +178,10 @@ public class FabanBenchmarkGeneratorResource {
 
             //this should have no effect for http drivers
             Path modelsPath = driverPath.resolve("build/models");
-            List<String> models = minio.listModels(benchmarkId);
+            List<String> models = minio.listModels(minioBenchmarkId);
+            System.out.println("Models for benchmark " + benchmarkId + ": " + models.size());
             for(String modelName : models) {
-                String model = minio.getModel(benchmarkId, modelName);
+                String model = minio.getModel(minioBenchmarkId, modelName);
                 Path modelPath = modelsPath.resolve(modelName);
                 FileUtils.writeStringToFile(modelPath.toFile(), model, Charsets.UTF_8);
                 logger.debug("Retrieved model " + modelName);

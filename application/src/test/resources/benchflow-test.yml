@@ -1,6 +1,6 @@
 sut:
     name: camunda
-    version: 3.5.0
+    version: 7.4.0-7.5.0
     type: http
 #    type: WfMS
 
@@ -8,7 +8,7 @@ testName: WfMSTest
 description: A WfMS test
 trials: 2
 
-users: 1000
+users: 10
 execution:
    rampUp: 0
    steadyState: 60
@@ -52,12 +52,17 @@ sutConfiguration:
 
     deploy:
         camunda: bull
-        db: lisa1
+        db: bull
 
     benchflowConfig:
 
         camunda:
         - stats
+        - logs
+        - properties
+        - zip:
+            config:
+              TO_ZIP: /
 
         db:
         - mysql:
@@ -67,4 +72,3 @@ sutConfiguration:
                 MYSQL_USER_PASSWORD: camunda
                 TABLE_NAMES: ACT_HI_PROCINST,ACT_HI_ACTINST
                 MYSQL_PORT: 3306
-                MY_MONITOR_QUERY: complete

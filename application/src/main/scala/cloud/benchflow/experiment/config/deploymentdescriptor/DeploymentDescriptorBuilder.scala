@@ -22,6 +22,13 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
   type Monitor = Service
   type Collector = Service
 
+  private def addIpToPorts(ip: String, ports: String) = {
+    ports.contains(':') match {
+      case true => s"$ip:$ports"
+      case false => s"$ip::$ports"
+    }
+  }
+
   /***
     * An abstract resolver of BenchFlow services descriptors.
     * Implemented for monitors and collectors
@@ -97,8 +104,9 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       monitor.copy(
         name = name,
         containerName = Some(ContainerName(s"${name}_${trial.getTrialId}")),
-        ports = monitor.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
-        net = Some(Network("bridge"))
+        //ports = monitor.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
+        ports = monitor.ports.map(p => Ports(Seq(addIpToPorts(aliasIp, p.ports.head))))
+//        net = Some(Network("bridge"))
       )
     }
 
@@ -186,8 +194,9 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
       collector.copy(
         name = name,
         containerName = Some(ContainerName(s"${name}_${trial.getTrialId}")),
-        ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
-        net = Some(Network("bridge"))
+//        ports = collector.ports.map(p => Ports(Seq(s"$aliasIp:${p.ports.head}"))),
+        ports = collector.ports.map(p => Ports(Seq(addIpToPorts(aliasIp, p.ports.head))))
+//        net = Some(Network("bridge"))
       )
     }
 
@@ -231,7 +240,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
 
 
     private def resolveCollectorVariables(collector: Collector): Collector = {
-      println(self.name, collector.name)
+//      println(self.name, collector.name)
       val newC = collector.copy(
         environment = Environment(
           collector.environment.vars.map {
@@ -240,7 +249,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
           }
         )
       )
-      println("finished")
+//      println("finished")
       newC
     }
 
@@ -290,7 +299,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
     def resolve(boundService: Service): String = {
       variable match {
         case "IP" => env.getIp(testConfig.getAliasForService(boundService.name).get)
-        case "PORT" => boundService.getPorts.get
+        case "PORT" => boundService.getPublicPort.get//.getPorts.get
         case "CONTAINER_NAME" => boundService.containerName.map(_.container_name).get
         case _ =>
           println(boundService.name, variable)
@@ -387,6 +396,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
         service.copy(
           containerName = Some(ContainerName(containerName)),
           ports = service.ports.map(p => Ports(Seq(env.getIp(alias) + ":" + p.ports.head)))
+//          ports = service.ports.map(p => Ports(Seq(addIpToPorts(env.getIp(alias), p.ports.head))))
         )
       case None => throw new Exception(s"Can't resolve deployment info for service ${service.name}")
     }

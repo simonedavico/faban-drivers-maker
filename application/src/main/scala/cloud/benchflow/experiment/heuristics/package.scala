@@ -11,6 +11,10 @@ import scala.reflect.ClassTag
   */
 package object heuristics {
 
+  private[heuristics] trait Configurable {
+    protected val configuration: Map[String, Any]
+  }
+
   abstract class HeuristicConfiguration(config: Map[String, Any])
 
   abstract class Heuristic[A <: HeuristicConfiguration : ClassTag](val mapConfig: Map[String, Any])(val env: ConfigYml)

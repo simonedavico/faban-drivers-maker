@@ -1,5 +1,6 @@
 package cloud.benchflow.driversmaker.generation.benchflowservices;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ public class ServiceInfo {
     private List<CollectorInfo> collectors;
 
     public ServiceInfo(String name) {
+        collectors = new ArrayList<CollectorInfo>();
         serviceName = name;
     }
 

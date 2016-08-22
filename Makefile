@@ -43,7 +43,8 @@ build_container_local: find_java
 
 test_container_local:
 	docker run -ti --rm -e "ENVCONSUL_CONSUL=$(ENVCONSUL_CONSUL)" \
-	-p 6060:8080 --name $(REPONAME) $(DOCKERIMAGENAME):$(VERSION)
+	-e "MINIO_ADDRESS=$(MINIO_ADDRESS)" \
+	-p 8080:8080 --name $(REPONAME) $(DOCKERIMAGENAME):$(VERSION)
 
 rm_container_local:
 	docker rm -f -v $(REPONAME)

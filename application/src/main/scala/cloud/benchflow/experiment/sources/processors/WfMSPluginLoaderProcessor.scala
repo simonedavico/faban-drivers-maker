@@ -3,14 +3,16 @@ package cloud.benchflow.experiment.sources.processors
 import cloud.benchflow.driversmaker.utils.env.DriversMakerEnv
 import cloud.benchflow.test.config.experiment.BenchFlowExperiment
 import spoon.reflect.declaration.{CtClass, CtType, ModifierKind}
+import spoon.reflect.factory.{Factory, CodeFactory}
 
 /**
   * @author Simone D'Avico (simonedavico@gmail.com)
   *
   * Created on 11/05/16.
   */
-class WfMSPluginLoaderProcessor(expConfig: BenchFlowExperiment,
-                                experimentId: String)(implicit env: DriversMakerEnv)
+abstract class WfMSPluginLoaderProcessor(expConfig: BenchFlowExperiment,
+                                experimentId: String,
+                                benchmarkSourcesProcessor: ChildProcessor)(implicit env: DriversMakerEnv)
   extends BenchmarkSourcesProcessor(expConfig, experimentId)(env) {
 
 
@@ -30,12 +32,58 @@ class WfMSPluginLoaderProcessor(expConfig: BenchFlowExperiment,
     val pluginField = getFactory.Code().createCtField("plugin", nestedApiType.getReference, "null", ModifierKind.PRIVATE)
     element.addFieldAtTop(pluginField)
 
-    val validateMethodBody = element.getMethod("initialize").getBody
-    validateMethodBody.addStatement(
-      getFactory.Code().createCodeSnippetStatement("plugin = new WfMSPlugin(sutEndpoint)")
-    )
+//    val configureMethodBody = element.getMethod("configure").getBody
+//    configureMethodBody.addStatement(
+//      getFactory.Code().createCodeSnippetStatement("plugin = new WfMSPlugin(sutEndpoint)")
+//    )
+    println(element.getClass.getSimpleName)
+    benchmarkSourcesProcessor.processWithFactory(element, getFactory())
 
     nestedPluginType.getSuperclass.replace(nestedApiType.getReference)
 
   }
 }
+
+abstract class ChildProcessor(expConfig: BenchFlowExperiment,
+                              experimentId: String)(implicit env: DriversMakerEnv)
+  extends BenchmarkSourcesProcessor(expConfig, experimentId) {
+
+  def processWithFactory(element: CtClass[_], parentFactory: Factory)
+
+}
+
+
+class BenchmarkWfMSPluginLoaderProcessor(expConfig: BenchFlowExperiment,
+                                         experimentId: String)(implicit env: DriversMakerEnv)
+  extends WfMSPluginLoaderProcessor(expConfig,
+                                    experimentId,
+    new ChildProcessor(expConfig, experimentId)(env) {
+
+      override def processWithFactory(element: CtClass[_], parentFactory: Factory): Unit = {
+        val configureMethodBody = element.getMethod("configure").getBody
+        configureMethodBody.addStatement(
+          parentFactory.Code().createCodeSnippetStatement("plugin = new WfMSPlugin(sutEndpoint)")
+        )
+      }
+
+      override protected def doProcess(element: CtClass[_]): Unit = ???
+    }
+  )
+
+class DriverWfMSPluginLoaderProcessor(expConfig: BenchFlowExperiment,
+                                      experimentId: String)(implicit env: DriversMakerEnv)
+  extends WfMSPluginLoaderProcessor(expConfig,
+    experimentId,
+    new ChildProcessor(expConfig, experimentId)(env) {
+
+      def processWithFactory(element: CtClass[_], parentFactory: Factory): Unit = {
+        element.getConstructor().getBody.addStatement(
+          parentFactory.Code().createCodeSnippetStatement(
+            "plugin = new WfMSPlugin(sutEndpoint)"
+          )
+        )
+      }
+
+      override protected def doProcess(element: CtClass[_]): Unit = ???
+    }
+  )

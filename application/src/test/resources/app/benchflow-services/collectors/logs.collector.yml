@@ -5,6 +5,7 @@ logs:
   - KAFKA_TOPIC=logs
   - CONTAINERS=${BENCHFLOW_BENCHMARK_BOUNDSERVICE_CONTAINER_NAME}
 
+  network_mode: bridge
   volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   expose:
