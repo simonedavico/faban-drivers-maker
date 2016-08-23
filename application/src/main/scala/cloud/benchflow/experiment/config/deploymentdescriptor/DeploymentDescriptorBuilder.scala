@@ -165,7 +165,7 @@ class DeploymentDescriptorBuilder(protected val testConfig: BenchFlowExperiment,
         collector.environment.vars("BENCHFLOW_COLLECTOR_NAME") = CollectorType.getName(collector.name)
         collector.environment.vars("BENCHFLOW_EXPERIMENT_ID") = trial.getExperimentId
         collector.environment.vars("BENCHFLOW_TRIAL_ID") = trial.getTrialId
-        collector.environment.vars("BENCHFLOW_TRIAL_TOTAL") = trial.getTotalTrials.toString
+//        collector.environment.vars("BENCHFLOW_TRIAL_TOTAL") = trial.getTotalTrials.toString
         collector.environment.vars("BENCHFLOW_DATA_NAME") = CollectorType.getName(collector.name)
         collector.environment.vars("MINIO_HOST") = env.getConfigYml.getVariable[String]("BENCHFLOW_MINIO_IP")
         collector.environment.vars("MINIO_PORT") = env.getConfigYml.getVariable[String]("BENCHFLOW_MINIO_PORT")

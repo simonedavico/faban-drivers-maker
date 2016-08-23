@@ -1,8 +1,3 @@
-import org.apache.http.client.fluent.Request
-
-var address = "http://195.176.181.55:8050/projects/BenchFlow.provaGo.1.1.1/port/benchflow.collector.stats.outyet/8080";
-println(Request.Get(address).execute().returnResponse().getStatusLine.getStatusCode)
-
 //import java.io.ByteArrayInputStream
 //import java.net.{URI, URL}
 //import javax.xml.parsers.DocumentBuilderFactory

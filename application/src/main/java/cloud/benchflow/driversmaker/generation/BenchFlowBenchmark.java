@@ -130,7 +130,6 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
 
     @StartRun
     public void start() throws Exception {
-        super.start();
         logger.info("[BenchFlowBenchmark] About to start BenchFlow services...");
         try {
             benchFlowServices.start();
@@ -141,6 +140,8 @@ public class BenchFlowBenchmark extends DefaultFabanBenchmark2 {
             throw new FatalException("An error occurred while starting BenchFlow services");
         }
         logger.info("[BenchFlowBenchmark] BenchFlow services started.");
+        logger.info("[BenchFlowBenchmark] Calling super.start");
+        super.start();
     }
 
     /**
