@@ -39,7 +39,7 @@ class FabanBenchmarkDeploymentDescriptorProcessor(expConfig: BenchFlowExperiment
 
     val benchmarkDeploymentDescriptor =
       <benchmark>
-          <name>{benchmarkName}</name>
+          <name>{experimentId.replace('.', '-')}</name>
           <version></version>
           <config-form></config-form>
           <config-stylesheet></config-stylesheet>
